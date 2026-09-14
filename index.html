@@ -130,6 +130,10 @@
     border-bottom: 1px solid var(--border);
     overflow-x: auto;
     scrollbar-width: none;
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;              /* corrected to sit right under the header by JS */
+    z-index: 99;          /* just below header (100), above page content */
   }
 
   .nav::-webkit-scrollbar { display: none; }
@@ -562,6 +566,7 @@
     .bnav-btn { font-size: 8.5px; }
   }
 
+
   /* MODAL */
   .modal-overlay {
     display: none;
@@ -660,7 +665,7 @@
 </nav>
 
 <!-- SYNC BAR -->
-<div id="sync-bar" style="background:rgba(10,22,40,0.95);border-bottom:1px solid rgba(201,168,76,0.2);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+<div id="sync-bar" style="background:rgba(10,22,40,0.95);border-bottom:1px solid rgba(201,168,76,0.2);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:-webkit-sticky;position:sticky;top:0;z-index:98;">
   <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;display:flex;align-items:center;gap:8px;">
     <span id="theme-day-badge" onclick="cycleDayTheme()" title="Click to change theme">🎨 MON</span>
     <span id="gdrive-status-dot" style="width:8px;height:8px;border-radius:50%;background:#888;display:inline-block;"></span>
@@ -6540,21 +6545,31 @@ function cycleDayTheme() {
     setDriveStatus(false, 'Session expired — reconnect');
   });
 })();
-// ===== MOBILE STICKY SYNC-BAR OFFSET =====
-// The sync bar (CALC / SAVE / LOAD / etc.) must stick directly under the
-// app header. Header height differs slightly across phones (font wrapping,
-// safe-area insets), so we measure it live instead of guessing a fixed px value.
-function positionMobileSyncBar() {
-  if (window.innerWidth > 600) return; // desktop untouched
+
+// ===== STICKY TOOLBAR OFFSET (header / nav / sync-bar) — all screen sizes =====
+// The page-tabs bar (.nav) and the sync bar (CALC / SAVE / LOAD / etc.) both
+// stick to the top so they're reachable without scrolling back up on ANY
+// page, on phone, tablet, or desktop. Header/nav heights differ slightly
+// across devices (font wrapping, safe-area insets, tablet vs phone), so we
+// measure them live instead of guessing fixed pixel values.
+function positionStickyBars() {
   var header = document.getElementById('app-header');
-  var bar = document.getElementById('sync-bar');
-  if (!header || !bar) return;
-  bar.style.top = header.offsetHeight + 'px';
+  var nav    = document.querySelector('.nav');
+  var bar    = document.getElementById('sync-bar');
+  if (!header) return;
+  var headerH = header.offsetHeight;
+  var navH = 0;
+  if (nav && getComputedStyle(nav).display !== 'none') {
+    nav.style.top = headerH + 'px';
+    navH = nav.offsetHeight;
+  }
+  if (bar) bar.style.top = (headerH + navH) + 'px';
 }
-window.addEventListener('load', positionMobileSyncBar);
-window.addEventListener('resize', positionMobileSyncBar);
-window.addEventListener('orientationchange', function() { setTimeout(positionMobileSyncBar, 150); });
-setTimeout(positionMobileSyncBar, 0);
+window.addEventListener('load', positionStickyBars);
+window.addEventListener('resize', positionStickyBars);
+window.addEventListener('orientationchange', function() { setTimeout(positionStickyBars, 150); });
+setTimeout(positionStickyBars, 0);
+setTimeout(positionStickyBars, 400); // fonts can finish loading slightly late and shift height
 
 // ===== MOBILE BOTTOM NAVIGATION =====
 function syncBottomNav(n) {
