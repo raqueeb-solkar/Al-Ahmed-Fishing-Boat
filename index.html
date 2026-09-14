@@ -139,8 +139,10 @@
   .nav::-webkit-scrollbar { display: none; }
 
   .nav-btn {
-    flex: 1;
-    min-width: 130px;
+    flex: 0 0 auto;      /* size to its own icon+label — prevents long labels
+                             (e.g. "Shareholder Attendance") from overflowing
+                             into the next tab when equal-width flex:1 made
+                             them too narrow to fit on one line */
     padding: 14px 20px;
     background: transparent;
     border: none;
