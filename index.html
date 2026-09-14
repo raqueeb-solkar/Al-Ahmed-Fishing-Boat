@@ -965,6 +965,11 @@
   <div id="p3-results" style="display:none">
     <div class="stats-grid" id="p3-stats"></div>
 
+    <div style="text-align:center;margin:18px 0;">
+      <button class="btn btn-primary" style="background:linear-gradient(135deg,var(--gold) 0%,var(--gold-light) 100%);color:#0d1117;font-weight:700;padding:12px 28px;" onclick="exportShareTransparencyPDF()">📄 EXPORT TRANSPARENCY REPORT (PDF) — SHOW TO CREW</button>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;">Full day-wise breakdown + category expenses, explained plainly — so every rupee is accounted for.</div>
+    </div>
+
     <div class="card">
       <div class="card-title">Daily Breakdown</div>
       <div class="table-wrap">
@@ -3411,6 +3416,125 @@ function clearSavedPeriods() {
   save(KEY_PERIODS, savedPeriods);
   renderSavedPeriods();
   alert('All saved periods cleared.');
+}
+
+
+// ===== SHARE CALCULATION — TRANSPARENCY REPORT (PDF for the whole crew) =====
+// Addresses the exact question crew ask: "we caught more that day, why is our
+// share less?" Explains the fair-expense-pooling principle plainly, then shows
+// every day and every rupee of expense so nothing is hidden. Amanat-first design.
+function exportShareTransparencyPDF() {
+  if (!_p3StartDate || !_p3EndDate || !_p3DailyBreakdown.length) {
+    alert('Please calculate shares for a period first.');
+    return;
+  }
+
+  function fmtN(n) { return Number(n||0).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+  function pdfD(s) { if (!s) return '—'; var p = s.split('-'); return p.length===3?p[2]+'-'+p[1]+'-'+p[0]:s; }
+  var genDate = new Date().toLocaleDateString('en-IN', {day:'2-digit',month:'2-digit',year:'numeric'});
+
+  const salesData = dailyRecords.filter(r => r.date >= _p3StartDate && r.date <= _p3EndDate);
+  const totalSales   = salesData.reduce((s, r) => s + r.sales, 0);
+  const totalExpense = salesData.reduce((s, r) => s + r.expense, 0);
+  const ratio = totalSales > 0 ? totalExpense / totalSales : 0;
+  const totalProfit = _p3DailyBreakdown.reduce((s, d) => s + d.profit, 0);
+
+  // Day-wise rows
+  var dayRows = '';
+  var seenDates = {};
+  _p3DailyBreakdown.forEach(function(d) {
+    const dayRecMatch = salesData.find(r => r.date === d.date);
+    const actualExp = dayRecMatch ? (dayRecMatch.expense || 0) : 0;
+    var actualCell;
+    if (!seenDates[d.date]) { seenDates[d.date] = true; actualCell = '&#8377;' + fmtN(actualExp); }
+    else { actualCell = '<span style="color:#999;font-size:11px;">(same day)</span>'; }
+    dayRows += '<tr>' +
+      '<td style="white-space:nowrap;">' + pdfD(d.date) + (d.trip ? ' <span style="color:#1e6b8a;font-size:10px;">(' + d.trip + ')</span>' : '') + '</td>' +
+      '<td style="font-size:11px;color:#666;">' + (d.fishingType || '—') + '</td>' +
+      '<td style="text-align:right;color:#1a7a4a;font-weight:700;">&#8377;' + fmtN(d.sales) + '</td>' +
+      '<td style="text-align:right;color:#c0392b;">' + actualCell + '</td>' +
+      '<td style="text-align:right;color:#888;">' + (d.ratio*100).toFixed(1) + '%</td>' +
+      '<td style="text-align:right;color:#c0392b;">&#8377;' + fmtN(d.allocExpense) + '</td>' +
+      '<td style="text-align:right;color:#1a7a4a;font-weight:700;">&#8377;' + fmtN(d.profit) + '</td>' +
+      '<td style="text-align:center;">' + d.numPresent + '</td>' +
+      '<td style="text-align:right;color:#0a5c2e;font-weight:700;">&#8377;' + fmtN(d.sharePerPerson) + '</td>' +
+      '</tr>';
+  });
+  dayRows += '<tr style="background:#0a1628;"><td colspan="2" style="color:#ff9f43;font-weight:700;">TOTAL — ' + salesData.length + ' days / ' + _p3DailyBreakdown.length + ' trips</td>' +
+    '<td style="text-align:right;color:#4ade80;font-weight:700;">&#8377;' + fmtN(totalSales) + '</td>' +
+    '<td style="text-align:right;color:#fca5a5;font-weight:700;">&#8377;' + fmtN(totalExpense) + '</td>' +
+    '<td></td><td></td>' +
+    '<td style="text-align:right;color:#4ade80;font-weight:700;">&#8377;' + fmtN(totalProfit) + '</td>' +
+    '<td></td><td></td></tr>';
+
+  // Category breakdown rows
+  const catTotals = {};
+  salesData.forEach(function(dayRec) {
+    (dayRec.expenseItems || []).forEach(function(item) {
+      const cat = item.cat || 'Other';
+      catTotals[cat] = (catTotals[cat] || 0) + (item.amount || 0);
+    });
+  });
+  const catRows = Object.keys(catTotals).map(k => ({cat:k, amount:catTotals[k]})).sort((a,b) => b.amount - a.amount);
+  const catGrandTotal = catRows.reduce((s,r) => s + r.amount, 0);
+  var catHtml = '';
+  catRows.forEach(function(r) {
+    const pct = catGrandTotal > 0 ? (r.amount/catGrandTotal*100) : 0;
+    catHtml += '<tr><td>' + r.cat + '</td><td style="text-align:right;color:#c0392b;font-weight:700;">&#8377;' + fmtN(r.amount) + '</td><td style="text-align:right;color:#888;">' + pct.toFixed(1) + '%</td></tr>';
+  });
+  catHtml += '<tr style="background:#0a1628;"><td style="color:#ff9f43;font-weight:700;">TOTAL EXPENSE</td><td style="text-align:right;color:#fca5a5;font-weight:700;">&#8377;' + fmtN(catGrandTotal) + '</td><td style="text-align:right;color:#ff9f43;">100%</td></tr>';
+
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Share Transparency Report</title>' +
+    '<style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,Helvetica,sans-serif;color:#1a1a2e;background:#fff;padding:26px;font-size:13px;}table{width:100%;border-collapse:collapse;margin-bottom:18px;}th{background:#0a1628;color:#ff9f43;font-size:9px;text-transform:uppercase;padding:8px 10px;text-align:left;font-weight:700;}td{padding:7px 10px;border-bottom:1px solid #e8e0d0;}tr:nth-child(even) td{background:#faf7f0;}@media print{body{padding:14px;}@page{margin:11mm;size:A4;}}</style>' +
+    '</head><body>' +
+
+    '<div style="text-align:center;border-bottom:3px double #ff9f43;padding-bottom:14px;margin-bottom:16px;">' +
+    '<div style="font-size:32px;margin-bottom:4px;">⚓</div>' +
+    '<div style="font-size:20px;font-weight:700;color:#0a1628;letter-spacing:2px;">AL AHMED FISHING BOAT</div>' +
+    '<div style="font-size:11px;color:#888;margin-top:3px;letter-spacing:1px;">SHARE CALCULATION — TRANSPARENCY REPORT</div>' +
+    '</div>' +
+
+    '<div style="display:flex;justify-content:space-between;background:#f7f3eb;border:1px solid #e0d5b8;border-radius:8px;padding:10px 16px;margin-bottom:14px;flex-wrap:wrap;gap:10px;">' +
+    '<div><div style="font-size:9px;color:#888;text-transform:uppercase;font-weight:600;">Period</div><div style="font-size:14px;font-weight:700;">' + pdfD(_p3StartDate) + ' to ' + pdfD(_p3EndDate) + '</div></div>' +
+    '<div><div style="font-size:9px;color:#888;text-transform:uppercase;font-weight:600;">Settlement Date</div><div style="font-size:13px;font-weight:700;">' + pdfD(_p3SettleDate) + '</div></div>' +
+    '<div><div style="font-size:9px;color:#888;text-transform:uppercase;font-weight:600;">Generated</div><div style="font-size:13px;font-weight:700;">' + genDate + '</div></div>' +
+    '</div>' +
+
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;">' +
+    '<div style="text-align:center;background:#eaf7f0;border:1px solid #a8dcc2;border-radius:8px;padding:10px;"><div style="font-size:9px;color:#888;text-transform:uppercase;">Total Sales</div><div style="font-size:16px;font-weight:700;color:#1a7a4a;">&#8377;' + fmtN(totalSales) + '</div></div>' +
+    '<div style="text-align:center;background:#fdf0ee;border:1px solid #f0b8b0;border-radius:8px;padding:10px;"><div style="font-size:9px;color:#888;text-transform:uppercase;">Total Expense</div><div style="font-size:16px;font-weight:700;color:#c0392b;">&#8377;' + fmtN(totalExpense) + '</div></div>' +
+    '<div style="text-align:center;background:#f7f3eb;border:1px solid #e0d5b8;border-radius:8px;padding:10px;"><div style="font-size:9px;color:#888;text-transform:uppercase;">Expense Ratio</div><div style="font-size:16px;font-weight:700;color:#a06a1a;">' + (ratio*100).toFixed(2) + '%</div></div>' +
+    '<div style="text-align:center;background:#eaf7f0;border:2px solid #a8dcc2;border-radius:8px;padding:10px;"><div style="font-size:9px;color:#888;text-transform:uppercase;">Net Profit</div><div style="font-size:16px;font-weight:700;color:#1a7a4a;">&#8377;' + fmtN(totalProfit) + '</div></div>' +
+    '</div>' +
+
+    '<div style="background:#fffaf0;border:1px solid #e8d9b0;border-left:4px solid #ff9f43;border-radius:6px;padding:14px 16px;margin-bottom:18px;">' +
+    '<div style="font-size:12px;font-weight:700;color:#8a5a10;margin-bottom:8px;">📖 HOW SHARE IS CALCULATED — PLEASE READ</div>' +
+    '<div style="font-size:11.5px;color:#444;line-height:1.7;">' +
+    '1. Expenses like petrol, ice, food and tractor are <strong>shared fairly across the whole period</strong>, not charged only to the day they happened — because one trip\'s petrol or ice often supports more than one fishing day.<br>' +
+    '2. Every day\'s share of expense = that day\'s sales × the <strong>period expense ratio</strong> (' + (ratio*100).toFixed(2) + '% for this period) — shown in the "Alloc. Expense" column below. This is a fair, consistent formula applied equally to every single day.<br>' +
+    '3. <strong>Share per person</strong> = (that day\'s profit after its fair expense share) ÷ <strong>number of crew present that day</strong>. A day with a big catch but more crew present will still give a smaller per-person share than a smaller catch with fewer crew — this is not a mistake, it is simple division.<br>' +
+    '4. The category table below shows exactly where every rupee of expense went — nothing is hidden.' +
+    '</div></div>' +
+
+    '<div style="background:#0a1628;color:#ff9f43;font-size:11px;padding:8px 14px;font-weight:700;letter-spacing:1px;">📅 DAY-WISE BREAKDOWN</div>' +
+    '<table><thead><tr><th>Date</th><th>Fishing</th><th style="text-align:right">Sales</th><th style="text-align:right">Actual Exp.</th><th style="text-align:right">Ratio</th><th style="text-align:right">Alloc. Exp.</th><th style="text-align:right">Profit</th><th style="text-align:center">Crew</th><th style="text-align:right">Share/Person</th></tr></thead>' +
+    '<tbody>' + dayRows + '</tbody></table>' +
+
+    '<div style="background:#0a1628;color:#ff9f43;font-size:11px;padding:8px 14px;font-weight:700;letter-spacing:1px;">📊 EXPENSE BREAKDOWN BY CATEGORY</div>' +
+    '<table><thead><tr><th>Category</th><th style="text-align:right">Amount</th><th style="text-align:right">% of Total</th></tr></thead>' +
+    '<tbody>' + catHtml + '</tbody></table>' +
+
+    '<div style="text-align:center;margin-top:20px;padding-top:14px;border-top:1px solid #e0d5b8;">' +
+    '<div style="font-size:11px;color:#888;">Al Ahmed Fishing Boat · Prepared with full transparency for all crew · ' + genDate + '</div>' +
+    '<div style="font-size:11px;color:#8a5a10;margin-top:4px;font-style:italic;">الحمد لله — Alhamdulillah</div>' +
+    '</div>' +
+    '<script>window.onload=function(){window.print();}<\/script>' +
+    '</body></html>';
+
+  var win = window.open('', '_blank');
+  if (!win) { alert('Please allow popups.'); return; }
+  win.document.write(html);
+  win.document.close();
 }
 
 function calculateShares() {
