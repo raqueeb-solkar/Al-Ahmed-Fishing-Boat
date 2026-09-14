@@ -2713,7 +2713,10 @@ function crossCheckDate() {
       '<div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:rgba(255,159,67,0.04);">' +
       '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;">' +
       '<span style="font-family:\'Space Grotesk\',sans-serif;font-size:13px;color:var(--gold);letter-spacing:0.5px;">⚓ DAILY RECORD — ' + niceDate + '</span>' +
+      '<span style="display:flex;gap:8px;">' +
+      '<button class="btn btn-sm" style="background:rgba(126,207,237,0.15);color:#7ecfed;border:1px solid rgba(126,207,237,0.4);" onclick="viewDailyRecordInLog(' + dr.id + ')">👁 VIEW</button>' +
       '<button class="btn btn-sm" style="background:rgba(255,159,67,0.15);color:var(--gold-light);border:1px solid var(--border);" onclick="editDailyRecord(' + dr.id + ')">✎ EDIT</button>' +
+      '</span>' +
       '</div>' +
       '<div style="display:flex;gap:22px;flex-wrap:wrap;font-size:13px;">' +
       '<div><span style="color:var(--muted);">Sales items:</span> <strong>' + (dr.saleItems?dr.saleItems.length:0) + '</strong></div>' +
@@ -2769,6 +2772,31 @@ function crossCheckDate() {
   }
 
   document.getElementById('xd-results').style.display = 'block';
+}
+
+
+// Jump to the Records Log below and highlight the matching card — read-only, no editing.
+function viewDailyRecordInLog(id) {
+  const rec = dailyRecords.find(r => r.id === id);
+  if (!rec) return;
+  // Make sure the record's month isn't hidden by an active month filter
+  const monthFilter = document.getElementById('p1-filter-month');
+  const recMonth = rec.date.slice(0, 7); // YYYY-MM
+  if (monthFilter && monthFilter.value && monthFilter.value !== recMonth) {
+    monthFilter.value = '';
+  }
+  renderP1Table();
+  setTimeout(function() {
+    const card = document.getElementById('daily-record-card-' + id);
+    if (!card) return;
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.style.borderColor = '#7ecfed';
+    card.style.boxShadow = '0 0 0 2px rgba(126,207,237,0.5), 0 0 20px rgba(126,207,237,0.25)';
+    setTimeout(function() {
+      card.style.borderColor = 'rgba(255,159,67,0.2)';
+      card.style.boxShadow = 'none';
+    }, 2200);
+  }, 80);
 }
 
 function addDailyRecord() {
@@ -2934,7 +2962,8 @@ function renderP1Table() {
     }).join('');
 
     const card = document.createElement('div');
-    card.style.cssText = 'background:rgba(13,17,23,0.5);border:1px solid rgba(255,159,67,0.2);border-radius:10px;margin-bottom:14px;overflow:hidden;';
+    card.id = 'daily-record-card-' + r.id;
+    card.style.cssText = 'background:rgba(13,17,23,0.5);border:1px solid rgba(255,159,67,0.2);border-radius:10px;margin-bottom:14px;overflow:hidden;transition:box-shadow 0.4s, border-color 0.4s;';
     card.innerHTML = `
       <!-- Record Header -->
       <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(255,159,67,0.08);border-bottom:1px solid rgba(255,159,67,0.15);flex-wrap:wrap;gap:8px;">
