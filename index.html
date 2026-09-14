@@ -728,6 +728,29 @@
   <div class="page-title">⚓ Daily Sales & Expenses</div>
   <datalist id="buyer-datalist"></datalist>
 
+  <!-- ===== CROSS-CHECK DATE — see Daily/Attendance/Payments for one date at once ===== -->
+  <div class="card" style="border-color:rgba(255,159,67,0.35);">
+    <div class="card-title">🔍 Cross-Check Date</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6;">
+      Verify a date against your notes in one place — Daily Record, Shareholder Attendance,
+      and Advances &amp; Payments all shown together, with a direct Edit button for each.
+    </div>
+    <div class="form-row" style="align-items:flex-end;">
+      <div class="form-group">
+        <label>Date to Check</label>
+        <input type="date" id="xd-date">
+      </div>
+      <div class="form-group" style="justify-content:flex-end;">
+        <button class="btn btn-primary" onclick="crossCheckDate()">🔍 CHECK DATE</button>
+      </div>
+    </div>
+    <div id="xd-results" style="display:none;margin-top:16px;">
+      <div id="xd-daily"></div>
+      <div id="xd-attendance" style="margin-top:14px;"></div>
+      <div id="xd-payments" style="margin-top:14px;"></div>
+    </div>
+  </div>
+
   <div class="card">
     <div class="card-title">Add New Daily Entry</div>
     <div class="form-row" style="margin-bottom:20px;">
@@ -2153,6 +2176,7 @@ function showPage(n) {
 
 // ===== PAGE 1 =====
 document.getElementById('p1-date').value = today();
+document.getElementById('xd-date').value = today();
 
 // ---- Dynamic row builders ----
 function makeSaleSupplierOptions(selected) {
@@ -2671,6 +2695,80 @@ function getItemsFromRows(containerId) {
     }
   });
   return items;
+}
+
+
+// ===== CROSS-CHECK DATE — Daily Records + Shareholder Attendance + Advances & Payments =====
+function crossCheckDate() {
+  const date = document.getElementById('xd-date').value;
+  if (!date) { alert('Please select a date.'); return; }
+  const niceDate = fmtDate(date);
+
+  // ---- Daily Record ----
+  const dr = dailyRecords.find(r => r.date === date);
+  const dailyBox = document.getElementById('xd-daily');
+  if (dr) {
+    const profit = (dr.sales||0) - (dr.expense||0);
+    dailyBox.innerHTML =
+      '<div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:rgba(255,159,67,0.04);">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;">' +
+      '<span style="font-family:\'Space Grotesk\',sans-serif;font-size:13px;color:var(--gold);letter-spacing:0.5px;">⚓ DAILY RECORD — ' + niceDate + '</span>' +
+      '<button class="btn btn-sm" style="background:rgba(255,159,67,0.15);color:var(--gold-light);border:1px solid var(--border);" onclick="editDailyRecord(' + dr.id + ')">✎ EDIT</button>' +
+      '</div>' +
+      '<div style="display:flex;gap:22px;flex-wrap:wrap;font-size:13px;">' +
+      '<div><span style="color:var(--muted);">Sales items:</span> <strong>' + (dr.saleItems?dr.saleItems.length:0) + '</strong></div>' +
+      '<div><span style="color:var(--muted);">Expense items:</span> <strong>' + (dr.expenseItems?dr.expenseItems.length:0) + '</strong></div>' +
+      '<div><span style="color:var(--muted);">Sales:</span> <strong class="result-positive">' + fmt(dr.sales) + '</strong></div>' +
+      '<div><span style="color:var(--muted);">Expenses:</span> <strong style="color:#f87171;">' + fmt(dr.expense) + '</strong></div>' +
+      '<div><span style="color:var(--muted);">Net:</span> <strong style="color:' + (profit>=0?'#4ade80':'#f87171') + ';">' + (profit<0?'-':'') + fmt(Math.abs(profit)) + '</strong></div>' +
+      '</div></div>';
+  } else {
+    dailyBox.innerHTML = '<div class="empty-state-cell" style="padding:14px 0;">' + '<svg class="es-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l2-7h12l2 7"/><path d="M4 13h5a1 1 0 0 1 1 1 2 2 0 0 0 4 0 1 1 0 0 1 1-1h5v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/></svg>' + '<span class="es-text">No Daily Record for ' + niceDate + '</span></div>';
+  }
+
+  // ---- Shareholder Attendance (may have multiple trips on one date) ----
+  const attRecs = attendanceRecords.filter(r => r.date === date);
+  const attBox = document.getElementById('xd-attendance');
+  if (attRecs.length > 0) {
+    let html = '';
+    attRecs.forEach(function(r) {
+      const tripLabel = r.trip ? ' — ' + r.trip : '';
+      html +=
+        '<div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:rgba(255,159,67,0.04);margin-bottom:8px;">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;">' +
+        '<span style="font-family:\'Space Grotesk\',sans-serif;font-size:13px;color:var(--gold);letter-spacing:0.5px;">👥 ATTENDANCE — ' + niceDate + tripLabel + '</span>' +
+        '<button class="btn btn-sm" style="background:rgba(255,159,67,0.15);color:var(--gold-light);border:1px solid var(--border);" onclick="goPage(2);loadAttendanceForEdit(\'' + date + '\',\'' + (r.trip||'') + '\')">✎ EDIT</button>' +
+        '</div>' +
+        '<div style="font-size:13px;margin-bottom:4px;"><span style="color:var(--muted);">Fishing Type:</span> <strong>' + (r.fishingType||'—') + '</strong> &nbsp; <span style="color:var(--muted);">Present:</span> <strong>' + (r.present?r.present.length:0) + '</strong></div>' +
+        '<div style="font-size:12px;color:var(--muted);">' + (r.present?r.present.join(', '):'—') + '</div>' +
+        '</div>';
+    });
+    attBox.innerHTML = html;
+  } else {
+    attBox.innerHTML = '<div class="empty-state-cell" style="padding:14px 0;">' + '<svg class="es-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l2-7h12l2 7"/><path d="M4 13h5a1 1 0 0 1 1 1 2 2 0 0 0 4 0 1 1 0 0 1 1-1h5v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/></svg>' + '<span class="es-text">No Attendance recorded for ' + niceDate + '</span></div>';
+  }
+
+  // ---- Advances & Payments ----
+  const pays = paymentRecords.filter(r => r.date === date);
+  const payBox = document.getElementById('xd-payments');
+  if (pays.length > 0) {
+    let rows = '';
+    pays.forEach(function(p) {
+      rows +=
+        '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:10px 0;border-bottom:1px dashed rgba(255,159,67,0.15);">' +
+        '<div style="font-size:13px;"><strong>' + p.member + '</strong> <span style="color:var(--muted);">(' + (p.type||'advance') + ')</span> — <span class="result-positive">' + fmt(p.amount) + '</span>' + (p.notes?' <span style="color:var(--muted);font-style:italic;">— ' + p.notes + '</span>':'') + '</div>' +
+        '<button class="btn btn-sm" style="background:rgba(255,159,67,0.15);color:var(--gold-light);border:1px solid var(--border);" onclick="goPage(4);editPayment(' + p.id + ')">✎ EDIT</button>' +
+        '</div>';
+    });
+    payBox.innerHTML =
+      '<div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:rgba(255,159,67,0.04);">' +
+      '<div style="font-family:\'Space Grotesk\',sans-serif;font-size:13px;color:var(--gold);letter-spacing:0.5px;margin-bottom:6px;">💰 ADVANCES & PAYMENTS — ' + niceDate + '</div>' +
+      rows + '</div>';
+  } else {
+    payBox.innerHTML = '<div class="empty-state-cell" style="padding:14px 0;">' + '<svg class="es-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l2-7h12l2 7"/><path d="M4 13h5a1 1 0 0 1 1 1 2 2 0 0 0 4 0 1 1 0 0 1 1-1h5v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/></svg>' + '<span class="es-text">No Advances/Payments recorded for ' + niceDate + '</span></div>';
+  }
+
+  document.getElementById('xd-results').style.display = 'block';
 }
 
 function addDailyRecord() {
