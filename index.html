@@ -4,74 +4,77 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Al Ahmed Fishing Boat</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --navy: #0a1628;
-    --deep: #0d1f3c;
-    --ocean: #1a3a5c;
-    --teal: #1e6b8a;
-    --gold: #c9a84c;
-    --gold-light: #e8c97a;
+    --navy: #0d1117;
+    --deep: #11161f;
+    --ocean: #171f2b;
+    --teal: #1a2534;
+    --gold: #ff9f43;
+    --gold-light: #ffb870;
     --foam: #e8f4f8;
-    --white: #f5f0e8;
-    --text: #d4c9b0;
-    --muted: #8a9ab5;
-    --danger: #c0392b;
-    --success: #1a7a4a;
-    --card: rgba(26, 58, 92, 0.5);
-    --border: rgba(201, 168, 76, 0.3);
+    --white: #eef2f7;
+    --text: #d8e0ea;
+    --muted: #7c8898;
+    --danger: #f87171;
+    --success: #4ade80;
+    --card: rgba(23, 31, 43, 0.55);
+    --border: rgba(255, 159, 67, 0.28);
+    --glow: 0 0 12px rgba(255, 159, 67, 0.35);
   }
 
-  /* ===== DAY-OF-WEEK THEMES ===== */
-  /* Monday — Deep Ocean Blue (default) */
+  /* ===== DAY-OF-WEEK ACCENT STATES ===== */
+  /* Deep Trawl Instrumentation: one consistent near-black slate base every day —
+     only the accent hue rotates, like a different readout state on the same panel. */
+  /* Monday — Amber (primary/default) */
   body.theme-monday {
-    --navy: #0a1628; --deep: #0d1f3c; --ocean: #1a3a5c; --teal: #1e6b8a;
-    --gold: #c9a84c; --gold-light: #e8c97a; --border: rgba(201,168,76,0.3);
-    --card: rgba(26,58,92,0.5); --muted: #8a9ab5; --text: #d4c9b0;
+    --navy: #0d1117; --deep: #11161f; --ocean: #171f2b; --teal: #1a2534;
+    --gold: #ff9f43; --gold-light: #ffb870; --border: rgba(255,159,67,0.28);
+    --card: rgba(23,31,43,0.55); --muted: #7c8898; --text: #d8e0ea;
   }
-  /* Tuesday — Forest Green */
+  /* Tuesday — Sonar Green */
   body.theme-tuesday {
-    --navy: #0a1a0f; --deep: #0f2415; --ocean: #1a4a25; --teal: #1e7a3a;
-    --gold: #4caf7a; --gold-light: #7acf9a; --border: rgba(76,175,122,0.3);
-    --card: rgba(26,74,37,0.5); --muted: #8ab59a; --text: #c8d4c0;
+    --navy: #0d1117; --deep: #11161f; --ocean: #17291f; --teal: #1a3427;
+    --gold: #4ade80; --gold-light: #86efac; --border: rgba(74,222,128,0.28);
+    --card: rgba(23,43,31,0.5); --muted: #7c9488; --text: #d8eae0;
   }
-  /* Wednesday — Royal Purple */
+  /* Wednesday — Signal Violet */
   body.theme-wednesday {
-    --navy: #120a28; --deep: #1a0f3c; --ocean: #2e1a5c; --teal: #4a1e8a;
-    --gold: #a04cc9; --gold-light: #c87ae8; --border: rgba(160,76,201,0.3);
-    --card: rgba(46,26,92,0.5); --muted: #9a8ab5; --text: #cfc9d4;
+    --navy: #0d1117; --deep: #131020; --ocean: #201a34; --teal: #2a2242;
+    --gold: #a78bfa; --gold-light: #c4b5fd; --border: rgba(167,139,250,0.28);
+    --card: rgba(31,25,50,0.55); --muted: #8a84a8; --text: #ddd8ea;
   }
-  /* Thursday — Warm Amber */
+  /* Thursday — Beacon Yellow */
   body.theme-thursday {
-    --navy: #1a1208; --deep: #241a0a; --ocean: #3d2e10; --teal: #7a5a1e;
-    --gold: #e8a020; --gold-light: #f0c050; --border: rgba(232,160,32,0.3);
-    --card: rgba(61,46,16,0.5); --muted: #b5a07a; --text: #d4cbb0;
+    --navy: #0d1117; --deep: #171410; --ocean: #2b2417; --teal: #3a2f1a;
+    --gold: #fbbf24; --gold-light: #fde68a; --border: rgba(251,191,36,0.28);
+    --card: rgba(43,36,23,0.5); --muted: #9a8c72; --text: #eae2d0;
   }
-  /* Friday — Deep Red / Maroon */
+  /* Friday — Alert Red */
   body.theme-friday {
-    --navy: #1a0808; --deep: #240d0d; --ocean: #4a1515; --teal: #8a1e1e;
-    --gold: #c94c4c; --gold-light: #e87a7a; --border: rgba(201,76,76,0.3);
-    --card: rgba(74,21,21,0.5); --muted: #b58a8a; --text: #d4c0c0;
+    --navy: #0d1117; --deep: #17111a; --ocean: #2b171f; --teal: #3a1e26;
+    --gold: #f87171; --gold-light: #fca5a5; --border: rgba(248,113,113,0.28);
+    --card: rgba(43,23,31,0.5); --muted: #9a7c82; --text: #ead8dc;
   }
-  /* Saturday — Steel Teal (lighter, weekend feel) */
+  /* Saturday — Radar Cyan */
   body.theme-saturday {
-    --navy: #081a1a; --deep: #0d2424; --ocean: #154040; --teal: #1e7a7a;
-    --gold: #4cc9c9; --gold-light: #7ae8e8; --border: rgba(76,201,201,0.3);
-    --card: rgba(21,64,64,0.5); --muted: #8ab5b5; --text: #c0d4d4;
+    --navy: #0d1117; --deep: #0f171a; --ocean: #162b2f; --teal: #1a373d;
+    --gold: #22d3ee; --gold-light: #67e8f9; --border: rgba(34,211,238,0.28);
+    --card: rgba(21,43,47,0.5); --muted: #7c9498; --text: #d8eaea;
   }
-  /* Sunday — Golden Sand */
+  /* Sunday — Depth Blue */
   body.theme-sunday {
-    --navy: #1a1508; --deep: #241e0a; --ocean: #3d3610; --teal: #7a6c1e;
-    --gold: #d4a832; --gold-light: #ecc85a; --border: rgba(212,168,50,0.3);
-    --card: rgba(61,54,16,0.5); --muted: #b5a85a; --text: #d4cca0;
+    --navy: #0d1117; --deep: #10141f; --ocean: #182236; --teal: #1e2c44;
+    --gold: #60a5fa; --gold-light: #93c5fd; --border: rgba(96,165,250,0.28);
+    --card: rgba(24,34,54,0.5); --muted: #7c8aa0; --text: #d8e2ea;
   }
 
   /* Theme badge in sync bar */
   #theme-day-badge {
     font-size:11px; padding:3px 10px; border-radius:12px;
     border:1px solid var(--border); color:var(--gold-light);
-    background:rgba(0,0,0,0.2); font-family:'IBM Plex Mono',monospace;
+    background:rgba(0,0,0,0.2); font-family:'JetBrains Mono',monospace;
     letter-spacing:1px; cursor:pointer; user-select:none;
   }
   #theme-day-badge:hover { opacity:0.8; }
@@ -81,11 +84,11 @@
   body {
     background: var(--navy);
     color: var(--text);
-    font-family: 'Crimson Text', serif;
+    font-family: 'Inter', sans-serif;
     min-height: 100vh;
     background-image: 
       radial-gradient(ellipse at 20% 50%, rgba(30, 107, 138, 0.15) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 20%, rgba(201, 168, 76, 0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(255, 159, 67, 0.08) 0%, transparent 50%),
       url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   }
 
@@ -108,12 +111,12 @@
   }
 
   .header-title {
-    font-family: 'Cinzel', serif;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 22px;
     font-weight: 700;
     color: var(--gold);
     letter-spacing: 2px;
-    text-shadow: 0 0 20px rgba(201,168,76,0.4);
+    text-shadow: 0 0 20px rgba(255,159,67,0.4);
   }
 
   .header-sub {
@@ -153,7 +156,7 @@
     border: none;
     border-bottom: 3px solid transparent;
     color: var(--muted);
-    font-family: 'Cinzel', serif;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 11px;
     letter-spacing: 0.9px;  /* trimmed from 1.5px, same reason */
     cursor: pointer;
@@ -161,8 +164,8 @@
     white-space: nowrap;
   }
 
-  .nav-btn:hover { color: var(--gold-light); background: rgba(201,168,76,0.05); }
-  .nav-btn.active { color: var(--gold); border-bottom-color: var(--gold); background: rgba(201,168,76,0.08); }
+  .nav-btn:hover { color: var(--gold-light); background: rgba(255,159,67,0.05); }
+  .nav-btn.active { color: var(--gold); border-bottom-color: var(--gold); background: rgba(255,159,67,0.08); box-shadow: inset 0 -1px 8px -2px var(--gold); }
 
   /* PAGES */
   .page { display: none; padding: 24px; max-width: 1200px; margin: 0 auto; }
@@ -179,7 +182,7 @@
   }
 
   .card-title {
-    font-family: 'Cinzel', serif;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 13px;
     letter-spacing: 2px;
     color: var(--gold);
@@ -210,17 +213,17 @@
     font-size: 11px;
     letter-spacing: 1.5px;
     color: var(--muted);
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'JetBrains Mono', monospace;
     text-transform: uppercase;
   }
 
   input[type="date"], input[type="number"], input[type="text"], select, textarea {
-    background: rgba(10, 22, 40, 0.8);
+    background: rgba(13, 17, 23, 0.8);
     border: 1px solid var(--border);
     border-radius: 8px;
     padding: 10px 14px;
     color: var(--white);
-    font-family: 'Crimson Text', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 16px;
     transition: border-color 0.2s;
     width: 100%;
@@ -229,7 +232,7 @@
   input:focus, select:focus, textarea:focus {
     outline: none;
     border-color: var(--gold);
-    box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+    box-shadow: 0 0 0 3px rgba(255,159,67,0.1);
   }
 
   input[type="date"]::-webkit-calendar-picker-indicator {
@@ -242,7 +245,7 @@
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    font-family: 'Cinzel', serif;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 11px;
     letter-spacing: 1.5px;
     transition: all 0.2s;
@@ -252,10 +255,10 @@
     background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
     color: var(--navy);
     font-weight: 700;
-    box-shadow: 0 4px 15px rgba(201,168,76,0.3);
+    box-shadow: 0 4px 15px rgba(255,159,67,0.3);
   }
 
-  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(201,168,76,0.4); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,159,67,0.4); }
 
   .btn-danger {
     background: rgba(192, 57, 43, 0.2);
@@ -277,9 +280,9 @@
   }
 
   th {
-    background: rgba(201, 168, 76, 0.1);
+    background: rgba(255, 159, 67, 0.1);
     color: var(--gold);
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
     letter-spacing: 1.5px;
     text-transform: uppercase;
@@ -290,12 +293,12 @@
 
   td {
     padding: 11px 14px;
-    border-bottom: 1px solid rgba(201,168,76,0.08);
+    border-bottom: 1px solid rgba(255,159,67,0.08);
     color: var(--text);
     vertical-align: middle;
   }
 
-  tr:hover td { background: rgba(201,168,76,0.04); }
+  tr:hover td { background: rgba(255,159,67,0.04); }
 
   /* STATS GRID */
   .stats-grid {
@@ -314,7 +317,7 @@
   }
 
   .stat-label {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
     letter-spacing: 1.5px;
     color: var(--muted);
@@ -323,7 +326,7 @@
   }
 
   .stat-value {
-    font-family: 'Cinzel', serif;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 22px;
     color: var(--gold);
   }
@@ -342,7 +345,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    background: rgba(10,22,40,0.6);
+    background: rgba(13,17,23,0.6);
     border: 1px solid var(--border);
     border-radius: 6px;
     padding: 8px 12px;
@@ -351,7 +354,7 @@
   }
 
   .checkbox-item:hover { border-color: var(--gold); }
-  .checkbox-item.checked { background: rgba(201,168,76,0.1); border-color: var(--gold); }
+  .checkbox-item.checked { background: rgba(255,159,67,0.1); border-color: var(--gold); }
 
   .checkbox-item input { display: none; }
 
@@ -388,7 +391,7 @@
 
   .alert-info { background: rgba(30,107,138,0.2); border: 1px solid rgba(30,107,138,0.4); color: #7ecfed; }
   .alert-success { background: rgba(26,122,74,0.2); border: 1px solid rgba(26,122,74,0.4); color: #52d48a; }
-  .alert-warning { background: rgba(201,168,76,0.15); border: 1px solid var(--border); color: var(--gold-light); }
+  .alert-warning { background: rgba(255,159,67,0.15); border: 1px solid var(--border); color: var(--gold-light); }
 
   /* BADGE */
   .badge {
@@ -396,16 +399,16 @@
     padding: 2px 8px;
     border-radius: 4px;
     font-size: 11px;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'JetBrains Mono', monospace;
   }
 
   .badge-green { background: rgba(26,122,74,0.3); color: #52d48a; }
   .badge-red { background: rgba(192,57,43,0.3); color: #e74c3c; }
-  .badge-gold { background: rgba(201,168,76,0.2); color: var(--gold-light); }
+  .badge-gold { background: rgba(255,159,67,0.2); color: var(--gold-light); }
 
   /* PAGE TITLE */
   .page-title {
-    font-family: 'Cinzel', serif;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 20px;
     color: var(--gold);
     margin-bottom: 24px;
@@ -476,7 +479,7 @@
       position: sticky;
       top: 0;              /* corrected to real header height by JS */
       z-index: 850;
-      background: #0a1628 !important;  /* solid — was translucent, avoid see-through while stuck */
+      background: #0d1117 !important;  /* solid — was translucent, avoid see-through while stuck */
     }
     #sync-bar > div:first-child { flex-wrap: wrap; font-size: 9px !important; line-height: 1.6; }
     #sync-bar > div:last-child {
@@ -515,7 +518,7 @@
     #edit-sales-rows [data-rowid] > div > button,
     #edit-expense-rows [data-rowid] > div > button { padding: 8px !important; }
     .tractor-extra, .auction-extra { grid-template-columns: 1fr !important; }
-    [data-rowid] { border: 1px solid rgba(201,168,76,0.12); border-radius: 8px; padding: 8px; margin-bottom: 10px !important; }
+    [data-rowid] { border: 1px solid rgba(255,159,67,0.12); border-radius: 8px; padding: 8px; margin-bottom: 10px !important; }
 
     /* Misc mobile polish */
     .section-header { flex-direction: column; align-items: flex-start; gap: 8px; }
@@ -534,13 +537,13 @@
     }
     .bnav-btn {
       flex: 1; background: none; border: none; color: var(--muted);
-      padding: 9px 2px 8px; font-family: 'IBM Plex Mono', monospace;
+      padding: 9px 2px 8px; font-family: 'JetBrains Mono', monospace;
       font-size: 9.5px; letter-spacing: 0.4px; cursor: pointer;
       display: flex; flex-direction: column; align-items: center; gap: 3px;
       border-top: 3px solid transparent; transition: color .2s;
     }
     .bnav-btn .bnav-ico { font-size: 18px; line-height: 1; }
-    .bnav-btn.active { color: var(--gold); border-top-color: var(--gold); background: rgba(201,168,76,0.08); }
+    .bnav-btn.active { color: var(--gold); border-top-color: var(--gold); background: rgba(255,159,67,0.08); }
 
     #more-sheet {
       display: block; position: fixed; inset: 0;
@@ -561,10 +564,10 @@
       display: flex; align-items: center; gap: 12px; width: 100%;
       background: rgba(255,255,255,0.03); border: 1px solid var(--border);
       border-radius: 10px; color: var(--text); padding: 13px 14px;
-      margin-bottom: 8px; font-family: 'Cinzel', serif; font-size: 13px;
+      margin-bottom: 8px; font-family: 'Space Grotesk', sans-serif; font-size: 13px;
       letter-spacing: 0.8px; cursor: pointer; text-align: left;
     }
-    .more-item.active { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.1); }
+    .more-item.active { border-color: var(--gold); color: var(--gold); background: rgba(255,159,67,0.1); }
     .more-item .more-ico { font-size: 18px; }
   }
 
@@ -613,7 +616,7 @@
     padding: 28px;
     width: 92%;
     max-width: 480px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(201,168,76,0.15);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(255,159,67,0.15);
     animation: modalIn 0.22s ease;
   }
   @keyframes modalIn {
@@ -621,7 +624,7 @@
     to   { transform: scale(1) translateY(0); opacity: 1; }
   }
   .modal-title {
-    font-family: 'Cinzel', serif;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 14px;
     letter-spacing: 2px;
     color: var(--gold);
@@ -642,27 +645,27 @@
 <!-- PASSWORD LOCK SCREEN -->
 <div id="lock-screen" style="
   position:fixed;top:0;left:0;width:100%;height:100%;
-  background:linear-gradient(135deg,#0a1628 0%,#0d2137 50%,#0a1628 100%);
+  background:linear-gradient(135deg,#0d1117 0%,#0d2137 50%,#0d1117 100%);
   display:flex;align-items:center;justify-content:center;
   z-index:99999;flex-direction:column;
 ">
   <div style="text-align:center;margin-bottom:32px;">
     <div style="font-size:56px;margin-bottom:12px;">⚓</div>
-    <div style="font-family:'Cinzel',serif;font-size:26px;font-weight:700;color:#c9a84c;letter-spacing:3px;">Al Ahmed Fishing Boat</div>
+    <div style="font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;color:#ff9f43;letter-spacing:3px;">Al Ahmed Fishing Boat</div>
     <div style="font-size:12px;color:rgba(255,255,255,0.4);letter-spacing:2px;margin-top:6px;">FLEET MANAGEMENT SYSTEM</div>
   </div>
 
-  <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.3);border-radius:16px;padding:36px 40px;width:320px;text-align:center;">
-    <div style="font-family:'Cinzel',serif;font-size:13px;color:#c9a84c;letter-spacing:2px;margin-bottom:20px;">🔒 ENTER PASSWORD</div>
+  <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,159,67,0.3);border-radius:16px;padding:36px 40px;width:320px;text-align:center;">
+    <div style="font-family:'Space Grotesk',sans-serif;font-size:13px;color:#ff9f43;letter-spacing:2px;margin-bottom:20px;">🔒 ENTER PASSWORD</div>
     <input type="password" id="lock-input"
       placeholder="Password"
-      style="width:100%;padding:14px 16px;background:rgba(255,255,255,0.06);border:1px solid rgba(201,168,76,0.3);border-radius:8px;color:#fff;font-size:18px;text-align:center;letter-spacing:4px;outline:none;margin-bottom:16px;box-sizing:border-box;"
+      style="width:100%;padding:14px 16px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,159,67,0.3);border-radius:8px;color:#fff;font-size:18px;text-align:center;letter-spacing:4px;outline:none;margin-bottom:16px;box-sizing:border-box;"
       onkeydown="if(event.key==='Enter') checkPassword()"
     >
     <div id="lock-error" style="color:#e74c3c;font-size:12px;margin-bottom:12px;min-height:18px;"></div>
     <button onclick="checkPassword()" style="
-      width:100%;padding:14px;background:linear-gradient(135deg,#c9a84c,#a07830);
-      border:none;border-radius:8px;color:#0a1628;font-family:'Cinzel',serif;
+      width:100%;padding:14px;background:linear-gradient(135deg,#ff9f43,#a07830);
+      border:none;border-radius:8px;color:#0d1117;font-family:'Space Grotesk',sans-serif;
       font-size:13px;font-weight:700;letter-spacing:2px;cursor:pointer;
     ">UNLOCK →</button>
   </div>
@@ -692,8 +695,8 @@
 </nav>
 
 <!-- SYNC BAR -->
-<div id="sync-bar" style="background:rgba(10,22,40,0.95);border-bottom:1px solid rgba(201,168,76,0.2);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:-webkit-sticky;position:sticky;top:0;z-index:98;">
-  <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;display:flex;align-items:center;gap:8px;">
+<div id="sync-bar" style="background:rgba(13,17,23,0.95);border-bottom:1px solid rgba(255,159,67,0.2);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:-webkit-sticky;position:sticky;top:0;z-index:98;">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;display:flex;align-items:center;gap:8px;">
     <span id="theme-day-badge" onclick="cycleDayTheme()" title="Click to change theme">🎨 MON</span>
     <span id="gdrive-status-dot" style="width:8px;height:8px;border-radius:50%;background:#888;display:inline-block;"></span>
     <span id="gdrive-status-text" style="color:var(--muted);">Google Drive: Not connected</span>
@@ -704,7 +707,7 @@
     <button id="gdrive-connect-btn" class="btn btn-sm" style="background:rgba(66,133,244,0.2);color:#7eaaff;border:1px solid rgba(66,133,244,0.4)" onclick="gdriveConnect()">
       ☁ CONNECT GOOGLE DRIVE
     </button>
-    <button class="btn btn-sm" style="background:rgba(201,168,76,0.2);color:#c9a84c;border:1px solid rgba(201,168,76,0.4);" onclick="toggleCalculator()" title="Calculator">🧮 CALC</button>
+    <button class="btn btn-sm" style="background:rgba(255,159,67,0.2);color:#ff9f43;border:1px solid rgba(255,159,67,0.4);" onclick="toggleCalculator()" title="Calculator">🧮 CALC</button>
     <button id="gdrive-save-btn" class="btn btn-sm" style="background:rgba(26,122,74,0.25);color:#52d48a;border:1px solid rgba(26,122,74,0.5);display:none" onclick="gdriveSave(true)">
       ☁ SAVE TO DRIVE
     </button>
@@ -734,7 +737,7 @@
       </div>
       <div class="form-group">
         <label>Fishing Trips This Day</label>
-        <select id="p1-multitrip" onchange="updateTripMode('sales-rows','p1-multitrip')" style="padding:10px 12px;background:rgba(10,22,40,0.8);border:1px solid rgba(30,107,138,0.5);border-radius:6px;color:#7ecfed;font-size:14px;width:100%;font-weight:600;">
+        <select id="p1-multitrip" onchange="updateTripMode('sales-rows','p1-multitrip')" style="padding:10px 12px;background:rgba(13,17,23,0.8);border:1px solid rgba(30,107,138,0.5);border-radius:6px;color:#7ecfed;font-size:14px;width:100%;font-weight:600;">
           <option value="0">Single Trip (Full Day)</option>
           <option value="1">Multiple Trips — tag each sale</option>
         </select>
@@ -744,7 +747,7 @@
     <!-- SALES SECTION -->
     <div style="margin-bottom:20px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-        <span style="font-family:'Cinzel',serif;font-size:12px;letter-spacing:1.5px;color:#2ecc71;">SALES ITEMS</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;letter-spacing:1.5px;color:#2ecc71;">SALES ITEMS</span>
         <button class="btn btn-sm" style="background:rgba(26,122,74,0.25);color:#2ecc71;border:1px solid rgba(26,122,74,0.5)" onclick="addSaleRow()">+ ADD SALE</button>
       </div>
       <div class="row-headers" style="display:grid;grid-template-columns:1.2fr 1fr 1.1fr 75px 90px 100px auto;gap:6px;margin-bottom:4px;padding:0 2px;">
@@ -752,13 +755,13 @@
         <span style="font-size:10px;color:var(--muted);">NOTES</span>
         <span style="font-size:10px;color:var(--muted);">SUPPLIER / TYPE</span>
         <span style="font-size:10px;color:#7ecfed;">QTY (KG)</span>
-        <span style="font-size:10px;color:#c9a84c;">RATE (₹)</span>
+        <span style="font-size:10px;color:#ff9f43;">RATE (₹)</span>
         <span style="font-size:10px;color:#2ecc71;">AMOUNT (₹)</span>
         <span></span>
       </div>
       <div id="sales-rows"></div>
       <div id="sales-empty-placeholder" class="empty-state-cell" style="padding:16px 0;"><svg class="es-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l2-7h12l2 7"/><path d="M4 13h5a1 1 0 0 1 1 1 2 2 0 0 0 4 0 1 1 0 0 1 1-1h5v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/></svg><span class="es-text">No sale items added yet — tap + Add Sale to start</span></div>
-      <div style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#2ecc71;margin-top:8px;">
+      <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:13px;color:#2ecc71;margin-top:8px;">
         Total Sales: <strong id="sale-total-preview">₹0</strong>
       </div>
     </div>
@@ -766,21 +769,21 @@
     <!-- EXPENSES SECTION -->
     <div style="margin-bottom:20px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-        <span style="font-family:'Cinzel',serif;font-size:12px;letter-spacing:1.5px;color:#e74c3c;">EXPENSE ITEMS</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;letter-spacing:1.5px;color:#e74c3c;">EXPENSE ITEMS</span>
         <button class="btn btn-sm" style="background:rgba(192,57,43,0.25);color:#e74c3c;border:1px solid rgba(192,57,43,0.5)" onclick="addExpenseRow()">+ ADD EXPENSE</button>
       </div>
       <div class="row-headers" style="display:grid;grid-template-columns:120px 1fr 70px 90px 1fr 110px auto;gap:5px;margin-bottom:4px;padding:0 2px;">
         <span style="font-size:10px;color:var(--muted);">CATEGORY</span>
         <span style="font-size:10px;color:var(--muted);">NOTES</span>
         <span style="font-size:10px;color:#7ecfed;">QTY</span>
-        <span style="font-size:10px;color:#c9a84c;">RATE (₹)</span>
+        <span style="font-size:10px;color:#ff9f43;">RATE (₹)</span>
         <span style="font-size:10px;color:var(--muted);">SUPPLIER</span>
         <span style="font-size:10px;color:#e74c3c;">AMOUNT (₹)</span>
         <span></span>
       </div>
       <div id="expense-rows"></div>
       <div id="expense-empty-placeholder" class="empty-state-cell" style="padding:16px 0;"><svg class="es-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l2-7h12l2 7"/><path d="M4 13h5a1 1 0 0 1 1 1 2 2 0 0 0 4 0 1 1 0 0 1 1-1h5v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/></svg><span class="es-text">No expense items added yet — tap + Add Expense to start</span></div>
-      <div style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#e74c3c;margin-top:8px;">
+      <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:13px;color:#e74c3c;margin-top:8px;">
         Total Expenses: <strong id="expense-total-preview">₹0</strong>
       </div>
     </div>
@@ -796,7 +799,7 @@
   </div>
 
   <!-- DATE RANGE FILTER & EXPORT -->
-  <div class="card" style="border-color:rgba(201,168,76,0.3);">
+  <div class="card" style="border-color:rgba(255,159,67,0.3);">
     <div class="card-title">📅 Date Range Report</div>
     <div class="form-row" style="align-items:flex-end;gap:12px;flex-wrap:wrap;">
       <div class="form-group">
@@ -842,7 +845,7 @@
       </div>
       <div class="form-group">
         <label>Trip</label>
-        <select id="p2-trip" style="padding:10px 12px;background:rgba(10,22,40,0.8);border:1px solid rgba(30,107,138,0.5);border-radius:6px;color:#7ecfed;font-size:14px;width:100%;font-weight:600;">
+        <select id="p2-trip" style="padding:10px 12px;background:rgba(13,17,23,0.8);border:1px solid rgba(30,107,138,0.5);border-radius:6px;color:#7ecfed;font-size:14px;width:100%;font-weight:600;">
           <option value="">Full Day (Single Trip)</option>
           <option value="Morning">Morning Trip</option>
           <option value="Afternoon">Afternoon Trip</option>
@@ -852,7 +855,7 @@
       </div>
       <div class="form-group">
         <label>Fishing Type</label>
-        <select id="p2-fishing-type" style="padding:10px 12px;background:rgba(10,22,40,0.8);border:1px solid rgba(201,168,76,0.4);border-radius:6px;color:var(--gold-light);font-size:14px;width:100%;font-weight:600;">
+        <select id="p2-fishing-type" style="padding:10px 12px;background:rgba(13,17,23,0.8);border:1px solid rgba(255,159,67,0.4);border-radius:6px;color:var(--gold-light);font-size:14px;width:100%;font-weight:600;">
           <option value="">— Select Fishing Type —</option>
           <option value="Tawar">Tawar Fishing</option>
           <option value="Bangda">Bangda Fishing</option>
@@ -915,7 +918,7 @@
       </div>
       <div class="form-group">
         <label style="color:var(--gold-light);">Settlement Date</label>
-        <input type="date" id="p3-settle-date" style="border-color:rgba(201,168,76,0.5);">
+        <input type="date" id="p3-settle-date" style="border-color:rgba(255,159,67,0.5);">
       </div>
     </div>
 
@@ -923,7 +926,7 @@
   </div>
 
   <!-- Saved Periods Panel -->
-  <div class="card" id="p3-saved-periods-panel" style="border-color:rgba(201,168,76,0.2);">
+  <div class="card" id="p3-saved-periods-panel" style="border-color:rgba(255,159,67,0.2);">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
       <div class="card-title" style="margin-bottom:0">↩ Saved Period Settlements <span id="saved-period-count" style="font-size:11px;color:var(--muted);">(0 periods saved)</span></div>
       <div style="display:flex;gap:8px;">
@@ -1019,24 +1022,24 @@
     </div>
 
     <!-- GROUP SETTLEMENT PANEL -->
-    <div class="card" style="border-color:rgba(201,168,76,0.35);">
+    <div class="card" style="border-color:rgba(255,159,67,0.35);">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
         <div class="card-title" style="margin-bottom:0;">👥 Group Settlement — Select Shareholders</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn btn-sm" style="background:rgba(201,168,76,0.2);color:var(--gold-light);border:1px solid rgba(201,168,76,0.4)" onclick="groupSelectOwner()" title="Select all owner shares">⚓ OWNER GROUP</button>
+          <button class="btn btn-sm" style="background:rgba(255,159,67,0.2);color:var(--gold-light);border:1px solid rgba(255,159,67,0.4)" onclick="groupSelectOwner()" title="Select all owner shares">⚓ OWNER GROUP</button>
           <button class="btn btn-sm" style="background:rgba(26,122,74,0.2);color:#52d48a;border:1px solid rgba(26,122,74,0.4)" onclick="groupSelectAll()">✓ ALL</button>
           <button class="btn btn-sm btn-danger" onclick="groupClearAll()">✕ CLEAR</button>
           <button class="btn btn-primary btn-sm" onclick="calculateGroup()">⚡ CALCULATE GROUP</button>
         </div>
       </div>
-      <div style="background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.15);border-radius:6px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:var(--muted);">
+      <div style="background:rgba(255,159,67,0.06);border:1px solid rgba(255,159,67,0.15);border-radius:6px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:var(--muted);">
         💡 Click <strong style="color:var(--gold-light);">⚓ OWNER GROUP</strong> to pre-select all owner shares — then freely <strong style="color:var(--text);">tick or untick</strong> any checkbox to customise before calculating.
       </div>
       <div id="group-checkbox-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-bottom:16px;"></div>
 
       <div id="group-results" style="display:none;">
         <div id="group-stats" class="stats-grid" style="margin-bottom:16px;"></div>
-        <div id="group-label-banner" style="display:none;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);border-radius:8px;padding:10px 16px;margin-bottom:12px;font-family:'Cinzel',serif;font-size:13px;color:var(--gold);letter-spacing:1px;"></div>
+        <div id="group-label-banner" style="display:none;background:rgba(255,159,67,0.1);border:1px solid rgba(255,159,67,0.3);border-radius:8px;padding:10px 16px;margin-bottom:12px;font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--gold);letter-spacing:1px;"></div>
         <div class="table-wrap" style="margin-bottom:12px;">
           <table>
             <thead>
@@ -1054,10 +1057,10 @@
     </div>
 
     <!-- INDIVIDUAL SHAREHOLDER DETAIL PANEL -->
-    <div class="card" id="p3-individual-panel" style="display:none; border-color: var(--gold); box-shadow: 0 0 30px rgba(201,168,76,0.15);">
+    <div class="card" id="p3-individual-panel" style="display:none; border-color: var(--gold); box-shadow: 0 0 30px rgba(255,159,67,0.15);">
       <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
         <div>
-          <div style="font-family:'Cinzel',serif; font-size:18px; color:var(--gold); letter-spacing:2px;" id="ind-name"></div>
+          <div style="font-family:'Space Grotesk',sans-serif; font-size:18px; color:var(--gold); letter-spacing:2px;" id="ind-name"></div>
           <div style="font-size:13px; color:var(--muted); margin-top:4px;" id="ind-period"></div>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
@@ -1136,7 +1139,7 @@
   </div>
 
   <!-- ADVANCE STATEMENT SECTION -->
-  <div class="card" style="border-color:rgba(201,168,76,0.3);">
+  <div class="card" style="border-color:rgba(255,159,67,0.3);">
     <div class="card-title">📋 Advance Statement by Date Range</div>
     <div class="form-row" style="align-items:flex-end;gap:12px;flex-wrap:wrap;">
       <div class="form-group">
@@ -1221,7 +1224,7 @@
     </div>
     <div class="form-group" style="margin-bottom:16px">
       <label>Fishing Trips This Day</label>
-      <select id="edit-daily-multitrip" onchange="updateTripMode('edit-sales-rows','edit-daily-multitrip')" style="padding:10px 12px;background:rgba(10,22,40,0.8);border:1px solid rgba(30,107,138,0.5);border-radius:6px;color:#7ecfed;font-size:14px;width:100%;font-weight:600;">
+      <select id="edit-daily-multitrip" onchange="updateTripMode('edit-sales-rows','edit-daily-multitrip')" style="padding:10px 12px;background:rgba(13,17,23,0.8);border:1px solid rgba(30,107,138,0.5);border-radius:6px;color:#7ecfed;font-size:14px;width:100%;font-weight:600;">
         <option value="0">Single Trip (Full Day)</option>
         <option value="1">Multiple Trips — tag each sale</option>
       </select>
@@ -1229,7 +1232,7 @@
 
     <div style="margin-bottom:16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-        <span style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:1.5px;color:#2ecc71;">SALES ITEMS</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:1.5px;color:#2ecc71;">SALES ITEMS</span>
         <button class="btn btn-sm" style="background:rgba(26,122,74,0.25);color:#2ecc71;border:1px solid rgba(26,122,74,0.5)" onclick="addEditSaleRow()">+ ADD</button>
       </div>
       <div class="row-headers" style="display:grid;grid-template-columns:1.2fr 1fr 1.1fr 65px 80px 90px auto;gap:5px;margin-bottom:4px;padding:0 2px;">
@@ -1237,7 +1240,7 @@
         <span style="font-size:10px;color:var(--muted);">NOTES</span>
         <span style="font-size:10px;color:var(--muted);">SUPPLIER / TYPE</span>
         <span style="font-size:10px;color:#7ecfed;">QTY</span>
-        <span style="font-size:10px;color:#c9a84c;">RATE</span>
+        <span style="font-size:10px;color:#ff9f43;">RATE</span>
         <span style="font-size:10px;color:#2ecc71;">AMOUNT</span>
         <span></span>
       </div>
@@ -1246,7 +1249,7 @@
 
     <div style="margin-bottom:16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-        <span style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:1.5px;color:#e74c3c;">EXPENSE ITEMS</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:1.5px;color:#e74c3c;">EXPENSE ITEMS</span>
         <button class="btn btn-sm" style="background:rgba(192,57,43,0.25);color:#e74c3c;border:1px solid rgba(192,57,43,0.5)" onclick="addEditExpenseRow()">+ ADD</button>
       </div>
       <div class="row-headers" style="display:grid;grid-template-columns:120px 1fr 1fr 110px auto;gap:5px;margin-bottom:4px;padding:0 2px;">
@@ -1281,7 +1284,7 @@
     </div>
     <div class="form-group" style="margin-bottom:14px">
       <label>Type</label>
-      <select id="edit-pay-type" style="padding:10px 12px;background:rgba(10,22,40,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;">
+      <select id="edit-pay-type" style="padding:10px 12px;background:rgba(13,17,23,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;">
         <option value="advance">Advance</option>
         <option value="salary">Salary</option>
         <option value="other">Other</option>
@@ -1429,7 +1432,7 @@
   </div>
 
   <!-- SUPPLIER LEDGER BY DATE RANGE -->
-  <div class="card" style="border-color:rgba(201,168,76,0.3);">
+  <div class="card" style="border-color:rgba(255,159,67,0.3);">
     <div class="card-title">📋 Supplier Ledger — Date Range Statement</div>
     <div class="form-row" style="align-items:flex-end;gap:12px;flex-wrap:wrap;">
       <div class="form-group">
@@ -1554,7 +1557,7 @@
     <input type="hidden" id="esp-id">
     <div class="form-group" style="margin-bottom:14px">
       <label>Supplier</label>
-      <select id="esp-supplier" style="padding:10px 12px;background:rgba(10,22,40,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;">
+      <select id="esp-supplier" style="padding:10px 12px;background:rgba(13,17,23,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;">
         <option>Local</option><option>Auction</option>
         <option>A Gift</option><option>MGM</option>
         <option>Noori Fish</option><option>Mansoori</option><option>AFF</option>
@@ -1599,7 +1602,7 @@
       </div>
       <div class="form-group">
         <label>Provider</label>
-        <select id="tt-provider" style="padding:10px 12px;background:rgba(10,22,40,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;">
+        <select id="tt-provider" style="padding:10px 12px;background:rgba(13,17,23,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;">
           <option value="Kakade">Kakade</option>
           <option value="AAT">AAT</option>
           <option value="Mayuresh">Mayuresh</option>
@@ -1633,7 +1636,7 @@
     <div class="form-row">
       <div class="form-group">
         <label>Provider</label>
-        <select id="tt-pay-provider" style="padding:10px 12px;background:rgba(10,22,40,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;">
+        <select id="tt-pay-provider" style="padding:10px 12px;background:rgba(13,17,23,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;">
           <option value="Kakade">Kakade</option>
           <option value="AAT">AAT</option>
           <option value="Mayuresh">Mayuresh</option>
@@ -1656,12 +1659,12 @@
   </div>
 
   <!-- DATE RANGE LEDGER -->
-  <div class="card" style="border-color:rgba(201,168,76,0.3);">
+  <div class="card" style="border-color:rgba(255,159,67,0.3);">
     <div class="card-title">📋 Trip Statement — Date Range</div>
     <div class="form-row" style="align-items:flex-end;flex-wrap:wrap;gap:12px;">
       <div class="form-group">
         <label>Provider</label>
-        <select id="tt-filter-provider" style="padding:10px 12px;background:rgba(10,22,40,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;">
+        <select id="tt-filter-provider" style="padding:10px 12px;background:rgba(13,17,23,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;">
           <option value="">Both Providers</option>
           <option value="Kakade">Kakade</option>
           <option value="AAT">AAT</option>
@@ -1753,7 +1756,7 @@
 
   <div class="card" style="border-color:rgba(30,107,138,0.35);">
     <div style="font-size:12px;color:var(--muted);line-height:1.7;">
-      Commission is <strong style="color:#c9a84c;">2% of auction sale amount</strong>, calculated automatically
+      Commission is <strong style="color:#ff9f43;">2% of auction sale amount</strong>, calculated automatically
       when a sale in Daily Records has <strong style="color:#7ecfed;">Type = Auction</strong> and an agent selected.
       It is added to that same day's expenses automatically.
     </div>
@@ -1767,7 +1770,7 @@
     <div class="form-row">
       <div class="form-group">
         <label>Agent</label>
-        <select id="ag-pay-agent" style="padding:10px 12px;background:rgba(10,22,40,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;">
+        <select id="ag-pay-agent" style="padding:10px 12px;background:rgba(13,17,23,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;">
           <option value="">— Select Agent —</option><option value="Baba">Baba</option><option value="Sunny">Sunny</option><option value="Nazir Chickte">Nazir Chickte</option><option value="Zaheer Chickte">Zaheer Chickte</option><option value="Anjum Mahaldar">Anjum Mahaldar</option><option value="Rizwan">Rizwan</option><option value="Arai">Arai</option><option value="Saeed Chickte">Saeed Chickte</option><option value="Sagir Mahaldar">Sagir Mahaldar</option><option value="Other">Other</option>
         </select>
       </div>
@@ -1788,12 +1791,12 @@
   </div>
 
   <!-- STATEMENT -->
-  <div class="card" style="border-color:rgba(201,168,76,0.3);">
+  <div class="card" style="border-color:rgba(255,159,67,0.3);">
     <div class="card-title">📋 Agent Statement — Date Range</div>
     <div class="form-row" style="align-items:flex-end;flex-wrap:wrap;gap:12px;">
       <div class="form-group">
         <label>Agent</label>
-        <select id="ag-filter-agent" style="padding:10px 12px;background:rgba(10,22,40,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;">
+        <select id="ag-filter-agent" style="padding:10px 12px;background:rgba(13,17,23,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;">
           <option value="">All Agents</option><option value="Baba">Baba</option><option value="Sunny">Sunny</option><option value="Nazir Chickte">Nazir Chickte</option><option value="Zaheer Chickte">Zaheer Chickte</option><option value="Anjum Mahaldar">Anjum Mahaldar</option><option value="Rizwan">Rizwan</option><option value="Arai">Arai</option><option value="Saeed Chickte">Saeed Chickte</option><option value="Sagir Mahaldar">Sagir Mahaldar</option><option value="Other">Other</option>
         </select>
       </div>
@@ -1858,12 +1861,12 @@
 
 <!-- ===== SMART CALCULATOR ===== -->
 <div id="calc-modal" style="display:none;position:fixed;bottom:70px;right:24px;z-index:99997;
-  background:#0d1f35;border:1px solid rgba(201,168,76,0.4);border-radius:16px;
+  background:#0d1f35;border:1px solid rgba(255,159,67,0.4);border-radius:16px;
   box-shadow:0 8px 40px rgba(0,0,0,0.6);width:340px;overflow:hidden;">
 
   <!-- Header -->
-  <div style="background:rgba(201,168,76,0.12);padding:10px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(201,168,76,0.2);">
-    <span style="font-family:'Cinzel',serif;font-size:12px;color:var(--gold);letter-spacing:1px;">🧮 SMART CALCULATOR</span>
+  <div style="background:rgba(255,159,67,0.12);padding:10px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,159,67,0.2);">
+    <span style="font-family:'Space Grotesk',sans-serif;font-size:12px;color:var(--gold);letter-spacing:1px;">🧮 SMART CALCULATOR</span>
     <button onclick="toggleCalculator()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:0 4px;">✕</button>
   </div>
 
@@ -1872,7 +1875,7 @@
     <div style="font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:0.5px;">Type any expression — result shows instantly</div>
     <input id="calc-input" type="text" placeholder="e.g. 36 * 80 + 500 - 200"
       autocomplete="off" autocorrect="off" spellcheck="false"
-      style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(201,168,76,0.4);
+      style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,159,67,0.4);
         border-radius:8px;padding:12px 14px;color:#fff;font-size:18px;outline:none;
         font-family:Arial,sans-serif;letter-spacing:0.5px;"
       oninput="calcEval()" onkeydown="if(event.key==='Escape')toggleCalculator()">
@@ -1881,7 +1884,7 @@
     <div id="calc-result" style="margin-top:10px;text-align:right;min-height:44px;padding:10px 14px;
       background:rgba(255,255,255,0.04);border-radius:8px;border:1px solid rgba(255,255,255,0.06);">
       <div id="calc-result-label" style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;text-transform:uppercase;"></div>
-      <div id="calc-result-value" style="font-size:28px;font-weight:700;color:#c9a84c;">—</div>
+      <div id="calc-result-value" style="font-size:28px;font-weight:700;color:#ff9f43;">—</div>
     </div>
 
     <!-- History -->
@@ -1933,11 +1936,11 @@
       </div>
       <div class="form-group">
         <label>Customer Name</label>
-        <select id="ct-retailer-select" onchange="ctRetailerPick()" style="padding:10px 12px;background:rgba(10,22,40,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;">
+        <select id="ct-retailer-select" onchange="ctRetailerPick()" style="padding:10px 12px;background:rgba(13,17,23,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;">
           <option value="">— Select existing customer —</option>
         </select>
         <input type="text" id="ct-retailer-name" placeholder="Or type new customer name..."
-          style="margin-top:6px;background:rgba(10,22,40,0.8);border:1px solid rgba(201,168,76,0.3);border-radius:6px;padding:8px 12px;color:var(--white);font-size:14px;width:100%;">
+          style="margin-top:6px;background:rgba(13,17,23,0.8);border:1px solid rgba(255,159,67,0.3);border-radius:6px;padding:8px 12px;color:var(--white);font-size:14px;width:100%;">
       </div>
       <div class="form-group">
         <label>Fish Qty (kg)</label>
@@ -1954,7 +1957,7 @@
       </div>
       <div class="form-group">
         <label>Payment Type</label>
-        <select id="ct-pay-type" style="padding:10px 12px;background:rgba(10,22,40,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;">
+        <select id="ct-pay-type" style="padding:10px 12px;background:rgba(13,17,23,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;">
           <option value="credit">Credit (Pay Later)</option>
           <option value="cash">Cash (Paid Now)</option>
         </select>
@@ -1969,7 +1972,7 @@
     <div class="form-row">
       <div class="form-group">
         <label>Customer Name</label>
-        <select id="ct-pay-retailer" style="padding:10px 12px;background:rgba(10,22,40,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;">
+        <select id="ct-pay-retailer" style="padding:10px 12px;background:rgba(13,17,23,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;">
           <option value="">— Select Retailer —</option>
         </select>
       </div>
@@ -1983,7 +1986,7 @@
       </div>
       <div class="form-group">
         <label>Payment Method</label>
-        <select id="ct-pay-method" style="padding:10px 12px;background:rgba(10,22,40,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;">
+        <select id="ct-pay-method" style="padding:10px 12px;background:rgba(13,17,23,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;">
           <option value="cash">Cash</option>
           <option value="upi">UPI</option>
           <option value="bank">Bank Transfer</option>
@@ -1999,10 +2002,10 @@
 
   <!-- RETAILER LEDGER PANEL -->
   <div id="ct-ledger-panel" style="display:none;">
-    <div class="card" style="border-color:rgba(201,168,76,0.4);box-shadow:0 0 20px rgba(201,168,76,0.1);">
+    <div class="card" style="border-color:rgba(255,159,67,0.4);box-shadow:0 0 20px rgba(255,159,67,0.1);">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
         <div>
-          <div style="font-family:'Cinzel',serif;font-size:18px;color:var(--gold);letter-spacing:2px;" id="ct-ledger-name"></div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:18px;color:var(--gold);letter-spacing:2px;" id="ct-ledger-name"></div>
           <div style="font-size:12px;color:var(--muted);margin-top:4px;" id="ct-ledger-sub"></div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -2175,48 +2178,48 @@ function makeItemRow(containerId, type) {
     div.innerHTML =
       '<div style="display:grid;grid-template-columns:1.2fr 1fr 1.1fr 75px 90px 100px auto;gap:6px;align-items:center;">' +
       '<select data-field="fishname" onchange="updatePreview()"' +
-      ' style="background:rgba(10,22,40,0.9);border:1px solid rgba(26,122,74,0.4);border-radius:6px;padding:8px 8px;color:var(--white);font-size:13px;width:100%">' +
+      ' style="background:rgba(13,17,23,0.9);border:1px solid rgba(26,122,74,0.4);border-radius:6px;padding:8px 8px;color:var(--white);font-size:13px;width:100%">' +
       '<option value="">— Fish Name —</option><option value="Tawar">Tawar</option><option value="Popat">Popat</option><option value="Morosa">Morosa</option><option value="Popti">Popti</option><option value="Harya">Harya</option><option value="Dhandas">Dhandas</option><option value="Karli">Karli</option><option value="Gobra">Gobra</option><option value="Squid">Squid</option><option value="Bangda">Bangda</option><option value="Tarli">Tarli</option><option value="Pomfret">Pomfret</option><option value="White">White</option><option value="Surmai">Surmai</option><option value="Taar Masa">Taar Masa</option><option value="Return Waqti">Return Waqti</option><option value="Fishmeal">Fishmeal</option><option value="Other">Other</option></select>' +
       '<input type="text" placeholder="Notes..." data-field="salenotes"' +
-      ' style="background:rgba(10,22,40,0.8);border:1px solid rgba(26,122,74,0.3);border-radius:6px;padding:8px 8px;color:var(--muted);font-size:13px;width:100%"' +
+      ' style="background:rgba(13,17,23,0.8);border:1px solid rgba(26,122,74,0.3);border-radius:6px;padding:8px 8px;color:var(--muted);font-size:13px;width:100%"' +
       ' oninput="updatePreview()">' +
       '<select data-field="supplier"' +
-      ' style="background:rgba(10,22,40,0.9);border:1px solid rgba(26,122,74,0.4);border-radius:6px;padding:8px 8px;color:var(--white);font-size:13px;width:100%"' +
+      ' style="background:rgba(13,17,23,0.9);border:1px solid rgba(26,122,74,0.4);border-radius:6px;padding:8px 8px;color:var(--white);font-size:13px;width:100%"' +
       ' onchange="updateAuctionAgent(this);updatePreview()">' +
       makeSaleSupplierOptions() +
       '</select>' +
       '<input type="number" placeholder="Qty kg" min="0" step="0.01" data-field="qty"' +
-      ' style="background:rgba(10,22,40,0.8);border:1px solid rgba(26,122,74,0.4);border-radius:6px;padding:8px 6px;color:#7ecfed;font-size:14px;width:100%"' +
+      ' style="background:rgba(13,17,23,0.8);border:1px solid rgba(26,122,74,0.4);border-radius:6px;padding:8px 6px;color:#7ecfed;font-size:14px;width:100%"' +
       ' oninput="calcSaleRowAmount(this);updatePreview()">' +
       '<input type="number" placeholder="Rate \u20b9" min="0" data-field="rate"' +
-      ' style="background:rgba(10,22,40,0.8);border:1px solid rgba(26,122,74,0.4);border-radius:6px;padding:8px 6px;color:#c9a84c;font-size:14px;width:100%"' +
+      ' style="background:rgba(13,17,23,0.8);border:1px solid rgba(26,122,74,0.4);border-radius:6px;padding:8px 6px;color:#ff9f43;font-size:14px;width:100%"' +
       ' oninput="calcSaleRowAmount(this);updatePreview()">' +
       '<input type="number" placeholder="\u20b9 Amt" min="0" data-field="amount"' +
-      ' style="background:rgba(10,22,40,0.8);border:1px solid rgba(26,122,74,0.4);border-radius:6px;padding:8px 6px;color:#2ecc71;font-size:14px;font-weight:700;width:100%"' +
+      ' style="background:rgba(13,17,23,0.8);border:1px solid rgba(26,122,74,0.4);border-radius:6px;padding:8px 6px;color:#2ecc71;font-size:14px;font-weight:700;width:100%"' +
       ' oninput="updatePreview()">' +
       '<button onclick="this.closest(\'[data-rowid]\').remove();updatePreview();"' +
       ' style="background:rgba(192,57,43,0.2);color:#e74c3c;border:1px solid rgba(192,57,43,0.4);border-radius:6px;padding:6px 8px;cursor:pointer;font-size:13px;">\u2715</button>' +
       '</div>' +
-      '<div class="trip-extra" style="display:none;grid-template-columns:auto 1fr;gap:6px;align-items:center;margin-top:6px;padding:6px 8px;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.25);border-radius:6px;">' +
+      '<div class="trip-extra" style="display:none;grid-template-columns:auto 1fr;gap:6px;align-items:center;margin-top:6px;padding:6px 8px;background:rgba(255,159,67,0.06);border:1px solid rgba(255,159,67,0.25);border-radius:6px;">' +
       '<span style="font-size:11px;color:var(--muted);letter-spacing:0.5px;">🕐 TRIP</span>' +
-      '<select data-field="trip" style="background:rgba(10,22,40,0.9);border:1px solid rgba(201,168,76,0.4);border-radius:6px;padding:6px 8px;color:#c9a84c;font-size:12px;font-weight:700;width:100%">' +
+      '<select data-field="trip" style="background:rgba(13,17,23,0.9);border:1px solid rgba(255,159,67,0.4);border-radius:6px;padding:6px 8px;color:#ff9f43;font-size:12px;font-weight:700;width:100%">' +
       tripOptionsHtml('') + '</select>' +
       '</div>' +
       '<div class="auction-extra" style="display:none;flex-direction:column;gap:6px;margin-top:6px;padding:8px;background:rgba(30,107,138,0.08);border:1px solid rgba(30,107,138,0.3);border-radius:6px;">' +
       '<div style="display:grid;grid-template-columns:1fr 210px;gap:6px;">' +
-      '<select data-field="auctionagent" onchange="updatePreview()" style="background:rgba(10,22,40,0.9);border:1px solid rgba(30,107,138,0.5);border-radius:6px;padding:8px;color:#7ecfed;font-size:13px;font-weight:700;width:100%">' +
+      '<select data-field="auctionagent" onchange="updatePreview()" style="background:rgba(13,17,23,0.9);border:1px solid rgba(30,107,138,0.5);border-radius:6px;padding:8px;color:#7ecfed;font-size:13px;font-weight:700;width:100%">' +
       '<option value="">\u2014 Select Auction Agent \u2014</option><option value="Baba">Baba</option><option value="Sunny">Sunny</option><option value="Nazir Chickte">Nazir Chickte</option><option value="Zaheer Chickte">Zaheer Chickte</option><option value="Anjum Mahaldar">Anjum Mahaldar</option><option value="Rizwan">Rizwan</option><option value="Arai">Arai</option><option value="Saeed Chickte">Saeed Chickte</option><option value="Sagir Mahaldar">Sagir Mahaldar</option><option value="Other">Other</option></select>' +
       '<div style="display:flex;align-items:center;font-size:12px;color:var(--muted);padding-left:4px;">Commission 2% = <strong style="color:#e74c3c;margin-left:4px;" data-field="agentcomm">\u20b90</strong></div>' +
       '</div>' +
       '<div style="display:grid;grid-template-columns:1fr 150px;gap:6px;">' +
       '<input type="text" list="buyer-datalist" data-field="buyer" placeholder="Buyer name..." onchange="updatePreview()" oninput="updatePreview()"' +
-      ' style="background:rgba(10,22,40,0.9);border:1px solid rgba(30,107,138,0.5);border-radius:6px;padding:8px;color:var(--white);font-size:13px;width:100%">' +
-      '<select data-field="paytype" onchange="toggleAuctionPayType(this);updatePreview()" style="background:rgba(10,22,40,0.9);border:1px solid rgba(30,107,138,0.5);border-radius:6px;padding:8px;color:#7ecfed;font-size:13px;font-weight:700;width:100%">' +
+      ' style="background:rgba(13,17,23,0.9);border:1px solid rgba(30,107,138,0.5);border-radius:6px;padding:8px;color:var(--white);font-size:13px;width:100%">' +
+      '<select data-field="paytype" onchange="toggleAuctionPayType(this);updatePreview()" style="background:rgba(13,17,23,0.9);border:1px solid rgba(30,107,138,0.5);border-radius:6px;padding:8px;color:#7ecfed;font-size:13px;font-weight:700;width:100%">' +
       '<option value="cash">Full Pay Cash</option><option value="partial">Partial Payment</option><option value="credit">Full Pending</option></select>' +
       '</div>' +
       '<div data-field="paidnowwrap" style="display:none;grid-template-columns:1fr;gap:6px;">' +
       '<input type="number" data-field="paidnow" placeholder="Amount Paid Now (₹)" min="0" oninput="updatePreview()"' +
-      ' style="background:rgba(10,22,40,0.9);border:1px solid rgba(201,168,76,0.5);border-radius:6px;padding:8px;color:#c9a84c;font-size:13px;font-weight:700;width:100%">' +
+      ' style="background:rgba(13,17,23,0.9);border:1px solid rgba(255,159,67,0.5);border-radius:6px;padding:8px;color:#ff9f43;font-size:13px;font-weight:700;width:100%">' +
       '</div>' +
       '</div>';
   } else {
@@ -2230,33 +2233,33 @@ function makeItemRow(containerId, type) {
     div.innerHTML =
       '<div style="display:grid;grid-template-columns:130px 1fr 70px 80px 1fr 110px auto;gap:5px;align-items:center;">' +
       '<select data-field="expcat" onchange="updateExpCatLabel(this);updatePreview();"' +
-      ' style="background:rgba(10,22,40,0.9);border:1px solid rgba(192,57,43,0.4);border-radius:6px;padding:8px 6px;color:#e74c3c;font-size:13px;width:100%">' +
+      ' style="background:rgba(13,17,23,0.9);border:1px solid rgba(192,57,43,0.4);border-radius:6px;padding:8px 6px;color:#e74c3c;font-size:13px;width:100%">' +
       expCatSelect + '</select>' +
       '<input type="text" data-field="expnotes" placeholder="Notes (optional)"' +
-      ' style="background:rgba(10,22,40,0.8);border:1px solid rgba(192,57,43,0.3);border-radius:6px;padding:8px 8px;color:var(--white);font-size:13px;width:100%"' +
+      ' style="background:rgba(13,17,23,0.8);border:1px solid rgba(192,57,43,0.3);border-radius:6px;padding:8px 8px;color:var(--white);font-size:13px;width:100%"' +
       ' oninput="updatePreview()">' +
       '<input type="number" data-field="expqty" placeholder="Qty" min="0" step="0.01"' +
-      ' style="background:rgba(10,22,40,0.8);border:1px solid rgba(192,57,43,0.3);border-radius:6px;padding:8px 6px;color:#7ecfed;font-size:13px;width:100%"' +
+      ' style="background:rgba(13,17,23,0.8);border:1px solid rgba(192,57,43,0.3);border-radius:6px;padding:8px 6px;color:#7ecfed;font-size:13px;width:100%"' +
       ' oninput="calcExpRowAmount(this);updatePreview()">' +
       '<input type="number" data-field="exprate" placeholder="\u20b9/unit" min="0"' +
-      ' style="background:rgba(10,22,40,0.8);border:1px solid rgba(192,57,43,0.3);border-radius:6px;padding:8px 6px;color:#c9a84c;font-size:13px;width:100%"' +
+      ' style="background:rgba(13,17,23,0.8);border:1px solid rgba(192,57,43,0.3);border-radius:6px;padding:8px 6px;color:#ff9f43;font-size:13px;width:100%"' +
       ' oninput="calcExpRowAmount(this);updatePreview()">' +
       '<select data-field="expsupplier" onchange="updatePreview();"' +
-      ' style="background:rgba(10,22,40,0.9);border:1px solid rgba(192,57,43,0.3);border-radius:6px;padding:8px 6px;color:var(--muted);font-size:13px;width:100%">' +
+      ' style="background:rgba(13,17,23,0.9);border:1px solid rgba(192,57,43,0.3);border-radius:6px;padding:8px 6px;color:var(--muted);font-size:13px;width:100%">' +
       expSupOpts + '</select>' +
       '<input type="number" data-field="expamount" placeholder="\u20b9 Amount" min="0"' +
-      ' style="background:rgba(10,22,40,0.8);border:1px solid rgba(192,57,43,0.4);border-radius:6px;padding:8px 8px;color:#e74c3c;font-size:14px;font-weight:700;width:100%"' +
+      ' style="background:rgba(13,17,23,0.8);border:1px solid rgba(192,57,43,0.4);border-radius:6px;padding:8px 8px;color:#e74c3c;font-size:14px;font-weight:700;width:100%"' +
       ' oninput="updatePreview()">' +
       '<button onclick="this.closest(\'[data-rowid]\').remove();updatePreview();"' +
       ' style="background:rgba(192,57,43,0.2);color:#e74c3c;border:1px solid rgba(192,57,43,0.4);border-radius:6px;padding:6px 8px;cursor:pointer;font-size:13px;">\u2715</button>' +
       '</div>' +
-      '<div class="tractor-extra" style="display:none;grid-template-columns:1fr 1fr 140px;gap:6px;margin-top:6px;padding:8px;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.25);border-radius:6px;">' +
-      '<select data-field="tractorprovider" style="background:rgba(10,22,40,0.9);border:1px solid rgba(201,168,76,0.4);border-radius:6px;padding:8px;color:#c9a84c;font-size:13px;font-weight:700;width:100%">' +
+      '<div class="tractor-extra" style="display:none;grid-template-columns:1fr 1fr 140px;gap:6px;margin-top:6px;padding:8px;background:rgba(255,159,67,0.06);border:1px solid rgba(255,159,67,0.25);border-radius:6px;">' +
+      '<select data-field="tractorprovider" style="background:rgba(13,17,23,0.9);border:1px solid rgba(255,159,67,0.4);border-radius:6px;padding:8px;color:#ff9f43;font-size:13px;font-weight:700;width:100%">' +
       '<option value="Kakade">\ud83d\ude9c Kakade</option><option value="AAT">\ud83d\ude9c AAT</option><option value="Mayuresh">\ud83d\ude9c Mayuresh</option></select>' +
       '<input type="number" data-field="tractortrips" value="2" min="1" placeholder="No. of Trips"' +
-      ' style="background:rgba(10,22,40,0.8);border:1px solid rgba(201,168,76,0.4);border-radius:6px;padding:8px;color:#c9a84c;font-size:15px;font-weight:700;width:100%"' +
+      ' style="background:rgba(13,17,23,0.8);border:1px solid rgba(255,159,67,0.4);border-radius:6px;padding:8px;color:#ff9f43;font-size:15px;font-weight:700;width:100%"' +
       ' oninput="tractorAutoCalc(this)">' +
-      '<div style="display:flex;align-items:center;font-size:12px;color:var(--muted);padding-left:4px;">\u00d7 \u20b9100 = <strong style="color:#c9a84c;margin-left:4px;" data-field="tractorcalc">\u20b9200</strong></div>' +
+      '<div style="display:flex;align-items:center;font-size:12px;color:var(--muted);padding-left:4px;">\u00d7 \u20b9100 = <strong style="color:#ff9f43;margin-left:4px;" data-field="tractorcalc">\u20b9200</strong></div>' +
       '</div>';
   }
   container.appendChild(div);
@@ -2509,46 +2512,46 @@ function makeEditItemRow(containerId, item, amount, type) {
     div.style.cssText = 'margin-bottom:6px;';
     div.innerHTML =
       '<div style="display:grid;grid-template-columns:1.2fr 1fr 1.1fr 65px 80px 90px auto;gap:5px;align-items:center;">' +
-      '<select data-field="fishname" style="background:rgba(10,22,40,0.9);border:1px solid rgba(26,122,74,0.4);border-radius:6px;padding:7px 6px;color:var(--white);font-size:13px;width:100%">' +
+      '<select data-field="fishname" style="background:rgba(13,17,23,0.9);border:1px solid rgba(26,122,74,0.4);border-radius:6px;padding:7px 6px;color:var(--white);font-size:13px;width:100%">' +
       '<option value="">— Fish Name —</option>' + '<option value="Tawar">Tawar</option><option value="Popat">Popat</option><option value="Morosa">Morosa</option><option value="Popti">Popti</option><option value="Harya">Harya</option><option value="Dhandas">Dhandas</option><option value="Karli">Karli</option><option value="Gobra">Gobra</option><option value="Squid">Squid</option><option value="Bangda">Bangda</option><option value="Tarli">Tarli</option><option value="Pomfret">Pomfret</option><option value="White">White</option><option value="Surmai">Surmai</option><option value="Taar Masa">Taar Masa</option><option value="Return Waqti">Return Waqti</option><option value="Fishmeal">Fishmeal</option><option value="Other">Other</option>'.replace('value="' + (fishname||'XXX_NO_MATCH') + '">', 'value="' + (fishname||'') + '" selected>') + '</select>' +
       '<input type="text" data-field="salenotes" value="' + (salenotes||'').replace(/"/g,'&quot;') + '" placeholder="Notes..."' +
-      ' style="background:rgba(10,22,40,0.8);border:1px solid rgba(26,122,74,0.3);border-radius:6px;padding:7px 6px;color:var(--muted);font-size:12px;width:100%">' +
-      '<select data-field="supplier" onchange="updateAuctionAgent(this)" style="background:rgba(10,22,40,0.9);border:1px solid rgba(26,122,74,0.4);border-radius:6px;padding:7px 5px;color:var(--white);font-size:12px;width:100%">' +
+      ' style="background:rgba(13,17,23,0.8);border:1px solid rgba(26,122,74,0.3);border-radius:6px;padding:7px 6px;color:var(--muted);font-size:12px;width:100%">' +
+      '<select data-field="supplier" onchange="updateAuctionAgent(this)" style="background:rgba(13,17,23,0.9);border:1px solid rgba(26,122,74,0.4);border-radius:6px;padding:7px 5px;color:var(--white);font-size:12px;width:100%">' +
       makeSaleSupplierOptions(supplier) + '</select>' +
       '<input type="number" data-field="qty" value="' + (qty||'') + '" placeholder="kg" min="0" step="0.01"' +
-      ' style="background:rgba(10,22,40,0.8);border:1px solid rgba(26,122,74,0.4);border-radius:6px;padding:7px 5px;color:#7ecfed;font-size:13px;width:100%"' +
+      ' style="background:rgba(13,17,23,0.8);border:1px solid rgba(26,122,74,0.4);border-radius:6px;padding:7px 5px;color:#7ecfed;font-size:13px;width:100%"' +
       ' oninput="calcSaleRowAmount(this)">' +
       '<input type="number" data-field="rate" value="' + (rate||'') + '" placeholder="\u20b9/kg" min="0"' +
-      ' style="background:rgba(10,22,40,0.8);border:1px solid rgba(26,122,74,0.4);border-radius:6px;padding:7px 5px;color:#c9a84c;font-size:13px;width:100%"' +
+      ' style="background:rgba(13,17,23,0.8);border:1px solid rgba(26,122,74,0.4);border-radius:6px;padding:7px 5px;color:#ff9f43;font-size:13px;width:100%"' +
       ' oninput="calcSaleRowAmount(this)">' +
       '<input type="number" data-field="amount" value="' + (amt||'') + '" placeholder="\u20b9 Amt" min="0"' +
-      ' style="background:rgba(10,22,40,0.8);border:1px solid rgba(26,122,74,0.4);border-radius:6px;padding:7px 5px;color:#2ecc71;font-size:13px;font-weight:700;width:100%">' +
+      ' style="background:rgba(13,17,23,0.8);border:1px solid rgba(26,122,74,0.4);border-radius:6px;padding:7px 5px;color:#2ecc71;font-size:13px;font-weight:700;width:100%">' +
       '<button onclick="this.closest(\'[data-rowid]\').remove();"' +
       ' style="background:rgba(192,57,43,0.2);color:#e74c3c;border:1px solid rgba(192,57,43,0.4);border-radius:6px;padding:6px 7px;cursor:pointer;font-size:12px;">\u2715</button>' +
       '</div>' +
-      '<div class="trip-extra" style="display:' + (trip?'grid':'none') + ';grid-template-columns:auto 1fr;gap:5px;align-items:center;margin-top:5px;padding:5px 7px;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.25);border-radius:6px;">' +
+      '<div class="trip-extra" style="display:' + (trip?'grid':'none') + ';grid-template-columns:auto 1fr;gap:5px;align-items:center;margin-top:5px;padding:5px 7px;background:rgba(255,159,67,0.06);border:1px solid rgba(255,159,67,0.25);border-radius:6px;">' +
       '<span style="font-size:10px;color:var(--muted);letter-spacing:0.5px;">🕐 TRIP</span>' +
-      '<select data-field="trip" style="background:rgba(10,22,40,0.9);border:1px solid rgba(201,168,76,0.4);border-radius:6px;padding:6px 7px;color:#c9a84c;font-size:12px;font-weight:700;width:100%">' +
+      '<select data-field="trip" style="background:rgba(13,17,23,0.9);border:1px solid rgba(255,159,67,0.4);border-radius:6px;padding:6px 7px;color:#ff9f43;font-size:12px;font-weight:700;width:100%">' +
       tripOptionsHtml(trip) + '</select>' +
       '</div>' +
       '<div class="auction-extra" style="display:' + (isAuction?'flex':'none') + ';flex-direction:column;gap:5px;margin-top:5px;padding:7px;background:rgba(30,107,138,0.08);border:1px solid rgba(30,107,138,0.3);border-radius:6px;">' +
       '<div style="display:grid;grid-template-columns:1fr 190px;gap:5px;">' +
-      '<select data-field="auctionagent" style="background:rgba(10,22,40,0.9);border:1px solid rgba(30,107,138,0.5);border-radius:6px;padding:7px;color:#7ecfed;font-size:12px;font-weight:700;width:100%">' +
+      '<select data-field="auctionagent" style="background:rgba(13,17,23,0.9);border:1px solid rgba(30,107,138,0.5);border-radius:6px;padding:7px;color:#7ecfed;font-size:12px;font-weight:700;width:100%">' +
       '<option value="">\u2014 Select Auction Agent \u2014</option>' +
       '<option value="Baba">Baba</option><option value="Sunny">Sunny</option><option value="Nazir Chickte">Nazir Chickte</option><option value="Zaheer Chickte">Zaheer Chickte</option><option value="Anjum Mahaldar">Anjum Mahaldar</option><option value="Rizwan">Rizwan</option><option value="Arai">Arai</option><option value="Saeed Chickte">Saeed Chickte</option><option value="Sagir Mahaldar">Sagir Mahaldar</option><option value="Other">Other</option>'.replace('value="' + (auctAgent||'ZZNONE') + '">', 'value="' + (auctAgent||'') + '" selected>') + '</select>' +
       '<div style="display:flex;align-items:center;font-size:11px;color:var(--muted);padding-left:4px;">Comm 2% = <strong style="color:#e74c3c;margin-left:4px;">\u20b9' + Math.round((amt||0)*0.02) + '</strong></div>' +
       '</div>' +
       '<div style="display:grid;grid-template-columns:1fr 140px;gap:5px;">' +
       '<input type="text" list="buyer-datalist" data-field="buyer" value="' + (buyer||'').replace(/"/g,'&quot;') + '" placeholder="Buyer name..."' +
-      ' style="background:rgba(10,22,40,0.9);border:1px solid rgba(30,107,138,0.5);border-radius:6px;padding:7px;color:var(--white);font-size:12px;width:100%">' +
-      '<select data-field="paytype" onchange="toggleAuctionPayType(this)" style="background:rgba(10,22,40,0.9);border:1px solid rgba(30,107,138,0.5);border-radius:6px;padding:7px;color:#7ecfed;font-size:12px;font-weight:700;width:100%">' +
+      ' style="background:rgba(13,17,23,0.9);border:1px solid rgba(30,107,138,0.5);border-radius:6px;padding:7px;color:var(--white);font-size:12px;width:100%">' +
+      '<select data-field="paytype" onchange="toggleAuctionPayType(this)" style="background:rgba(13,17,23,0.9);border:1px solid rgba(30,107,138,0.5);border-radius:6px;padding:7px;color:#7ecfed;font-size:12px;font-weight:700;width:100%">' +
       '<option value="cash"' + (payType==='cash'?' selected':'') + '>Full Pay Cash</option>' +
       '<option value="partial"' + (payType==='partial'?' selected':'') + '>Partial Payment</option>' +
       '<option value="credit"' + (payType==='credit'?' selected':'') + '>Full Pending</option></select>' +
       '</div>' +
       '<div data-field="paidnowwrap" style="display:' + (isPartial?'grid':'none') + ';grid-template-columns:1fr;gap:5px;">' +
       '<input type="number" data-field="paidnow" value="' + (paidNow||'') + '" placeholder="Amount Paid Now (₹)" min="0"' +
-      ' style="background:rgba(10,22,40,0.9);border:1px solid rgba(201,168,76,0.5);border-radius:6px;padding:7px;color:#c9a84c;font-size:12px;font-weight:700;width:100%">' +
+      ' style="background:rgba(13,17,23,0.9);border:1px solid rgba(255,159,67,0.5);border-radius:6px;padding:7px;color:#ff9f43;font-size:12px;font-weight:700;width:100%">' +
       '</div>' +
       '</div>';
   } else {
@@ -2569,30 +2572,30 @@ function makeEditItemRow(containerId, item, amount, type) {
     div.style.cssText = 'margin-bottom:6px;';
     div.innerHTML =
       '<div style="display:grid;grid-template-columns:120px 1fr 65px 75px 1fr 100px auto;gap:5px;align-items:center;">' +
-      '<select data-field="expcat" onchange="updateExpCatLabel(this)" style="background:rgba(10,22,40,0.9);border:1px solid rgba(192,57,43,0.4);border-radius:6px;padding:7px 5px;color:#e74c3c;font-size:12px;width:100%">' + expCatOpts + '</select>' +
+      '<select data-field="expcat" onchange="updateExpCatLabel(this)" style="background:rgba(13,17,23,0.9);border:1px solid rgba(192,57,43,0.4);border-radius:6px;padding:7px 5px;color:#e74c3c;font-size:12px;width:100%">' + expCatOpts + '</select>' +
       '<input type="text" data-field="expnotes" value="' + (custom||'').replace(/"/g,'&quot;') + '" placeholder="Notes..."' +
-      ' style="background:rgba(10,22,40,0.8);border:1px solid rgba(192,57,43,0.3);border-radius:6px;padding:7px 6px;color:var(--white);font-size:12px;width:100%">' +
+      ' style="background:rgba(13,17,23,0.8);border:1px solid rgba(192,57,43,0.3);border-radius:6px;padding:7px 6px;color:var(--white);font-size:12px;width:100%">' +
       '<input type="number" data-field="expqty" value="' + (expQtyV||'') + '" placeholder="Qty" min="0" step="0.01"' +
-      ' style="background:rgba(10,22,40,0.8);border:1px solid rgba(192,57,43,0.3);border-radius:6px;padding:7px 5px;color:#7ecfed;font-size:12px;width:100%"' +
+      ' style="background:rgba(13,17,23,0.8);border:1px solid rgba(192,57,43,0.3);border-radius:6px;padding:7px 5px;color:#7ecfed;font-size:12px;width:100%"' +
       ' oninput="calcExpRowAmount(this)">' +
       '<input type="number" data-field="exprate" value="' + (expRateV||'') + '" placeholder="\u20b9/unit" min="0"' +
-      ' style="background:rgba(10,22,40,0.8);border:1px solid rgba(192,57,43,0.3);border-radius:6px;padding:7px 5px;color:#c9a84c;font-size:12px;width:100%"' +
+      ' style="background:rgba(13,17,23,0.8);border:1px solid rgba(192,57,43,0.3);border-radius:6px;padding:7px 5px;color:#ff9f43;font-size:12px;width:100%"' +
       ' oninput="calcExpRowAmount(this)">' +
-      '<select data-field="expsupplier" style="background:rgba(10,22,40,0.9);border:1px solid rgba(192,57,43,0.3);border-radius:6px;padding:7px 5px;color:var(--muted);font-size:12px;width:100%">' + expSupOpts + '</select>' +
+      '<select data-field="expsupplier" style="background:rgba(13,17,23,0.9);border:1px solid rgba(192,57,43,0.3);border-radius:6px;padding:7px 5px;color:var(--muted);font-size:12px;width:100%">' + expSupOpts + '</select>' +
       '<input type="number" data-field="expamount" value="' + (amt||'') + '" placeholder="\u20b9 Amt" min="0"' +
-      ' style="background:rgba(10,22,40,0.8);border:1px solid rgba(192,57,43,0.4);border-radius:6px;padding:7px 6px;color:#e74c3c;font-size:12px;font-weight:700;width:100%">' +
+      ' style="background:rgba(13,17,23,0.8);border:1px solid rgba(192,57,43,0.4);border-radius:6px;padding:7px 6px;color:#e74c3c;font-size:12px;font-weight:700;width:100%">' +
       '<button onclick="this.closest(\'[data-rowid]\').remove();"' +
       ' style="background:rgba(192,57,43,0.2);color:#e74c3c;border:1px solid rgba(192,57,43,0.4);border-radius:6px;padding:6px 7px;cursor:pointer;font-size:12px;">\u2715</button>' +
       '</div>' +
-      '<div class="tractor-extra" style="display:' + (isTractor?'grid':'none') + ';grid-template-columns:1fr 1fr 140px;gap:6px;margin-top:5px;padding:7px;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.25);border-radius:6px;">' +
-      '<select data-field="tractorprovider" style="background:rgba(10,22,40,0.9);border:1px solid rgba(201,168,76,0.4);border-radius:6px;padding:7px;color:#c9a84c;font-size:13px;font-weight:700;width:100%">' +
+      '<div class="tractor-extra" style="display:' + (isTractor?'grid':'none') + ';grid-template-columns:1fr 1fr 140px;gap:6px;margin-top:5px;padding:7px;background:rgba(255,159,67,0.06);border:1px solid rgba(255,159,67,0.25);border-radius:6px;">' +
+      '<select data-field="tractorprovider" style="background:rgba(13,17,23,0.9);border:1px solid rgba(255,159,67,0.4);border-radius:6px;padding:7px;color:#ff9f43;font-size:13px;font-weight:700;width:100%">' +
       '<option value="Kakade"' + (tractorProv==='Kakade'?' selected':'') + '>\ud83d\ude9c Kakade</option>' +
       '<option value="AAT"' + (tractorProv==='AAT'?' selected':'') + '>\ud83d\ude9c AAT</option>' +
       '<option value="Mayuresh"' + (tractorProv==='Mayuresh'?' selected':'') + '>\ud83d\ude9c Mayuresh</option></select>' +
       '<input type="number" data-field="tractortrips" value="' + tractorTripsV + '" min="1" placeholder="Trips"' +
-      ' style="background:rgba(10,22,40,0.8);border:1px solid rgba(201,168,76,0.4);border-radius:6px;padding:7px;color:#c9a84c;font-size:14px;font-weight:700;width:100%"' +
+      ' style="background:rgba(13,17,23,0.8);border:1px solid rgba(255,159,67,0.4);border-radius:6px;padding:7px;color:#ff9f43;font-size:14px;font-weight:700;width:100%"' +
       ' oninput="tractorAutoCalc(this)">' +
-      '<div style="display:flex;align-items:center;font-size:12px;color:var(--muted);padding-left:4px;">\u00d7 \u20b9100 = <strong style="color:#c9a84c;margin-left:4px;" data-field="tractorcalc">\u20b9' + (tractorTripsV*100) + '</strong></div>' +
+      '<div style="display:flex;align-items:center;font-size:12px;color:var(--muted);padding-left:4px;">\u00d7 \u20b9100 = <strong style="color:#ff9f43;margin-left:4px;" data-field="tractorcalc">\u20b9' + (tractorTripsV*100) + '</strong></div>' +
       '</div>';
   }
   container.appendChild(div);
@@ -2812,33 +2815,33 @@ function renderP1Table() {
       const detail = [
         i.fishname || i.notes || '—',
         i.salenotes ? `<span style="color:var(--muted);font-size:11px;font-style:italic;">${i.salenotes}</span>` : '',
-        i.supplier ? `<span style="background:rgba(201,168,76,0.15);color:#c9a84c;padding:1px 6px;border-radius:3px;font-size:11px;">${i.supplier}</span>` : '',
+        i.supplier ? `<span style="background:rgba(255,159,67,0.15);color:#ff9f43;padding:1px 6px;border-radius:3px;font-size:11px;">${i.supplier}</span>` : '',
         i.qty ? `${i.qty}kg` : '',
         i.rate ? `@₹${i.rate}` : ''
       ].filter(Boolean).join(' ');
       return `<tr>
-        <td style="padding:6px 12px;border-bottom:1px dashed rgba(201,168,76,0.06);color:var(--muted);font-size:13px;">${detail}</td>
-        <td style="padding:6px 12px;border-bottom:1px dashed rgba(201,168,76,0.06);color:#2ecc71;font-family:'IBM Plex Mono',monospace;font-size:13px;text-align:right">${fmt(i.amount)}</td>
+        <td style="padding:6px 12px;border-bottom:1px dashed rgba(255,159,67,0.06);color:var(--muted);font-size:13px;">${detail}</td>
+        <td style="padding:6px 12px;border-bottom:1px dashed rgba(255,159,67,0.06);color:#2ecc71;font-family:'JetBrains Mono',monospace;font-size:13px;text-align:right">${fmt(i.amount)}</td>
       </tr>`;
     }).join('');
 
     const expRows = expenseItems.map(i => {
-      const supTag = i.expSupplier ? '<span style="background:rgba(201,168,76,0.15);color:#c9a84c;padding:1px 6px;border-radius:3px;font-size:11px;margin-left:4px;">' + i.expSupplier + '</span>' : '';
-      const tractorTag = (i.cat === 'Tractor' && i.tractorProvider) ? '<span style="background:rgba(201,168,76,0.15);color:#c9a84c;padding:1px 6px;border-radius:3px;font-size:11px;margin-left:4px;">🚜 ' + i.tractorProvider + (i.tractorTrips ? ' · ' + i.tractorTrips + ' trips' : '') + '</span>' : '';
+      const supTag = i.expSupplier ? '<span style="background:rgba(255,159,67,0.15);color:#ff9f43;padding:1px 6px;border-radius:3px;font-size:11px;margin-left:4px;">' + i.expSupplier + '</span>' : '';
+      const tractorTag = (i.cat === 'Tractor' && i.tractorProvider) ? '<span style="background:rgba(255,159,67,0.15);color:#ff9f43;padding:1px 6px;border-radius:3px;font-size:11px;margin-left:4px;">🚜 ' + i.tractorProvider + (i.tractorTrips ? ' · ' + i.tractorTrips + ' trips' : '') + '</span>' : '';
       const qtyRateTag = (i.expQty && i.expRate) ? '<span style="font-size:11px;color:#7ecfed;margin-left:4px;">' + i.expQty + ' × ₹' + i.expRate + '</span>' : (i.expQty ? '<span style="font-size:11px;color:#7ecfed;margin-left:4px;">Qty:' + i.expQty + '</span>' : '');
       return '<tr>' +
-        '<td style="padding:6px 12px;border-bottom:1px dashed rgba(201,168,76,0.06);color:var(--muted);font-size:13px;">' + (i.notes || '—') + qtyRateTag + supTag + tractorTag + '</td>' +
-        '<td style="padding:6px 12px;border-bottom:1px dashed rgba(201,168,76,0.06);color:#e74c3c;font-family:Arial,sans-serif;font-size:13px;text-align:right">' + fmt(i.amount) + '</td>' +
+        '<td style="padding:6px 12px;border-bottom:1px dashed rgba(255,159,67,0.06);color:var(--muted);font-size:13px;">' + (i.notes || '—') + qtyRateTag + supTag + tractorTag + '</td>' +
+        '<td style="padding:6px 12px;border-bottom:1px dashed rgba(255,159,67,0.06);color:#e74c3c;font-family:Arial,sans-serif;font-size:13px;text-align:right">' + fmt(i.amount) + '</td>' +
         '</tr>';
     }).join('');
 
     const card = document.createElement('div');
-    card.style.cssText = 'background:rgba(10,22,40,0.5);border:1px solid rgba(201,168,76,0.2);border-radius:10px;margin-bottom:14px;overflow:hidden;';
+    card.style.cssText = 'background:rgba(13,17,23,0.5);border:1px solid rgba(255,159,67,0.2);border-radius:10px;margin-bottom:14px;overflow:hidden;';
     card.innerHTML = `
       <!-- Record Header -->
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(201,168,76,0.08);border-bottom:1px solid rgba(201,168,76,0.15);flex-wrap:wrap;gap:8px;">
-        <span style="font-family:'Cinzel',serif;font-size:13px;color:var(--gold);letter-spacing:1px;">⚓ ${fmtDate(r.date)}</span>
-        <div style="display:flex;gap:20px;font-family:'IBM Plex Mono',monospace;font-size:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(255,159,67,0.08);border-bottom:1px solid rgba(255,159,67,0.15);flex-wrap:wrap;gap:8px;">
+        <span style="font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--gold);letter-spacing:1px;">⚓ ${fmtDate(r.date)}</span>
+        <div style="display:flex;gap:20px;font-family:'JetBrains Mono',monospace;font-size:12px;">
           <span style="color:#2ecc71">Sales: ${fmt(totalSales)}</span>
           <span style="color:#e74c3c">Exp: ${fmt(totalExpense)}</span>
           <span style="color:${profit>=0?'#2ecc71':'#e74c3c'}">Profit: ${profit<0?'-':''}${fmt(Math.abs(profit))}</span>
@@ -2850,16 +2853,16 @@ function renderP1Table() {
       </div>
       <!-- Detail Tables -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
-        <div style="border-right:1px solid rgba(201,168,76,0.1);">
-          <div style="padding:8px 12px;font-family:'Cinzel',serif;font-size:10px;letter-spacing:1.5px;color:#2ecc71;background:rgba(26,122,74,0.08);">SALES</div>
+        <div style="border-right:1px solid rgba(255,159,67,0.1);">
+          <div style="padding:8px 12px;font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:1.5px;color:#2ecc71;background:rgba(26,122,74,0.08);">SALES</div>
           <table style="width:100%;border-collapse:collapse;">${saleRows}
-            <tr><td colspan="2" style="padding:6px 12px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#2ecc71;text-align:right;font-weight:600;border-top:1px solid rgba(26,122,74,0.2);">Total: ${fmt(totalSales)}</td></tr>
+            <tr><td colspan="2" style="padding:6px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#2ecc71;text-align:right;font-weight:600;border-top:1px solid rgba(26,122,74,0.2);">Total: ${fmt(totalSales)}</td></tr>
           </table>
         </div>
         <div>
-          <div style="padding:8px 12px;font-family:'Cinzel',serif;font-size:10px;letter-spacing:1.5px;color:#e74c3c;background:rgba(192,57,43,0.08);">EXPENSES</div>
+          <div style="padding:8px 12px;font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:1.5px;color:#e74c3c;background:rgba(192,57,43,0.08);">EXPENSES</div>
           <table style="width:100%;border-collapse:collapse;">${expRows}
-            <tr><td colspan="2" style="padding:6px 12px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#e74c3c;text-align:right;font-weight:600;border-top:1px solid rgba(192,57,43,0.2);">Total: ${fmt(totalExpense)}</td></tr>
+            <tr><td colspan="2" style="padding:6px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#e74c3c;text-align:right;font-weight:600;border-top:1px solid rgba(192,57,43,0.2);">Total: ${fmt(totalExpense)}</td></tr>
           </table>
         </div>
       </div>
@@ -2871,9 +2874,9 @@ function renderP1Table() {
   if (data.length > 0) {
     const netProfit = grandSales - grandExp;
     const bar = document.createElement('div');
-    bar.style.cssText = 'background:rgba(201,168,76,0.1);border:1px solid var(--border);border-radius:8px;padding:12px 16px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-family:"IBM Plex Mono",monospace;font-size:13px;';
+    bar.style.cssText = 'background:rgba(255,159,67,0.1);border:1px solid var(--border);border-radius:8px;padding:12px 16px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-family:"JetBrains Mono",monospace;font-size:13px;';
     bar.innerHTML = `
-      <span style="color:var(--gold);font-family:'Cinzel',serif;letter-spacing:1.5px;font-size:12px;">PERIOD TOTAL</span>
+      <span style="color:var(--gold);font-family:'Space Grotesk',sans-serif;letter-spacing:1.5px;font-size:12px;">PERIOD TOTAL</span>
       <span style="color:#2ecc71">Sales: ${fmt(grandSales)}</span>
       <span style="color:#e74c3c">Expenses: ${fmt(grandExp)}</span>
       <span style="color:${netProfit>=0?'#2ecc71':'#e74c3c'}">Net Profit: ${netProfit<0?'-':''}${fmt(Math.abs(netProfit))}</span>
@@ -3139,7 +3142,7 @@ function renderP2Table() {
     tr.innerHTML = `
       <td><span class="badge badge-gold">${fmtDate(r.date)}</span></td>
       <td>${r.trip ? '<span class="badge" style="background:rgba(30,107,138,0.25);color:#7ecfed;border:1px solid rgba(30,107,138,0.5);">🕐 ' + r.trip + '</span>' : '<span style="color:var(--muted);font-size:12px;">Full Day</span>'}</td>
-      <td>${r.fishingType ? '<span class="badge" style="background:rgba(201,168,76,0.2);color:var(--gold-light);border:1px solid rgba(201,168,76,0.3);">🎣 ' + r.fishingType + '</span>' : '<span style="color:var(--muted);font-size:12px;">—</span>'}</td>
+      <td>${r.fishingType ? '<span class="badge" style="background:rgba(255,159,67,0.2);color:var(--gold-light);border:1px solid rgba(255,159,67,0.3);">🎣 ' + r.fishingType + '</span>' : '<span style="color:var(--muted);font-size:12px;">—</span>'}</td>
       <td style="font-size:13px;color:var(--muted)">${r.present.join(', ')}</td>
       <td><span class="badge badge-green">${r.present.length}</span></td>
       <td style="display:flex;gap:8px;flex-wrap:wrap">
@@ -3379,7 +3382,7 @@ function calculateShares() {
     tr.innerHTML = `
       <td><span class="badge badge-gold">${fmtDate(d.date)}</span></td>
       <td>${d.trip ? '<span class="badge" style="background:rgba(30,107,138,0.25);color:#7ecfed;border:1px solid rgba(30,107,138,0.5);">🕐 ' + d.trip + '</span>' : '<span style="color:var(--muted);font-size:11px;">Full Day</span>'}</td>
-      <td>${d.fishingType ? '<span class="badge" style="background:rgba(201,168,76,0.15);color:var(--gold-light);">🎣 ' + d.fishingType + '</span>' : '<span style="color:var(--muted);font-size:11px;">—</span>'}</td>
+      <td>${d.fishingType ? '<span class="badge" style="background:rgba(255,159,67,0.15);color:var(--gold-light);">🎣 ' + d.fishingType + '</span>' : '<span style="color:var(--muted);font-size:11px;">—</span>'}</td>
       <td>${fmt(d.sales)}</td>
       <td><span class="badge badge-red">${(d.ratio * 100).toFixed(2)}%</span></td>
       <td class="result-negative">${fmt(d.allocExpense)}</td>
@@ -3406,7 +3409,7 @@ function calculateShares() {
       <td><strong>${sh}</strong></td>
       <td><span class="badge badge-gold">${s.days}</span></td>
       <td class="result-positive">${fmt(s.total)}</td>
-      <td><button class="btn btn-sm" style="background:rgba(201,168,76,0.15);color:var(--gold-light);border:1px solid var(--border)" onclick="showIndividual('${sh}')">🔍 VIEW DETAIL</button></td>
+      <td><button class="btn btn-sm" style="background:rgba(255,159,67,0.15);color:var(--gold-light);border:1px solid var(--border)" onclick="showIndividual('${sh}')">🔍 VIEW DETAIL</button></td>
     `;
     stbody.appendChild(tr);
   });
@@ -3450,7 +3453,7 @@ function showIndividual(name) {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td><span class="badge badge-gold">${fmtDate(d.date)}</span>${d.trip ? ' <span class="badge" style="background:rgba(30,107,138,0.25);color:#7ecfed;border:1px solid rgba(30,107,138,0.5);">🕐 ' + d.trip + '</span>' : ''}</td>
-      <td>${d.fishingType ? '<span class="badge" style="background:rgba(201,168,76,0.15);color:var(--gold-light);">🎣 ' + d.fishingType + '</span>' : '<span style="color:var(--muted);font-size:11px;">—</span>'}</td>
+      <td>${d.fishingType ? '<span class="badge" style="background:rgba(255,159,67,0.15);color:var(--gold-light);">🎣 ' + d.fishingType + '</span>' : '<span style="color:var(--muted);font-size:11px;">—</span>'}</td>
       <td class="result-positive" style="text-align:right;font-size:15px;font-weight:700;">${fmt(d.sharePerPerson)}</td>
     `;
     dtbody.appendChild(tr);
@@ -3631,7 +3634,7 @@ function calcEval() {
   if (!input) {
     resVal.textContent = '—';
     resLbl.textContent = '';
-    resVal.style.color = '#c9a84c';
+    resVal.style.color = '#ff9f43';
     return;
   }
 
@@ -3668,9 +3671,9 @@ function calcRenderHistory() {
   if (_calcHistory.length === 0) { hist.innerHTML = ''; return; }
   hist.innerHTML = '<div style="font-size:10px;color:var(--muted);letter-spacing:0.5px;margin-bottom:6px;">HISTORY (Enter to save)</div>' +
     _calcHistory.map(function(h, i) {
-      return '<div onclick="calcUseHistory(' + i + ')" style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:6px;margin-bottom:4px;cursor:pointer;border:1px solid rgba(255,255,255,0.05);" onmouseover="this.style.background=\'rgba(201,168,76,0.08)\'" onmouseout="this.style.background=\'rgba(255,255,255,0.03)\'">' +
+      return '<div onclick="calcUseHistory(' + i + ')" style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:6px;margin-bottom:4px;cursor:pointer;border:1px solid rgba(255,255,255,0.05);" onmouseover="this.style.background=\'rgba(255,159,67,0.08)\'" onmouseout="this.style.background=\'rgba(255,255,255,0.03)\'">' +
         '<span style="color:var(--muted);font-size:12px;">' + h.expr + '</span>' +
-        '<span style="color:#c9a84c;font-weight:700;font-size:13px;">₹' + h.result.toLocaleString('en-IN', {maximumFractionDigits:4}) + '</span>' +
+        '<span style="color:#ff9f43;font-weight:700;font-size:13px;">₹' + h.result.toLocaleString('en-IN', {maximumFractionDigits:4}) + '</span>' +
         '</div>';
     }).join('');
 }
@@ -4076,7 +4079,7 @@ function setDriveStatus(connected, text) {
   const cBtn = document.getElementById('gdrive-connect-btn');
   const sBtn = document.getElementById('gdrive-save-btn');
   const lBtn = document.getElementById('gdrive-load-btn');
-  if (dot) dot.style.background = connected ? '#2ecc71' : '#e74c3c';
+  if (dot) { dot.style.background = connected ? '#4ade80' : '#f87171'; dot.style.boxShadow = connected ? '0 0 6px rgba(74,222,128,0.7)' : 'none'; }
   if (txt) txt.textContent = 'Google Drive: ' + text;
   if (cBtn) cBtn.style.display = connected ? 'none' : 'inline-flex';
   if (sBtn) sBtn.style.display = connected ? 'inline-flex' : 'none';
@@ -4555,9 +4558,9 @@ function calculateFinalPayment() {
 
   // Grand total row
   const totTr = document.createElement('tr');
-  totTr.style.cssText = 'background:rgba(201,168,76,0.1);';
+  totTr.style.cssText = 'background:rgba(255,159,67,0.1);';
   totTr.innerHTML = `
-    <td colspan="2" style="font-family:'Cinzel',serif;color:var(--gold);font-size:13px;letter-spacing:1px;">GRAND TOTAL</td>
+    <td colspan="2" style="font-family:'Space Grotesk',sans-serif;color:var(--gold);font-size:13px;letter-spacing:1px;">GRAND TOTAL</td>
     <td class="result-positive" style="font-weight:700;">${fmt(totalShareAll)}</td>
     <td class="adv-pending" style="font-weight:700;">${fmt(totalAdvAll)}</td>
     <td class="${totalNetAll >= 0 ? 'result-positive' : 'adv-pending'}" style="font-size:16px;font-weight:700;">${totalNetAll < 0 ? '-' : ''}${fmt(Math.abs(totalNetAll))}</td>
@@ -4702,8 +4705,8 @@ function renderGroupCheckboxes() {
     const isOwner = OWNER_SHARES.includes(sh);
     const label = document.createElement('label');
     label.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 12px;background:' +
-      (isOwner ? 'rgba(201,168,76,0.06)' : 'rgba(255,255,255,0.03)') +
-      ';border:1px solid ' + (isOwner ? 'rgba(201,168,76,0.25)' : 'var(--border)') +
+      (isOwner ? 'rgba(255,159,67,0.06)' : 'rgba(255,255,255,0.03)') +
+      ';border:1px solid ' + (isOwner ? 'rgba(255,159,67,0.25)' : 'var(--border)') +
       ';border-radius:6px;cursor:pointer;font-size:13px;color:var(--text);transition:all 0.2s;';
     label.innerHTML = '<input type="checkbox" class="group-sh-chk" value="' + sh + '" style="width:16px;height:16px;accent-color:var(--gold);"> ' +
       (isOwner ? '<span style="color:var(--gold-light);">⚓ ' + sh + '</span>' : sh);
@@ -4795,9 +4798,9 @@ function calculateGroup() {
 
   // Grand total row
   const totTr = document.createElement('tr');
-  totTr.style.cssText = 'background:rgba(201,168,76,0.12);';
+  totTr.style.cssText = 'background:rgba(255,159,67,0.12);';
   totTr.innerHTML = `
-    <td colspan="2" style="font-family:'Cinzel',serif;color:var(--gold);letter-spacing:1px;font-size:13px;">GRAND TOTAL (${selected.length} shareholders)</td>
+    <td colspan="2" style="font-family:'Space Grotesk',sans-serif;color:var(--gold);letter-spacing:1px;font-size:13px;">GRAND TOTAL (${selected.length} shareholders)</td>
     <td class="result-positive" style="font-size:16px;font-weight:700;">${fmt(grandShare)}</td>
   `;
   tbody.appendChild(totTr);
@@ -5039,13 +5042,13 @@ function renderSupplierCards() {
     const excess     = pending < 0;
     const settled    = pending === 0 && totalSales > 0;
 
-    const statusColor = excess ? '#c9a84c' : pending > 0 ? '#e74c3c' : totalSales === 0 ? '#888' : '#2ecc71';
+    const statusColor = excess ? '#ff9f43' : pending > 0 ? '#e74c3c' : totalSales === 0 ? '#888' : '#2ecc71';
     const statusText  = excess ? '⬆ EXCESS' : pending > 0 ? '⚠ PENDING' : totalSales === 0 ? '— NO SALES' : '✓ CLEARED';
 
     const card = document.createElement('div');
     card.style.cssText = 'background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:14px;';
     card.innerHTML = `
-      <div style="font-family:'Cinzel',serif;font-size:13px;color:var(--gold);letter-spacing:1px;margin-bottom:10px;">🐟 ${sup}</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--gold);letter-spacing:1px;margin-bottom:10px;">🐟 ${sup}</div>
       <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
         <span style="font-size:11px;color:var(--muted);">Total Sales</span>
         <span style="font-size:13px;font-weight:700;color:#2ecc71;">${fmt(totalSales)}</span>
@@ -5142,7 +5145,7 @@ function generateSupplierLedger() {
         <td><strong>${r.supplier}</strong></td>
         <td>${typeBadge}</td>
         <td style="color:#7ecfed;font-weight:600;">${r.qty ? r.qty + ' kg' : '—'}</td>
-        <td style="color:#c9a84c;">${r.rate ? '₹' + r.rate + '/kg' : '—'}</td>
+        <td style="color:#ff9f43;">${r.rate ? '₹' + r.rate + '/kg' : '—'}</td>
         <td class="result-positive" style="text-align:right;font-weight:700;">${fmt(r.amount)}</td>
         <td>${payBadge}</td>
         <td style="color:var(--muted);font-style:italic;">${fishDetail}</td>
@@ -5151,7 +5154,7 @@ function generateSupplierLedger() {
     });
     // Total row
     const totTr = document.createElement('tr');
-    totTr.style.cssText = 'background:rgba(201,168,76,0.1);font-weight:700;';
+    totTr.style.cssText = 'background:rgba(255,159,67,0.1);font-weight:700;';
     totTr.innerHTML = `<td colspan="3" style="color:var(--gold);">TOTAL (${sales.length} sales)</td><td>${totalQty.toFixed(1)} kg</td><td></td><td class="result-positive" style="text-align:right;font-size:15px;">${fmt(totalSales)}</td><td colspan="2"></td>`;
     stbody.appendChild(totTr);
   }
@@ -5421,7 +5424,7 @@ function renderAgentSummary() {
   let html = '';
   active.forEach(function(agent) {
     const t = agentTotals(agent);
-    const clr = t.pending > 0 ? '#e74c3c' : t.pending < 0 ? '#c9a84c' : '#2ecc71';
+    const clr = t.pending > 0 ? '#e74c3c' : t.pending < 0 ? '#ff9f43' : '#2ecc71';
     const lbl = t.pending > 0 ? '\u26a0 PENDING' : t.pending < 0 ? '\u2b06 EXCESS' : '\u2713 CLEARED';
     html +=
       '<div class="stat-card" style="border-color:rgba(30,107,138,0.35);">' +
@@ -5444,7 +5447,7 @@ function renderAgentSummary() {
   const gPend  = gEarn - gPaid;
   const gCollect = active.reduce(function(s,a){ return s + agentPendingCollections(a); }, 0);
   html +=
-    '<div class="stat-card" style="border-color:rgba(201,168,76,0.5);background:rgba(201,168,76,0.05);">' +
+    '<div class="stat-card" style="border-color:rgba(255,159,67,0.5);background:rgba(255,159,67,0.05);">' +
     '<div class="stat-label" style="font-size:12px;font-weight:700;letter-spacing:1px;">GRAND TOTAL</div>' +
     '<div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">' +
     '<div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--muted);">Auction Sales</span><span style="font-weight:700;">' + fmt(gSales) + '</span></div>' +
@@ -5571,7 +5574,7 @@ function generateAgentStatement() {
       tb.appendChild(tr);
     });
     const t = document.createElement('tr');
-    t.style.cssText = 'background:rgba(201,168,76,0.1);font-weight:700;';
+    t.style.cssText = 'background:rgba(255,159,67,0.1);font-weight:700;';
     t.innerHTML = '<td colspan="2" style="color:var(--gold);">TOTAL (' + comms.length + ' records)</td>' +
       '<td style="text-align:right;">' + fmt(totalSales) + '</td>' +
       '<td class="adv-pending" style="text-align:right;font-size:15px;">' + fmt(totalComm) + '</td>';
@@ -5738,11 +5741,11 @@ function renderTractorSummary() {
     const totalAmt   = trips.reduce((s,t) => s + t.amount, 0);
     const totalPaid  = tractorPays.filter(p => p.provider === prov).reduce((s,p) => s + p.amount, 0);
     const pending    = totalAmt - totalPaid;
-    const pendClr    = pending > 0 ? '#e74c3c' : pending < 0 ? '#c9a84c' : '#2ecc71';
+    const pendClr    = pending > 0 ? '#e74c3c' : pending < 0 ? '#ff9f43' : '#2ecc71';
     const pendLbl    = pending > 0 ? '⚠ PENDING' : pending < 0 ? '⬆ EXCESS' : '✓ CLEARED';
 
     html +=
-      '<div class="stat-card" style="border-color:rgba(201,168,76,0.3);">' +
+      '<div class="stat-card" style="border-color:rgba(255,159,67,0.3);">' +
       '<div class="stat-label" style="font-family:Arial,sans-serif;letter-spacing:1px;font-size:12px;font-weight:700;">🚜 ' + prov + '</div>' +
       '<div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">' +
       '<div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--muted);">Total Trips</span><span style="font-weight:700;">' + totalTrips + '</span></div>' +
@@ -5761,7 +5764,7 @@ function renderTractorSummary() {
   const grandPend  = grandAmt - grandPaid;
 
   html +=
-    '<div class="stat-card" style="border-color:rgba(201,168,76,0.5);background:rgba(201,168,76,0.05);">' +
+    '<div class="stat-card" style="border-color:rgba(255,159,67,0.5);background:rgba(255,159,67,0.05);">' +
     '<div class="stat-label" style="font-family:Arial,sans-serif;letter-spacing:1px;font-size:12px;font-weight:700;">GRAND TOTAL</div>' +
     '<div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">' +
     '<div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--muted);">Total Trips</span><span style="font-weight:700;">' + grandTrips + '</span></div>' +
@@ -5787,8 +5790,8 @@ function renderTractorTable() {
     return;
   }
   sorted.forEach(function(t) {
-    const provClr = t.provider === 'Kakade' ? 'rgba(201,168,76,0.2)' : 'rgba(30,107,138,0.2)';
-    const provTxt = t.provider === 'Kakade' ? '#c9a84c' : '#7ecfed';
+    const provClr = t.provider === 'Kakade' ? 'rgba(255,159,67,0.2)' : 'rgba(30,107,138,0.2)';
+    const provTxt = t.provider === 'Kakade' ? '#ff9f43' : '#7ecfed';
     const tr = document.createElement('tr');
     tr.innerHTML =
       '<td><span class="badge badge-gold">' + fmtDate(t.date) + '</span></td>' +
@@ -5811,8 +5814,8 @@ function renderTractorPayTable() {
     return;
   }
   sorted.forEach(function(p) {
-    const provClr = p.provider === 'Kakade' ? 'rgba(201,168,76,0.2)' : 'rgba(30,107,138,0.2)';
-    const provTxt = p.provider === 'Kakade' ? '#c9a84c' : '#7ecfed';
+    const provClr = p.provider === 'Kakade' ? 'rgba(255,159,67,0.2)' : 'rgba(30,107,138,0.2)';
+    const provTxt = p.provider === 'Kakade' ? '#ff9f43' : '#7ecfed';
     const tr = document.createElement('tr');
     tr.innerHTML =
       '<td><span class="badge badge-gold">' + fmtDate(p.date) + '</span></td>' +
@@ -5864,7 +5867,7 @@ function generateTractorStatement() {
       tbody.appendChild(tr);
     });
     const tot = document.createElement('tr');
-    tot.style.cssText = 'background:rgba(201,168,76,0.1);font-weight:700;';
+    tot.style.cssText = 'background:rgba(255,159,67,0.1);font-weight:700;';
     tot.innerHTML = '<td colspan="2" style="color:var(--gold);">TOTAL (' + trips.length + ' days)</td><td style="text-align:center;color:var(--gold-light);font-size:16px;">' + totalTrips + '</td><td class="adv-pending" style="text-align:right;font-size:15px;">' + fmt(totalAmount) + '</td><td></td>';
     tbody.appendChild(tot);
   }
@@ -6067,11 +6070,11 @@ function renderCreditSummary() {
       ? agents.map(a => '<span class="badge badge-gold" style="margin:1px;">' + a + '</span>').join(' ')
       : '<span style="color:var(--muted);">—</span>';
 
-    const statusColor = outstanding > 0 ? '#e74c3c' : outstanding < 0 ? '#c9a84c' : '#2ecc71';
+    const statusColor = outstanding > 0 ? '#e74c3c' : outstanding < 0 ? '#ff9f43' : '#2ecc71';
     const statusBadge = outstanding > 0
       ? '<span style="background:rgba(192,57,43,0.2);color:#e74c3c;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">⚠ PENDING</span>'
       : outstanding < 0
-      ? '<span style="background:rgba(201,168,76,0.2);color:#c9a84c;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">⬆ EXCESS</span>'
+      ? '<span style="background:rgba(255,159,67,0.2);color:#ff9f43;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">⬆ EXCESS</span>'
       : '<span style="background:rgba(26,122,74,0.2);color:#2ecc71;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">✓ CLEARED</span>';
 
     const tr = document.createElement('tr');
@@ -6082,7 +6085,7 @@ function renderCreditSummary() {
       '<td style="text-align:right;color:#7ecfed;font-weight:700;">' + fmt(totalPaid) + '</td>' +
       '<td style="text-align:right;font-size:15px;font-weight:700;color:' + statusColor + ';">' + (outstanding < 0 ? '-' : '') + fmt(Math.abs(outstanding)) + ' ' + statusBadge + '</td>' +
       '<td style="color:var(--muted);">' + (lastPay ? fmtDate(lastPay) : '—') + '</td>' +
-      '<td><button class="btn btn-sm" style="background:rgba(201,168,76,0.15);color:var(--gold-light);border:1px solid var(--border);" onclick="showRetailerLedger(this.dataset.r)" data-r="' + retailer.replace(/"/g, '&quot;') + '">📒 LEDGER</button></td>';
+      '<td><button class="btn btn-sm" style="background:rgba(255,159,67,0.15);color:var(--gold-light);border:1px solid var(--border);" onclick="showRetailerLedger(this.dataset.r)" data-r="' + retailer.replace(/"/g, '&quot;') + '">📒 LEDGER</button></td>';
     tbody.appendChild(tr);
   });
 }
@@ -6145,7 +6148,7 @@ function showRetailerLedger(retailer) {
         '<td style="color:var(--muted);font-size:12px;font-style:italic;">' + (p.notes || '—') + '</td>' +
         '<td style="text-align:right;color:var(--muted);">—</td>' +
         '<td style="text-align:right;color:#7ecfed;font-weight:700;">' + fmt(p.amount) + '</td>' +
-        '<td style="text-align:right;font-weight:700;color:' + (runBal > 0 ? '#e74c3c' : runBal < 0 ? '#c9a84c' : '#2ecc71') + ';">' + (runBal < 0 ? '-' : '') + fmt(Math.abs(runBal)) + '</td>';
+        '<td style="text-align:right;font-weight:700;color:' + (runBal > 0 ? '#e74c3c' : runBal < 0 ? '#ff9f43' : '#2ecc71') + ';">' + (runBal < 0 ? '-' : '') + fmt(Math.abs(runBal)) + '</td>';
     }
     tbody.appendChild(tr);
   });
@@ -6293,9 +6296,9 @@ function generateAdvStmt() {
     });
     // Total row
     const totTr = document.createElement('tr');
-    totTr.style.cssText = 'background:rgba(201,168,76,0.1);font-weight:700;';
+    totTr.style.cssText = 'background:rgba(255,159,67,0.1);font-weight:700;';
     totTr.innerHTML = `
-      <td colspan="3" style="font-family:'Cinzel',serif;letter-spacing:1px;color:var(--gold);">GRAND TOTAL (${filtered.length} transactions)</td>
+      <td colspan="3" style="font-family:'Space Grotesk',sans-serif;letter-spacing:1px;color:var(--gold);">GRAND TOTAL (${filtered.length} transactions)</td>
       <td class="adv-pending" style="font-size:16px;">${fmt(totalAll)}</td>
       <td></td>
     `;
@@ -6666,7 +6669,7 @@ function closeMoreSheet() {
   <div id="more-sheet-panel">
     <div style="text-align:center;margin-bottom:14px;">
       <div style="width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 12px;"></div>
-      <div style="font-family:'Cinzel',serif;font-size:13px;color:var(--gold);letter-spacing:2px;">MORE PAGES</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--gold);letter-spacing:2px;">MORE PAGES</div>
     </div>
     <button class="more-item" data-page="5" onclick="goPage(5)"><span class="more-ico"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12c3-4 8-6 13-4 2 .8 4 2.4 5 4-1 1.6-3 3.2-5 4-5 2-10 0-13-4Z"/><path d="M17 9.5v5M6.5 10.5l-2-2.5M6.5 13.5l-2 2.5"/></svg></span> Fish Sales &amp; Suppliers</button>
     <button class="more-item" data-page="6" onclick="goPage(6)"><span class="more-ico"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2Z"/><path d="M5 18a2 2 0 0 1 2-2h11"/><line x1="9" y1="8" x2="14" y2="8"/></svg></span> Credit Tracking</button>
@@ -6674,12 +6677,12 @@ function closeMoreSheet() {
     <button class="more-item" data-page="8" onclick="goPage(8)"><span class="more-ico"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg></span> Agent Commission</button>
 
     <div style="border-top:1px solid var(--border);margin:14px 0 12px;"></div>
-    <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;">&#9729; GOOGLE DRIVE &amp; BACKUP</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;">&#9729; GOOGLE DRIVE &amp; BACKUP</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
       <button class="btn btn-sm" style="background:rgba(66,133,244,0.2);color:#7eaaff;border:1px solid rgba(66,133,244,0.4);" onclick="closeMoreSheet();gdriveConnect();">&#9729; CONNECT</button>
       <button class="btn btn-sm" style="background:rgba(26,122,74,0.25);color:#52d48a;border:1px solid rgba(26,122,74,0.5);" onclick="closeMoreSheet();gdriveSave(true);">&#9729; SAVE</button>
       <button class="btn btn-sm" style="background:rgba(30,107,138,0.25);color:#7ecfed;border:1px solid rgba(30,107,138,0.5);" onclick="closeMoreSheet();gdriveLoad();">&#9729; LOAD</button>
-      <button class="btn btn-sm" style="background:rgba(201,168,76,0.2);color:#c9a84c;border:1px solid rgba(201,168,76,0.4);" onclick="closeMoreSheet();toggleCalculator();">&#129518; CALC</button>
+      <button class="btn btn-sm" style="background:rgba(255,159,67,0.2);color:#ff9f43;border:1px solid rgba(255,159,67,0.4);" onclick="closeMoreSheet();toggleCalculator();">&#129518; CALC</button>
       <button class="btn btn-sm" style="background:rgba(100,100,100,0.2);color:#aaa;border:1px solid rgba(100,100,100,0.3);" onclick="closeMoreSheet();exportData();">&#11015; BACKUP</button>
       <label class="btn btn-sm" style="background:rgba(100,100,100,0.2);color:#aaa;border:1px solid rgba(100,100,100,0.3);cursor:pointer;margin:0;text-align:center;">
         &#11014; RESTORE
