@@ -975,6 +975,7 @@
               <th>Trip</th>
               <th>Fishing Type</th>
               <th>Sales (₹)</th>
+              <th>Actual Expense (₹)</th>
               <th>Expense Ratio</th>
               <th>Alloc. Expense (₹)</th>
               <th>Profit (₹)</th>
@@ -983,6 +984,27 @@
             </tr>
           </thead>
           <tbody id="p3-daily-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== EXPENSE BREAKDOWN BY CATEGORY (selected period) ===== -->
+    <div class="card" style="border-color:rgba(248,113,113,0.3);">
+      <div class="card-title">📊 Expense Breakdown by Category</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">
+        Where the money went in the selected period — Petrol, Ice, Waqti, Nashta, Lunch, Dinner, etc.
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th style="text-align:right">Amount (₹)</th>
+              <th style="text-align:right">% of Total Expense</th>
+              <th>Share</th>
+            </tr>
+          </thead>
+          <tbody id="p3-category-tbody"></tbody>
         </table>
       </div>
     </div>
@@ -3504,13 +3526,24 @@ function calculateShares() {
   // Render daily table
   const dtbody = document.getElementById('p3-daily-tbody');
   dtbody.innerHTML = '';
+  const _seenExpDates = {};
   dailyBreakdown.forEach(d => {
+    const dayRecMatch = salesData.find(r => r.date === d.date);
+    const actualExp = dayRecMatch ? (dayRecMatch.expense || 0) : 0;
+    let actualExpCell;
+    if (!_seenExpDates[d.date]) {
+      _seenExpDates[d.date] = true;
+      actualExpCell = '<span style="color:#f87171;font-family:\'JetBrains Mono\',monospace;">' + fmt(actualExp) + '</span>';
+    } else {
+      actualExpCell = '<span style="color:var(--muted);font-size:11px;">↳ same day</span>';
+    }
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td><span class="badge badge-gold">${fmtDate(d.date)}</span></td>
       <td>${d.trip ? '<span class="badge" style="background:rgba(30,107,138,0.25);color:#7ecfed;border:1px solid rgba(30,107,138,0.5);">🕐 ' + d.trip + '</span>' : '<span style="color:var(--muted);font-size:11px;">Full Day</span>'}</td>
       <td>${d.fishingType ? '<span class="badge" style="background:rgba(255,159,67,0.15);color:var(--gold-light);">🎣 ' + d.fishingType + '</span>' : '<span style="color:var(--muted);font-size:11px;">—</span>'}</td>
       <td>${fmt(d.sales)}</td>
+      <td>${actualExpCell}</td>
       <td><span class="badge badge-red">${(d.ratio * 100).toFixed(2)}%</span></td>
       <td class="result-negative">${fmt(d.allocExpense)}</td>
       <td class="result-positive">${fmt(d.profit)}</td>
@@ -3519,6 +3552,40 @@ function calculateShares() {
     `;
     dtbody.appendChild(tr);
   });
+
+  // ---- Expense Breakdown by Category (whole selected period) ----
+  const catTotals = {};
+  salesData.forEach(function(dayRec) {
+    (dayRec.expenseItems || []).forEach(function(item) {
+      const cat = item.cat || 'Other';
+      catTotals[cat] = (catTotals[cat] || 0) + (item.amount || 0);
+    });
+  });
+  const catRows = Object.keys(catTotals)
+    .map(function(cat) { return { cat: cat, amount: catTotals[cat] }; })
+    .sort(function(a, b) { return b.amount - a.amount; });
+  const catGrandTotal = catRows.reduce(function(s, r) { return s + r.amount; }, 0);
+
+  const ctbody = document.getElementById('p3-category-tbody');
+  ctbody.innerHTML = '';
+  if (catRows.length === 0) {
+    ctbody.innerHTML = emptyRow(4, 'No expense items recorded in this period');
+  } else {
+    catRows.forEach(function(r) {
+      const pct = catGrandTotal > 0 ? (r.amount / catGrandTotal * 100) : 0;
+      const tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td><strong>' + r.cat + '</strong></td>' +
+        '<td style="text-align:right;color:#f87171;font-family:\'JetBrains Mono\',monospace;font-weight:600;">' + fmt(r.amount) + '</td>' +
+        '<td style="text-align:right;color:var(--muted);font-family:\'JetBrains Mono\',monospace;">' + pct.toFixed(1) + '%</td>' +
+        '<td><div style="background:rgba(248,113,113,0.15);border-radius:4px;height:8px;width:140px;overflow:hidden;"><div style="background:#f87171;height:100%;width:' + pct.toFixed(1) + '%;"></div></div></td>';
+      ctbody.appendChild(tr);
+    });
+    const totTr = document.createElement('tr');
+    totTr.style.cssText = 'background:rgba(255,159,67,0.08);font-weight:700;';
+    totTr.innerHTML = '<td style="color:var(--gold);">TOTAL EXPENSE</td><td style="text-align:right;color:#f87171;font-family:\'JetBrains Mono\',monospace;">' + fmt(catGrandTotal) + '</td><td style="text-align:right;color:var(--muted);">100%</td><td></td>';
+    ctbody.appendChild(totTr);
+  }
 
   // Render shareholder summary table
   const stbody = document.getElementById('p3-share-tbody');
