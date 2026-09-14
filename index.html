@@ -750,6 +750,7 @@
         <span></span>
       </div>
       <div id="sales-rows"></div>
+      <div id="sales-empty-placeholder" class="empty-state-cell" style="padding:16px 0;"><svg class="es-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l2-7h12l2 7"/><path d="M4 13h5a1 1 0 0 1 1 1 2 2 0 0 0 4 0 1 1 0 0 1 1-1h5v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/></svg><span class="es-text">No sale items added yet — tap + Add Sale to start</span></div>
       <div style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#2ecc71;margin-top:8px;">
         Total Sales: <strong id="sale-total-preview">₹0</strong>
       </div>
@@ -771,6 +772,7 @@
         <span></span>
       </div>
       <div id="expense-rows"></div>
+      <div id="expense-empty-placeholder" class="empty-state-cell" style="padding:16px 0;"><svg class="es-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l2-7h12l2 7"/><path d="M4 13h5a1 1 0 0 1 1 1 2 2 0 0 0 4 0 1 1 0 0 1 1-1h5v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/></svg><span class="es-text">No expense items added yet — tap + Add Expense to start</span></div>
       <div style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#e74c3c;margin-top:8px;">
         Total Expenses: <strong id="expense-total-preview">₹0</strong>
       </div>
@@ -2606,6 +2608,14 @@ function updatePreview() {
   });
   document.getElementById('sale-total-preview').textContent = fmt(sTotal);
   document.getElementById('expense-total-preview').textContent = fmt(eTotal);
+
+  // Visual polish: show/hide the empty-state placeholder for each entry area
+  var salesCount = document.querySelectorAll('#sales-rows [data-rowid]').length;
+  var expCount   = document.querySelectorAll('#expense-rows [data-rowid]').length;
+  var sEmpty = document.getElementById('sales-empty-placeholder');
+  var eEmpty = document.getElementById('expense-empty-placeholder');
+  if (sEmpty) sEmpty.style.display = salesCount ? 'none' : '';
+  if (eEmpty) eEmpty.style.display = expCount ? 'none' : '';
 }
 
 function getItemsFromRows(containerId) {
