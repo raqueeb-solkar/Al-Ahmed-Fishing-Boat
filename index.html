@@ -134,23 +134,28 @@
     position: sticky;
     top: 0;              /* corrected to sit right under the header by JS */
     z-index: 99;          /* just below header (100), above page content */
+    /* if all 8 tabs still don't fit a narrow window, fade the right edge so
+       a partially-visible tab reads as "scroll for more", not a glitch */
+    -webkit-mask-image: linear-gradient(to right, #000 96%, transparent 100%);
+            mask-image: linear-gradient(to right, #000 96%, transparent 100%);
   }
+  .nav::-webkit-scrollbar { display: none; }
 
   .nav::-webkit-scrollbar { display: none; }
 
   .nav-btn {
     flex: 0 0 auto;      /* size to its own icon+label — prevents long labels
-                             (e.g. "Shareholder Attendance") from overflowing
-                             into the next tab when equal-width flex:1 made
-                             them too narrow to fit on one line */
-    padding: 14px 20px;
+                             from overflowing into the next tab */
+    padding: 14px 13px;   /* trimmed from 20px so all 8 tabs fit more screens
+                             without needing to scroll (e.g. Agent Commission
+                             was getting cut off at the right edge) */
     background: transparent;
     border: none;
     border-bottom: 3px solid transparent;
     color: var(--muted);
     font-family: 'Cinzel', serif;
     font-size: 11px;
-    letter-spacing: 1.5px;
+    letter-spacing: 0.9px;  /* trimmed from 1.5px, same reason */
     cursor: pointer;
     transition: all 0.3s;
     white-space: nowrap;
@@ -583,7 +588,7 @@
   .page.active { animation: pageFadeIn 0.28s ease; }
 
   /* ===== VISUAL POLISH: nav icon sizing ===== */
-  .nav-ico { display: inline-block; vertical-align: -4px; margin-right: 7px; }
+  .nav-ico { display: inline-block; vertical-align: -4px; margin-right: 6px; }
 
   @media (prefers-reduced-motion: reduce) {
     .page.active { animation: none; }
