@@ -567,6 +567,26 @@
   }
 
 
+
+  /* ===== VISUAL POLISH: empty states ===== */
+  .empty-state-cell { text-align: center; color: var(--muted); padding: 28px 16px; font-style: italic; }
+  .empty-state-cell .es-icon { display: block; margin: 0 auto 8px; opacity: 0.45; }
+  .empty-state-cell .es-text { font-size: 13px; }
+
+  /* ===== VISUAL POLISH: smooth page transition ===== */
+  @keyframes pageFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .page.active { animation: pageFadeIn 0.28s ease; }
+
+  /* ===== VISUAL POLISH: nav icon sizing ===== */
+  .nav-ico { display: inline-block; vertical-align: -4px; margin-right: 7px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .page.active { animation: none; }
+  }
+
   /* MODAL */
   .modal-overlay {
     display: none;
@@ -654,14 +674,14 @@
 </div>
 
 <nav class="nav">
-  <button class="nav-btn active" onclick="showPage(1)">⚓ Daily Records</button>
-  <button class="nav-btn" onclick="showPage(2)">👥 Shareholder Attendance</button>
-  <button class="nav-btn" onclick="showPage(3)">📊 Share Calculation</button>
-  <button class="nav-btn" onclick="showPage(4)">💰 Advances & Payments</button>
-  <button class="nav-btn" onclick="showPage(5)">🐟 Fish Sales & Suppliers</button>
-  <button class="nav-btn" onclick="showPage(6)">📒 Credit Tracking</button>
-  <button class="nav-btn" onclick="showPage(7)">🚜 Tractor Trips</button>
-  <button class="nav-btn" onclick="showPage(8)">🎯 Agent Commission</button>
+  <button class="nav-btn active" onclick="showPage(1)"><svg class="nav-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2.2"/><path d="M12 7v13M6 12H3a9 9 0 0 0 18 0h-3M8.5 9.5l3.5 2 3.5-2"/></svg>Daily Records</button>
+  <button class="nav-btn" onclick="showPage(2)"><svg class="nav-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.2c2.4.4 4.2 2.6 4.5 5.3"/></svg>Shareholder Attendance</button>
+  <button class="nav-btn" onclick="showPage(3)"><svg class="nav-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M9 20V4M14 20v-7M19 20V8"/></svg>Share Calculation</button>
+  <button class="nav-btn" onclick="showPage(4)"><svg class="nav-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="16" cy="14" r="1.3" fill="currentColor" stroke="none"/></svg>Advances &amp; Payments</button>
+  <button class="nav-btn" onclick="showPage(5)"><svg class="nav-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12c3-4 8-6 13-4 2 .8 4 2.4 5 4-1 1.6-3 3.2-5 4-5 2-10 0-13-4Z"/><path d="M17 9.5v5M6.5 10.5l-2-2.5M6.5 13.5l-2 2.5"/></svg>Fish Sales &amp; Suppliers</button>
+  <button class="nav-btn" onclick="showPage(6)"><svg class="nav-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2Z"/><path d="M5 18a2 2 0 0 1 2-2h11"/><line x1="9" y1="8" x2="14" y2="8"/></svg>Credit Tracking</button>
+  <button class="nav-btn" onclick="showPage(7)"><svg class="nav-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="11" height="8"/><path d="M13 11h4l3 3v2h-7z"/><circle cx="6" cy="18" r="1.6"/><circle cx="16.5" cy="18" r="1.6"/></svg>Tractor Trips</button>
+  <button class="nav-btn" onclick="showPage(8)"><svg class="nav-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg>Agent Commission</button>
 </nav>
 
 <!-- SYNC BAR -->
@@ -903,7 +923,7 @@
       </div>
     </div>
     <div id="saved-periods-list" style="display:none;margin-top:14px;">
-      <p style="color:var(--muted);font-size:13px;font-style:italic;">No saved periods yet. Calculate a period to save it.</p>
+      <div class="empty-state-cell" style="padding:14px 0;"><svg class="es-icon" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l2-7h12l2 7"/><path d="M4 13h5a1 1 0 0 1 1 1 2 2 0 0 0 4 0 1 1 0 0 1 1-1h5v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/></svg><span class="es-text">No saved periods yet. Calculate a period to save it.</span></div>
     </div>
   </div>
 
@@ -3183,7 +3203,7 @@ function renderSavedPeriods() {
   if (!listEl) return;
 
   if (count === 0) {
-    listEl.innerHTML = '<p style="color:var(--muted);font-size:13px;font-style:italic;">No saved periods yet. Calculate a period to save it.</p>';
+    listEl.innerHTML = emptyPara('No saved periods yet. Calculate a period to save it.');
     return;
   }
 
@@ -3657,6 +3677,18 @@ document.addEventListener('click', function(e) {
 });
 
 // ===== TOAST NOTIFICATION =====
+
+// ===== VISUAL POLISH: consistent empty-state markup (empty crate icon) =====
+function emptyRow(colspan, text) {
+  return '<tr><td colspan="' + colspan + '" class="empty-state-cell">' + '<svg class="es-icon" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l2-7h12l2 7"/><path d="M4 13h5a1 1 0 0 1 1 1 2 2 0 0 0 4 0 1 1 0 0 1 1-1h5v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/></svg>' + '<span class="es-text">' + text + '</span></td></tr>';
+}
+function emptyBlock(text) {
+  return '<div class="stat-card" style="grid-column:1/-1;"><div class="empty-state-cell" style="padding:12px;">' + '<svg class="es-icon" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l2-7h12l2 7"/><path d="M4 13h5a1 1 0 0 1 1 1 2 2 0 0 0 4 0 1 1 0 0 1 1-1h5v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/></svg>' + '<span class="es-text">' + text + '</span></div></div>';
+}
+function emptyPara(text) {
+  return '<div class="empty-state-cell" style="padding:14px 0;">' + '<svg class="es-icon" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l2-7h12l2 7"/><path d="M4 13h5a1 1 0 0 1 1 1 2 2 0 0 0 4 0 1 1 0 0 1 1-1h5v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/></svg>' + '<span class="es-text">' + text + '</span></div>';
+}
+
 function showToast(msg) {
   let toast = document.getElementById('global-toast');
   if (!toast) {
@@ -3768,7 +3800,7 @@ function renderP4Summary() {
   });
 
   if (tbody.innerHTML === '') {
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px">No payment records yet</td></tr>';
+    tbody.innerHTML = emptyRow(4, 'No payment records yet');
   }
 }
 
@@ -4892,7 +4924,7 @@ function renderSupplierPayTable() {
   const sorted = [...data].reverse();
   tbody.innerHTML = '';
   if (sorted.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px;font-style:italic;">No payments recorded yet</td></tr>';
+    tbody.innerHTML = emptyRow(5, 'No payments recorded yet');
     return;
   }
   sorted.forEach(function(p) {
@@ -4952,7 +4984,7 @@ function renderFSTable() {
 
   const filtered = filter ? fishSales.filter(r => r.supplier === filter) : fishSales;
   if (filtered.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px;font-style:italic;">No sales recorded yet</td></tr>';
+    tbody.innerHTML = emptyRow(8, 'No sales recorded yet');
     return;
   }
 
@@ -5366,7 +5398,7 @@ function renderAgentSummary() {
     if (agentComms.some(function(x){ return x.agent === a; }) || agentPays.some(function(x){ return x.agent === a; })) active.push(a);
   });
   if (active.length === 0) {
-    box.innerHTML = '<div class="stat-card" style="grid-column:1/-1;text-align:center;"><div style="color:var(--muted);font-style:italic;padding:12px;">No auction agent commissions yet — record an auction sale in Daily Records</div></div>';
+    box.innerHTML = emptyBlock('No auction agent commissions yet — record an auction sale in Daily Records');
     return;
   }
   let html = '';
@@ -5418,7 +5450,7 @@ function renderAgentCommTable() {
   const rows = data.slice().reverse();
   tb.innerHTML = '';
   if (rows.length === 0) {
-    tb.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px;font-style:italic;">No commission records yet</td></tr>';
+    tb.innerHTML = emptyRow(5, 'No commission records yet');
     return;
   }
   rows.forEach(function(a) {
@@ -5465,7 +5497,7 @@ function renderAgentPayTable() {
   const rows = agentPays.slice().reverse();
   tb.innerHTML = '';
   if (rows.length === 0) {
-    tb.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px;font-style:italic;">No payments recorded yet</td></tr>';
+    tb.innerHTML = emptyRow(5, 'No payments recorded yet');
     return;
   }
   rows.forEach(function(p) {
@@ -5734,7 +5766,7 @@ function renderTractorTable() {
   const sorted = [...data].reverse();
   tbody.innerHTML = '';
   if (sorted.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px;font-style:italic;">No trips recorded yet</td></tr>';
+    tbody.innerHTML = emptyRow(6, 'No trips recorded yet');
     return;
   }
   sorted.forEach(function(t) {
@@ -5758,7 +5790,7 @@ function renderTractorPayTable() {
   const sorted = [...tractorPays].reverse();
   tbody.innerHTML = '';
   if (sorted.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px;font-style:italic;">No payments recorded yet</td></tr>';
+    tbody.innerHTML = emptyRow(5, 'No payments recorded yet');
     return;
   }
   sorted.forEach(function(p) {
@@ -5998,7 +6030,7 @@ function renderCreditSummary() {
   const filtered = search ? allRetailers.filter(r => r.toLowerCase().includes(search)) : allRetailers;
 
   if (filtered.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px;font-style:italic;">No retailers yet — record a sale above</td></tr>';
+    tbody.innerHTML = emptyRow(7, 'No retailers yet — record a sale above');
     return;
   }
 
@@ -6102,7 +6134,7 @@ function showRetailerLedger(retailer) {
   });
 
   if (events.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px;font-style:italic;">No transactions yet</td></tr>';
+    tbody.innerHTML = emptyRow(7, 'No transactions yet');
   }
 
   // Store for PDF
@@ -6230,7 +6262,7 @@ function generateAdvStmt() {
   const tbody = document.getElementById('adv-stmt-tbody');
   tbody.innerHTML = '';
   if (filtered.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px;font-style:italic;">No transactions found for selected period</td></tr>';
+    tbody.innerHTML = emptyRow(5, 'No transactions found for selected period');
   } else {
     filtered.forEach(p => {
       const tr = document.createElement('tr');
@@ -6606,11 +6638,11 @@ function closeMoreSheet() {
 
 <!-- ===== MOBILE BOTTOM NAVIGATION ===== -->
 <nav id="bottom-nav">
-  <button class="bnav-btn active" data-page="1" onclick="goPage(1)"><span class="bnav-ico">&#9875;</span>Daily</button>
-  <button class="bnav-btn" data-page="2" onclick="goPage(2)"><span class="bnav-ico">&#128101;</span>Crew</button>
-  <button class="bnav-btn" data-page="3" onclick="goPage(3)"><span class="bnav-ico">&#128202;</span>Shares</button>
-  <button class="bnav-btn" data-page="4" onclick="goPage(4)"><span class="bnav-ico">&#128176;</span>Money</button>
-  <button class="bnav-btn" id="bnav-more" onclick="openMoreSheet()"><span class="bnav-ico">&#8943;</span>More</button>
+  <button class="bnav-btn active" data-page="1" onclick="goPage(1)"><span class="bnav-ico"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2.2"/><path d="M12 7v13M6 12H3a9 9 0 0 0 18 0h-3M8.5 9.5l3.5 2 3.5-2"/></svg></span>Daily</button>
+  <button class="bnav-btn" data-page="2" onclick="goPage(2)"><span class="bnav-ico"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.2c2.4.4 4.2 2.6 4.5 5.3"/></svg></span>Crew</button>
+  <button class="bnav-btn" data-page="3" onclick="goPage(3)"><span class="bnav-ico"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M9 20V4M14 20v-7M19 20V8"/></svg></span>Shares</button>
+  <button class="bnav-btn" data-page="4" onclick="goPage(4)"><span class="bnav-ico"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="16" cy="14" r="1.3" fill="currentColor" stroke="none"/></svg></span>Money</button>
+  <button class="bnav-btn" id="bnav-more" onclick="openMoreSheet()"><span class="bnav-ico"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.8" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.8" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.8" fill="currentColor" stroke="none"/></svg></span>More</button>
 </nav>
 
 <div id="more-sheet" onclick="if(event.target===this)closeMoreSheet()">
@@ -6619,10 +6651,10 @@ function closeMoreSheet() {
       <div style="width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 12px;"></div>
       <div style="font-family:'Cinzel',serif;font-size:13px;color:var(--gold);letter-spacing:2px;">MORE PAGES</div>
     </div>
-    <button class="more-item" data-page="5" onclick="goPage(5)"><span class="more-ico">&#128031;</span> Fish Sales &amp; Suppliers</button>
-    <button class="more-item" data-page="6" onclick="goPage(6)"><span class="more-ico">&#128210;</span> Credit Tracking</button>
-    <button class="more-item" data-page="7" onclick="goPage(7)"><span class="more-ico">&#128668;</span> Tractor Trips</button>
-    <button class="more-item" data-page="8" onclick="goPage(8)"><span class="more-ico">&#127919;</span> Agent Commission</button>
+    <button class="more-item" data-page="5" onclick="goPage(5)"><span class="more-ico"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12c3-4 8-6 13-4 2 .8 4 2.4 5 4-1 1.6-3 3.2-5 4-5 2-10 0-13-4Z"/><path d="M17 9.5v5M6.5 10.5l-2-2.5M6.5 13.5l-2 2.5"/></svg></span> Fish Sales &amp; Suppliers</button>
+    <button class="more-item" data-page="6" onclick="goPage(6)"><span class="more-ico"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2Z"/><path d="M5 18a2 2 0 0 1 2-2h11"/><line x1="9" y1="8" x2="14" y2="8"/></svg></span> Credit Tracking</button>
+    <button class="more-item" data-page="7" onclick="goPage(7)"><span class="more-ico"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="11" height="8"/><path d="M13 11h4l3 3v2h-7z"/><circle cx="6" cy="18" r="1.6"/><circle cx="16.5" cy="18" r="1.6"/></svg></span> Tractor Trips</button>
+    <button class="more-item" data-page="8" onclick="goPage(8)"><span class="more-ico"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg></span> Agent Commission</button>
 
     <div style="border-top:1px solid var(--border);margin:14px 0 12px;"></div>
     <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;">&#9729; GOOGLE DRIVE &amp; BACKUP</div>
