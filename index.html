@@ -1374,6 +1374,7 @@
           <option>A Gift</option>
           <option>MGM</option>
           <option>Noori Fish</option>
+          <option>Noori Squid</option>
           <option>Mansoori</option>
           <option>AFF</option>
           <option>Farook</option>
@@ -1422,6 +1423,7 @@
           <option>A Gift</option>
           <option>MGM</option>
           <option>Noori Fish</option>
+          <option>Noori Squid</option>
           <option>Mansoori</option>
           <option>AFF</option>
           <option>Farook</option>
@@ -1452,6 +1454,7 @@
         <option>A Gift</option>
         <option>MGM</option>
         <option>Noori Fish</option>
+        <option>Noori Squid</option>
         <option>Mansoori</option>
         <option>AFF</option>
           <option>Farook</option>
@@ -1494,6 +1497,7 @@
           <option>A Gift</option>
           <option>MGM</option>
           <option>Noori Fish</option>
+          <option>Noori Squid</option>
           <option>Mansoori</option>
           <option>AFF</option>
           <option>Farook</option>
@@ -1572,6 +1576,7 @@
         <option>A Gift</option>
         <option>MGM</option>
         <option>Noori Fish</option>
+        <option>Noori Squid</option>
         <option>Mansoori</option>
         <option>AFF</option>
           <option>Farook</option>
@@ -1610,7 +1615,7 @@
       <select id="esp-supplier" style="padding:10px 12px;background:rgba(13,17,23,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;">
         <option>Local</option><option>Auction</option>
         <option>A Gift</option><option>MGM</option>
-        <option>Noori Fish</option><option>Mansoori</option><option>AFF</option>
+        <option>Noori Fish</option><option>Noori Squid</option><option>Mansoori</option><option>AFF</option>
           <option>Farook</option>
           <option>Chawan</option>
           <option>Gulshad</option>
@@ -2091,11 +2096,12 @@
 const SHAREHOLDERS = [
   'Azim','Taasir','Maqsood','Ittifaque','Zubair','Sufiyan',
   'IrfanW','IrfanS','Shafi','Riyaz','Salim','Maqbool','Maazin',
-  'Sagir','Parvez','Nazim','Sarfaraz','Munim','Affan','Altamash','Azman','Tandel 1','Tandel 2','Owner',
+  'Sagir','Parvez','Nazim','Sarfaraz','Munim','Affan','Altamash','Azman','Sahel','Ayyan','Aman','Paagi','Tandel 1','Tandel 2','Owner',
   'Al Muhammad Boat','Al Muhammad Boat Engine',
   'Al Bahar Boat','Al Bahar Boat Engine',
   'Maryam Boat','Maryam Boat Engine',
   'Safiya Boat','Safiya Boat Engine',
+  'Al Ahmed Boat','Al Ahmed Boat Engine',
   'Net A 1','Net A 2','Net R 1','Net R 2',
   'Dhanda 1','Dhanda 2'
 ];
@@ -2207,7 +2213,7 @@ document.getElementById('xd-date').value = today();
 
 // ---- Dynamic row builders ----
 function makeSaleSupplierOptions(selected) {
-  return ['','Local','Auction','A Gift','MGM','Noori Fish','Mansoori','AFF','Farook','Chawan','Gulshad']
+  return ['','Local','Auction','A Gift','MGM','Noori Fish','Noori Squid','Mansoori','AFF','Farook','Chawan','Gulshad']
     .map(function(s) {
       const val = s;
       const label = s === '' ? '— Select —' : s;
@@ -4995,6 +5001,7 @@ const OWNER_SHARES = [
   'Al Bahar Boat','Al Bahar Boat Engine',
   'Maryam Boat','Maryam Boat Engine',
   'Safiya Boat','Safiya Boat Engine',
+  'Al Ahmed Boat','Al Ahmed Boat Engine',
   'Net R 1','Net R 2',
   'Dhanda 1','Dhanda 2'
 ];
@@ -5186,7 +5193,7 @@ function exportGroupPDF() {
 }
 
 // ===== PAGE 5: FISH SALES & SUPPLIER LEDGER =====
-const SUPPLIERS = ['Local','Auction','A Gift','MGM','Noori Fish','Mansoori','AFF','Farook','Chawan','Gulshad'];
+const SUPPLIERS = ['Local','Auction','A Gift','MGM','Noori Fish','Noori Squid','Mansoori','AFF','Farook','Chawan','Gulshad'];
 
 let _fsLedgerData = null;
 
