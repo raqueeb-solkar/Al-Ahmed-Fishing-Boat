@@ -878,7 +878,7 @@
       </div>
       <div class="form-group">
         <label>Fishing Type</label>
-        <select id="p2-fishing-type" style="padding:10px 12px;background:rgba(13,17,23,0.8);border:1px solid rgba(255,159,67,0.4);border-radius:6px;color:var(--gold-light);font-size:14px;width:100%;font-weight:600;">
+        <select id="p2-fishing-type" onchange="togglePaagiSection()" style="padding:10px 12px;background:rgba(13,17,23,0.8);border:1px solid rgba(255,159,67,0.4);border-radius:6px;color:var(--gold-light);font-size:14px;width:100%;font-weight:600;">
           <option value="">— Select Fishing Type —</option>
           <option value="Tawar">Tawar Fishing</option>
           <option value="Bangda">Bangda Fishing</option>
@@ -891,6 +891,17 @@
         </select>
       </div>
     </div>
+    <!-- ===== PAAGI (CAST NET) — only for Squid Fishing ===== -->
+    <div id="paagi-section" style="display:none;border:1px solid rgba(248,113,113,0.3);border-radius:10px;padding:14px 16px;margin-bottom:18px;background:rgba(248,113,113,0.03);">
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:13px;color:#f87171;letter-spacing:0.5px;margin-bottom:4px;">🎯 PAAGI (CAST NET) — SQUID FISHING</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">
+        Paagi earns one full share that day, same as any crew member. If more than one person cast the net,
+        tap each one and split that single share between them by % (must total 100%).
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;"><div class="checkbox-item" data-paagi-name="Sarfaraz" onclick="togglePaagiPerson(this)" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid rgba(248,113,113,0.25);border-radius:8px;cursor:pointer;background:rgba(248,113,113,0.04);"><span class="paagi-check-box" style="width:18px;height:18px;border:1px solid rgba(248,113,113,0.5);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#f87171;flex-shrink:0;"></span><span style="flex:1;font-size:13px;">Sarfaraz</span><input type="number" class="paagi-percent-input" data-paagi-name="Sarfaraz" placeholder="%" min="0" max="100" oninput="updatePaagiRemaining()" style="display:none;width:70px;background:rgba(13,17,23,0.8);border:1px solid rgba(248,113,113,0.4);border-radius:6px;padding:6px 8px;color:#f87171;font-size:13px;text-align:center;font-weight:700;"></div><div class="checkbox-item" data-paagi-name="Azim" onclick="togglePaagiPerson(this)" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid rgba(248,113,113,0.25);border-radius:8px;cursor:pointer;background:rgba(248,113,113,0.04);"><span class="paagi-check-box" style="width:18px;height:18px;border:1px solid rgba(248,113,113,0.5);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#f87171;flex-shrink:0;"></span><span style="flex:1;font-size:13px;">Azim</span><input type="number" class="paagi-percent-input" data-paagi-name="Azim" placeholder="%" min="0" max="100" oninput="updatePaagiRemaining()" style="display:none;width:70px;background:rgba(13,17,23,0.8);border:1px solid rgba(248,113,113,0.4);border-radius:6px;padding:6px 8px;color:#f87171;font-size:13px;text-align:center;font-weight:700;"></div><div class="checkbox-item" data-paagi-name="Ittifaque" onclick="togglePaagiPerson(this)" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid rgba(248,113,113,0.25);border-radius:8px;cursor:pointer;background:rgba(248,113,113,0.04);"><span class="paagi-check-box" style="width:18px;height:18px;border:1px solid rgba(248,113,113,0.5);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#f87171;flex-shrink:0;"></span><span style="flex:1;font-size:13px;">Ittifaque</span><input type="number" class="paagi-percent-input" data-paagi-name="Ittifaque" placeholder="%" min="0" max="100" oninput="updatePaagiRemaining()" style="display:none;width:70px;background:rgba(13,17,23,0.8);border:1px solid rgba(248,113,113,0.4);border-radius:6px;padding:6px 8px;color:#f87171;font-size:13px;text-align:center;font-weight:700;"></div><div class="checkbox-item" data-paagi-name="IrfanW" onclick="togglePaagiPerson(this)" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid rgba(248,113,113,0.25);border-radius:8px;cursor:pointer;background:rgba(248,113,113,0.04);"><span class="paagi-check-box" style="width:18px;height:18px;border:1px solid rgba(248,113,113,0.5);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#f87171;flex-shrink:0;"></span><span style="flex:1;font-size:13px;">IrfanW</span><input type="number" class="paagi-percent-input" data-paagi-name="IrfanW" placeholder="%" min="0" max="100" oninput="updatePaagiRemaining()" style="display:none;width:70px;background:rgba(13,17,23,0.8);border:1px solid rgba(248,113,113,0.4);border-radius:6px;padding:6px 8px;color:#f87171;font-size:13px;text-align:center;font-weight:700;"></div></div>
+      <div id="paagi-remaining" style="margin-top:10px;font-size:12px;font-weight:700;color:var(--muted);"></div>
+    </div>
+
     <div class="card-title">Select Present Shareholders</div>
     <div class="checkbox-grid" id="shareholder-checks"></div>
     <br>
@@ -984,6 +995,7 @@
               <th>Expense Ratio</th>
               <th>Alloc. Expense (₹)</th>
               <th>Profit (₹)</th>
+              <th>Paagi (Cast Net)</th>
               <th>Shareholders</th>
               <th>Share/Person (₹)</th>
             </tr>
@@ -3213,6 +3225,67 @@ function selectAll() {
   });
 }
 
+
+// ===== PAAGI (CAST NET) — Squid Fishing only =====
+function togglePaagiSection() {
+  const ft = document.getElementById('p2-fishing-type').value;
+  const section = document.getElementById('paagi-section');
+  if (!section) return;
+  section.style.display = (ft === 'Squid') ? 'block' : 'none';
+  if (ft !== 'Squid') {
+    // Clear any selection if user switches away from Squid, so it never saves by accident
+    document.querySelectorAll('[data-paagi-name]').forEach(function(el) {
+      el.classList.remove('checked');
+      const box = el.querySelector('.paagi-check-box');
+      if (box) box.textContent = '';
+      const inp = el.querySelector('.paagi-percent-input');
+      if (inp) { inp.style.display = 'none'; inp.value = ''; }
+    });
+  }
+  updatePaagiRemaining();
+}
+
+function togglePaagiPerson(el) {
+  const checked = el.classList.toggle('checked');
+  const box = el.querySelector('.paagi-check-box');
+  const inp = el.querySelector('.paagi-percent-input');
+  if (checked) {
+    if (box) box.textContent = '✓';
+    if (inp) inp.style.display = 'inline-block';
+  } else {
+    if (box) box.textContent = '';
+    if (inp) { inp.style.display = 'none'; inp.value = ''; }
+  }
+  updatePaagiRemaining();
+}
+
+function getPaagiSelections() {
+  const out = [];
+  document.querySelectorAll('[data-paagi-name].checked').forEach(function(el) {
+    const name = el.dataset.paagiName;
+    const inp = el.querySelector('.paagi-percent-input');
+    const pct = inp ? (parseFloat(inp.value) || 0) : 0;
+    out.push({ name: name, percent: pct });
+  });
+  return out;
+}
+
+function updatePaagiRemaining() {
+  const box = document.getElementById('paagi-remaining');
+  if (!box) return;
+  const sel = getPaagiSelections();
+  if (sel.length === 0) { box.textContent = ''; return; }
+  const used = sel.reduce(function(s, p) { return s + p.percent; }, 0);
+  const remaining = 100 - used;
+  if (remaining === 0) {
+    box.innerHTML = '<span style="color:#4ade80;">✓ 100% allocated — ready to save</span>';
+  } else if (remaining > 0) {
+    box.innerHTML = '<span style="color:#fbbf24;">Remaining to allocate: ' + remaining + '%</span>';
+  } else {
+    box.innerHTML = '<span style="color:#f87171;">⚠ Over-allocated by ' + Math.abs(remaining) + '% — totals must equal 100%</span>';
+  }
+}
+
 function clearAll() {
   document.querySelectorAll('.checkbox-item').forEach(d => {
     d.classList.remove('checked');
@@ -3236,6 +3309,19 @@ function saveAttendance() {
   const present = Array.from(document.querySelectorAll('.checkbox-item.checked')).map(d => d.dataset.name);
   if (present.length === 0) { alert('Please select at least one shareholder.'); return; }
 
+  // Paagi (cast net) — only meaningful for Squid Fishing
+  let paagi = [];
+  if (fishingType === 'Squid') {
+    paagi = getPaagiSelections();
+    if (paagi.length > 0) {
+      const totalPct = paagi.reduce((s, p) => s + p.percent, 0);
+      if (Math.round(totalPct) !== 100) {
+        alert('Paagi percentages must add up to exactly 100%.\nCurrently: ' + totalPct + '%');
+        return;
+      }
+    }
+  }
+
   // Guard against mixing a "Full Day" record with named trips on the same date —
   // that would double-count the day's profit.
   const sameDate = attendanceRecords.filter(r => r.date === date);
@@ -3257,13 +3343,13 @@ function saveAttendance() {
     attendanceRecords.splice(existing, 1);
   }
 
-  attendanceRecords.push({ date, trip, fishingType, present });
+  attendanceRecords.push({ date, trip, fishingType, present, paagi });
   attendanceRecords.sort((a,b) => a.date.localeCompare(b.date) || (a.trip||'').localeCompare(b.trip||''));
   save(KEY_ATTEND, attendanceRecords);
 
   clearAll();
   renderP2Table();
-  showToast('✓ Attendance saved — ' + fmtDate(date) + (trip ? ' | ' + trip + ' Trip' : '') + (fishingType ? ' | ' + fishingType + ' Fishing' : ''));
+  showToast('✓ Attendance saved — ' + fmtDate(date) + (trip ? ' | ' + trip + ' Trip' : '') + (fishingType ? ' | ' + fishingType + ' Fishing' : '') + (paagi.length ? ' | Paagi: ' + paagi.map(p=>p.name+' '+p.percent+'%').join(', ') : ''));
 }
 
 function deleteAttendance(date, trip) {
@@ -3282,11 +3368,30 @@ function loadAttendanceForEdit(date, trip) {
   const tripEl = document.getElementById('p2-trip');
   if (tripEl) tripEl.value = rec.trip || '';
   document.getElementById('p2-fishing-type').value = rec.fishingType || '';
+  togglePaagiSection();
   clearAll();
   rec.present.forEach(name => {
     const div = document.querySelector(`.checkbox-item[data-name="${name}"]`);
     if (div) { div.classList.add('checked'); div.querySelector('.check-box').textContent = '✓'; }
   });
+  // Restore Paagi selections if this was a Squid Fishing day
+  document.querySelectorAll('[data-paagi-name]').forEach(function(el) {
+    el.classList.remove('checked');
+    const box = el.querySelector('.paagi-check-box');
+    if (box) box.textContent = '';
+    const inp = el.querySelector('.paagi-percent-input');
+    if (inp) { inp.style.display = 'none'; inp.value = ''; }
+  });
+  (rec.paagi || []).forEach(function(p) {
+    const el = document.querySelector('[data-paagi-name="' + p.name + '"]');
+    if (!el) return;
+    el.classList.add('checked');
+    const box = el.querySelector('.paagi-check-box');
+    if (box) box.textContent = '✓';
+    const inp = el.querySelector('.paagi-percent-input');
+    if (inp) { inp.style.display = 'inline-block'; inp.value = p.percent; }
+  });
+  updatePaagiRemaining();
   window.scrollTo(0, 0);
 }
 
@@ -3302,7 +3407,7 @@ function renderP2Table() {
     tr.innerHTML = `
       <td><span class="badge badge-gold">${fmtDate(r.date)}</span></td>
       <td>${r.trip ? '<span class="badge" style="background:rgba(30,107,138,0.25);color:#7ecfed;border:1px solid rgba(30,107,138,0.5);">🕐 ' + r.trip + '</span>' : '<span style="color:var(--muted);font-size:12px;">Full Day</span>'}</td>
-      <td>${r.fishingType ? '<span class="badge" style="background:rgba(255,159,67,0.2);color:var(--gold-light);border:1px solid rgba(255,159,67,0.3);">🎣 ' + r.fishingType + '</span>' : '<span style="color:var(--muted);font-size:12px;">—</span>'}</td>
+      <td>${r.fishingType ? '<span class="badge" style="background:rgba(255,159,67,0.2);color:var(--gold-light);border:1px solid rgba(255,159,67,0.3);">🎣 ' + r.fishingType + '</span>' : '<span style="color:var(--muted);font-size:12px;">—</span>'}${(r.paagi && r.paagi.length) ? '<br>' + r.paagi.map(p => '<span class="badge" style="background:rgba(248,113,113,0.15);color:#f87171;border:1px solid rgba(248,113,113,0.3);font-size:10px;margin-top:3px;">🎯 ' + p.name + ' ' + p.percent + '%</span>').join(' ') : ''}</td>
       <td style="font-size:13px;color:var(--muted)">${r.present.join(', ')}</td>
       <td><span class="badge badge-green">${r.present.length}</span></td>
       <td style="display:flex;gap:8px;flex-wrap:wrap">
@@ -3578,6 +3683,19 @@ function calculateShares() {
     const profit = tripSales - allocExpense;
     const present = attend ? attend.present : [];
     const numPresent = present.length;
+
+    // Paagi (cast net, Squid Fishing): the role is worth exactly ONE normal
+    // share that day — same value every present crew member gets. If more
+    // than one person cast the net, that single share is split between them
+    // by the percentage set in attendance, on top of their normal presence share.
+    const paagiList = (attend && attend.paagi && attend.paagi.length) ? attend.paagi : [];
+    const shareDivisor = numPresent + (paagiList.length > 0 ? 1 : 0);
+    const sharePerPerson = shareDivisor > 0 ? profit / shareDivisor : 0;
+    const paagiShareUnit = sharePerPerson; // the "+1" share, same value as everyone else's
+    const paagiBreakdown = paagiList.map(function(p) {
+      return { name: p.name, percent: p.percent, bonus: paagiShareUnit * (p.percent / 100) };
+    });
+
     dailyBreakdown.push({
       date: date,
       trip: trip || '',
@@ -3587,8 +3705,9 @@ function calculateShares() {
       allocExpense,
       profit,
       numPresent,
-      sharePerPerson: numPresent > 0 ? profit / numPresent : 0,
-      present: present
+      sharePerPerson: sharePerPerson,
+      present: present,
+      paagi: paagiBreakdown
     });
   }
 
@@ -3640,6 +3759,12 @@ function calculateShares() {
       shareMap[sh].days++;
       shareMap[sh].total += d.sharePerPerson;
     });
+    // Paagi bonus — additional, on top of the normal presence share above
+    (d.paagi || []).forEach(function(p) {
+      if (!shareMap[p.name]) shareMap[p.name] = { days: 0, total: 0 };
+      shareMap[p.name].total += p.bonus;
+      shareMap[p.name].paagiBonus = (shareMap[p.name].paagiBonus || 0) + p.bonus;
+    });
   });
 
   const totalProfit = dailyBreakdown.reduce((s, d) => s + d.profit, 0);
@@ -3677,7 +3802,8 @@ function calculateShares() {
       <td><span class="badge badge-red">${(d.ratio * 100).toFixed(2)}%</span></td>
       <td class="result-negative">${fmt(d.allocExpense)}</td>
       <td class="result-positive">${fmt(d.profit)}</td>
-      <td><span class="badge badge-green">${d.numPresent}</span></td>
+      <td>${(d.paagi && d.paagi.length) ? d.paagi.map(p => '<span class="badge" style="background:rgba(248,113,113,0.15);color:#f87171;border:1px solid rgba(248,113,113,0.3);margin:1px;">🎯 ' + p.name + ' ' + p.percent + '% (' + fmt(p.bonus) + ')</span>').join(' ') : '<span style="color:var(--muted);font-size:11px;">—</span>'}</td>
+      <td><span class="badge badge-green">${d.numPresent}</span>${(d.paagi && d.paagi.length) ? ' <span style="color:#f87171;font-size:10px;">+1 Paagi share</span>' : ''}</td>
       <td class="result-positive">${fmt(d.sharePerPerson)}</td>
     `;
     dtbody.appendChild(tr);
