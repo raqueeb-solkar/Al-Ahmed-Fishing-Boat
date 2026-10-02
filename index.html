@@ -1143,7 +1143,9 @@
             <tr>
               <th>Date</th>
               <th>Fishing Type</th>
-              <th style="text-align:right">Share Earned (₹)</th>
+              <th style="text-align:right">Share (₹)</th>
+              <th style="text-align:right">Paagi Bonus (₹)</th>
+              <th style="text-align:right">Total (₹)</th>
             </tr>
           </thead>
           <tbody id="ind-daily-tbody"></tbody>
@@ -3896,25 +3898,34 @@ function showIndividual(name) {
   const dailyRows = [];
 
   _p3DailyBreakdown.forEach(d => {
-    if (!d.present.includes(name)) return;
+    const paagiEntry = (d.paagi || []).find(p => p.name === name);
+    const wasPresent = d.present.includes(name);
+    if (!wasPresent && !paagiEntry) return;
+
     daysPresent++;
-    totalShareEarned += d.sharePerPerson;
-    dailyRows.push({ date: d.date, earned: d.sharePerPerson, fishingType: d.fishingType || '', trip: d.trip || '' });
+    const baseShare = wasPresent ? d.sharePerPerson : 0;
+    const paagiBonus = paagiEntry ? paagiEntry.bonus : 0;
+    const dayTotal = baseShare + paagiBonus;
+    totalShareEarned += dayTotal;
+    dailyRows.push({ date: d.date, earned: dayTotal, baseShare: baseShare, paagiBonus: paagiBonus, paagiPercent: paagiEntry ? paagiEntry.percent : 0, fishingType: d.fishingType || '', trip: d.trip || '' });
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td><span class="badge badge-gold">${fmtDate(d.date)}</span>${d.trip ? ' <span class="badge" style="background:rgba(30,107,138,0.25);color:#7ecfed;border:1px solid rgba(30,107,138,0.5);">🕐 ' + d.trip + '</span>' : ''}</td>
       <td>${d.fishingType ? '<span class="badge" style="background:rgba(255,159,67,0.15);color:var(--gold-light);">🎣 ' + d.fishingType + '</span>' : '<span style="color:var(--muted);font-size:11px;">—</span>'}</td>
-      <td class="result-positive" style="text-align:right;font-size:15px;font-weight:700;">${fmt(d.sharePerPerson)}</td>
+      <td style="text-align:right;">${wasPresent ? fmt(baseShare) : '<span style="color:var(--muted);font-size:11px;">—</span>'}</td>
+      <td style="text-align:right;">${paagiEntry ? '<span style="color:#f87171;font-weight:700;">🎯 ' + paagiEntry.percent + '% = ' + fmt(paagiBonus) + '</span>' : '<span style="color:var(--muted);font-size:11px;">—</span>'}</td>
+      <td class="result-positive" style="text-align:right;font-size:15px;font-weight:700;">${fmt(dayTotal)}</td>
     `;
     dtbody.appendChild(tr);
   });
 
   if (daysPresent === 0) {
-    dtbody.innerHTML = '<tr><td colspan="2" style="text-align:center;color:var(--muted);padding:16px;font-style:italic;">Not present any day in this period</td></tr>';
+    dtbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px;font-style:italic;">Not present any day in this period</td></tr>';
   } else {
     const sumTr = document.createElement('tr');
     sumTr.style.cssText = 'background:rgba(26,122,74,0.1);font-weight:700;';
-    sumTr.innerHTML = `<td style="color:var(--gold);">TOTAL — ${daysPresent} trips</td><td class="result-positive" style="text-align:right;font-size:16px;font-weight:700;">${fmt(totalShareEarned)}</td>`;
+    sumTr.innerHTML = `<td colspan="4" style="color:var(--gold);">TOTAL — ${daysPresent} trips</td><td class="result-positive" style="text-align:right;font-size:16px;font-weight:700;">${fmt(totalShareEarned)}</td>`;
     dtbody.appendChild(sumTr);
   }
 
@@ -3947,9 +3958,11 @@ function exportToPDF() {
   (d.dailyRows||[]).forEach(function(r) {
     shareRows += '<tr><td>' + pdfD(r.date) + (r.trip ? ' <span style="color:#1e6b8a;font-size:11px;font-weight:700;">(' + r.trip + ')</span>' : '') + '</td>' +
       '<td style="color:#c9a84c;font-size:12px;">' + (r.fishingType ? '🎣 ' + r.fishingType : '—') + '</td>' +
+      '<td style="text-align:right;color:#444;">' + (r.baseShare ? '&#8377;' + fmtN(r.baseShare) : '—') + '</td>' +
+      '<td style="text-align:right;color:#c0392b;">' + (r.paagiBonus ? r.paagiPercent + '% = &#8377;' + fmtN(r.paagiBonus) : '—') + '</td>' +
       '<td style="text-align:right;color:#1a7a4a;font-size:15px;font-weight:700;">&#8377;' + fmtN(r.earned) + '</td></tr>';
   });
-  shareRows += '<tr style="background:#0a1628;"><td colspan="2" style="color:#c9a84c;font-weight:700;">TOTAL — ' + d.daysPresent + ' trips present</td>' +
+  shareRows += '<tr style="background:#0a1628;"><td colspan="4" style="color:#c9a84c;font-weight:700;">TOTAL — ' + d.daysPresent + ' trips present</td>' +
     '<td style="text-align:right;color:#2ecc71;font-size:16px;font-weight:700;">&#8377;' + fmtN(d.totalShareEarned) + '</td></tr>';
 
   var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Statement - ' + d.name + '</title>' +
@@ -3980,7 +3993,7 @@ function exportToPDF() {
 
     // Share table
     '<div style="background:#0a1628;color:#c9a84c;font-size:11px;padding:8px 14px;border-radius:4px 4px 0 0;font-weight:700;letter-spacing:1px;display:inline-block;margin-bottom:0;">📅 DATE-WISE SHARE EARNED</div>' +
-    '<table><thead><tr><th>Date</th><th>Fishing Type</th><th style="text-align:right;">Share Earned (&#8377;)</th></tr></thead>' +
+    '<table><thead><tr><th>Date</th><th>Fishing Type</th><th style="text-align:right;">Share (&#8377;)</th><th style="text-align:right;">Paagi Bonus (&#8377;)</th><th style="text-align:right;">Total (&#8377;)</th></tr></thead>' +
     '<tbody>' + shareRows + '</tbody></table>' +
 
 
