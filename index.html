@@ -585,6 +585,10 @@
 
 
 
+  /* ===== LOCKED PERIODS ===== */
+  #lock-badge { background: #f87171; color: #0d1117; border-radius: 10px; padding: 0 6px; margin-left: 4px; font-weight: 700; font-size: 11px; }
+  #lock-badge:empty { display: none; }
+
   /* ===== COMPARE TWO PERIODS ===== */
   .cmp-good { color: #4ade80; font-weight: 700; }
   .cmp-bad  { color: #f87171; font-weight: 700; }
@@ -755,6 +759,7 @@
       <input type="file" accept=".json,.txt,application/json,text/plain" id="import-file-input" style="display:none" onchange="importData(event)">
     </label>
     <button id="undo-restore-btn" class="btn btn-sm" style="display:none;background:rgba(251,191,36,0.18);color:#fbbf24;border:1px solid rgba(251,191,36,0.45);" onclick="undoLastRestore()" title="Go back to your data as it was just before the last restore">↩ UNDO RESTORE</button>
+    <button id="lock-btn" class="btn btn-sm" style="background:rgba(251,191,36,0.15);color:#fbbf24;border:1px solid rgba(251,191,36,0.4);" onclick="showPage(12)" title="Lock settled periods so they cannot change by accident">🔒 LOCKS<span id="lock-badge"></span></button>
     <button class="btn btn-sm" style="background:rgba(126,207,237,0.15);color:#7ecfed;border:1px solid rgba(126,207,237,0.4);" onclick="showPage(11)" title="Compare two periods and explain why a share was higher or lower">📈 COMPARE</button>
     <button id="health-btn" class="btn btn-sm" style="background:rgba(74,222,128,0.15);color:#4ade80;border:1px solid rgba(74,222,128,0.4);" onclick="showPage(10)" title="Check your records for mistakes before paying shares">🩺 CHECK<span id="health-badge"></span></button>
     <button class="btn btn-sm" style="background:rgba(255,159,67,0.2);color:#ff9f43;border:1px solid rgba(255,159,67,0.4);" onclick="showPage(9)" title="Add or edit crew, suppliers, fish names, categories">⚙ MANAGE</button>
@@ -1023,12 +1028,14 @@
   </div>
 
   <div id="p3-results" style="display:none">
+    <div id="p3-lock-banner"></div>
     <div id="p3-health-banner" style="margin-bottom:14px;"></div>
     <div class="stats-grid" id="p3-stats"></div>
 
     <div style="text-align:center;margin:18px 0;">
       <button class="btn btn-primary" style="background:linear-gradient(135deg,var(--gold) 0%,var(--gold-light) 100%);color:#0d1117;font-weight:700;padding:12px 28px;" onclick="exportShareTransparencyPDF()">📄 EXPORT TRANSPARENCY REPORT (PDF) — SHOW TO CREW</button>
       <button class="btn btn-sm" style="background:rgba(126,207,237,0.15);color:#7ecfed;border:1px solid rgba(126,207,237,0.45);padding:12px 18px;margin-left:8px;" onclick="cmpOpenFromShareCalc()">📈 COMPARE WITH PREVIOUS PERIOD</button>
+      <button class="btn btn-sm" style="background:rgba(251,191,36,0.15);color:#fbbf24;border:1px solid rgba(251,191,36,0.45);padding:12px 18px;margin-left:8px;" onclick="lockOpenFromShareCalc()">🔒 LOCK THIS PERIOD (after paying)</button>
       <div style="font-size:11px;color:var(--muted);margin-top:8px;">Full day-wise breakdown + category expenses, explained plainly — so every rupee is accounted for.</div>
     </div>
 
@@ -1497,6 +1504,27 @@
     </div>
   </div>
   <div id="cmp-results"></div>
+</div>
+
+<!-- ===== PAGE 12: LOCKED PERIODS ===== -->
+<div class="page" id="page12">
+  <div class="page-title">🔒 Locked Periods</div>
+  <div class="card">
+    <div style="font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:14px;">
+      After you have <strong style="color:var(--text);">paid</strong> a period, lock it. Nothing dated inside it can then be added, changed or deleted by accident.
+      If the records ever change some other way (an automatic import, an old backup restored), the lock turns <strong style="color:#f87171;">red</strong> and shows exactly what changed.
+      The settled figures stay on record as proof of what was paid.
+    </div>
+    <div class="form-row" style="align-items:flex-end;">
+      <div class="form-group"><label>Period from</label><input type="date" id="lk-from" onchange="lockPreview()"></div>
+      <div class="form-group"><label>Period to</label><input type="date" id="lk-to" onchange="lockPreview()"></div>
+      <div class="form-group"><label>Advances counted up to</label><input type="date" id="lk-settle" onchange="lockPreview()"></div>
+      <div class="form-group"><label>Note (optional)</label><input type="text" id="lk-note" maxlength="80" placeholder="e.g. Paid in cash 24-08"></div>
+    </div>
+    <div id="lk-preview" style="font-size:12px;color:var(--gold-light);margin:10px 0;min-height:16px;"></div>
+    <button class="btn btn-primary" onclick="lockCreate()">🔒 LOCK THIS PERIOD</button>
+  </div>
+  <div class="card"><div class="card-title">Locked periods</div><div id="lk-list"></div></div>
 </div>
 
 <!-- WHATSAPP SLIP PREVIEW -->
@@ -2380,6 +2408,29 @@ function loadLists() {
 }
 let lists = loadLists();
 
+// Locked periods (see 🔒 LOCKED PERIODS). Declared early because getAllData() reads it.
+const KEY_LOCKS = 'aafb_locks';
+// Cleans a stored lock: drops entries that cannot be enforced (no valid dates) and marks a lock
+// whose settled figures are missing or damaged (snapshot = null), which shows up red instead of crashing.
+function lockNormalize(x) {
+  if (!x || typeof x !== 'object') return null;
+  if (typeof x.startDate !== 'string' || typeof x.endDate !== 'string' || !hcValidDate(x.startDate) || !hcValidDate(x.endDate) || x.startDate > x.endDate) return null;
+  const l = Object.assign({}, x);
+  l.settleDate = (typeof l.settleDate === 'string' && hcValidDate(l.settleDate) && l.settleDate >= l.endDate) ? l.settleDate : l.endDate;
+  l.history = Array.isArray(l.history) ? l.history.filter(function(h) { return h && typeof h === 'object'; }) : [];
+  if (l.id === undefined || l.id === null) l.id = Date.now() + Math.floor(Math.random() * 1000);
+  const s = l.snapshot;
+  const good = s && typeof s === 'object' && s.fp && s.fp.daily && s.fp.attendance && s.fp.payments && s.lab && s.shares && s.advances && s.totals && s.counts;
+  if (!good) l.snapshot = null;
+  return l;
+}
+function lockLoadList(arr) { return (Array.isArray(arr) ? arr : []).map(lockNormalize).filter(Boolean); }
+let periodLocks = (function() {
+  try { return lockLoadList(JSON.parse(localStorage.getItem(KEY_LOCKS) || '[]')); }
+  catch (e) { return []; }
+})();
+function saveLocks() { save(KEY_LOCKS, periodLocks); }
+
 // Derived arrays used all over the app. They hold EVERYTHING (active + archived)
 // so history and reports stay complete. Mutated in place, never reassigned.
 const SHAREHOLDERS = [];
@@ -2537,6 +2588,7 @@ function showPage(n) {
   if (n === 9) renderManager();
   if (n === 10) hcOnOpen();
   if (n === 11) cmpOnOpen();
+  if (n === 12) renderLocks();
   if (n === 1) renderP1Table();
   if (n === 2) renderP2Table();
   if (n === 3) renderSavedPeriods();
@@ -3186,6 +3238,7 @@ function viewDailyRecordInLog(id) {
 function addDailyRecord() {
   const date = document.getElementById('p1-date').value;
   if (!date) { alert('Please select a date.'); return; }
+  if (lockBlocked(date, 'daily', 'A Daily Record')) return;
 
   const saleItems    = getItemsFromRows('sales-rows');
   const expenseItems = getItemsFromRows('expense-rows');
@@ -3288,6 +3341,8 @@ function addDailyRecord() {
 }
 
 function deleteDailyRecord(id) {
+  const _lr = dailyRecords.find(r => r.id === id);
+  if (_lr && lockBlocked(_lr.date, 'daily', 'This Daily Record')) return;
   if (!confirm('Delete this record?')) return;
   dailyRecords = dailyRecords.filter(r => r.id !== id);
   agentComms = agentComms.filter(a => !(a.fromDaily && a.dailyRecId === id));
@@ -3351,7 +3406,7 @@ function renderP1Table() {
     card.innerHTML = `
       <!-- Record Header -->
       <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(255,159,67,0.08);border-bottom:1px solid rgba(255,159,67,0.15);flex-wrap:wrap;gap:8px;">
-        <span style="font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--gold);letter-spacing:1px;">⚓ ${fmtDate(r.date)}</span>
+        <span style="font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--gold);letter-spacing:1px;">⚓ ${fmtDate(r.date)}${lockBadge(r.date, 'daily')}</span>
         <div style="display:flex;gap:20px;font-family:'JetBrains Mono',monospace;font-size:12px;">
           <span style="color:#2ecc71">Sales: ${fmt(totalSales)}</span>
           <span style="color:#e74c3c">Exp: ${fmt(totalExpense)}</span>
@@ -3683,6 +3738,7 @@ function tripLabel(t) { return t ? t : 'Full Day'; }
 function saveAttendance() {
   const date = document.getElementById('p2-date').value;
   if (!date) { alert('Please select a date.'); return; }
+  if (lockBlocked(date, 'attendance', 'Attendance')) return;
 
   const tripEl = document.getElementById('p2-trip');
   const trip = tripEl ? tripEl.value : '';
@@ -3752,6 +3808,7 @@ function saveAttendance() {
 
 function deleteAttendance(date, trip) {
   trip = trip || '';
+  if (lockBlocked(date, 'attendance', 'This attendance')) return;
   if (!confirm('Delete attendance for ' + date + (trip ? ' (' + trip + ' trip)' : '') + '?')) return;
   attendanceRecords = attendanceRecords.filter(r => !(r.date === date && (r.trip || '') === trip));
   save(KEY_ATTEND, attendanceRecords);
@@ -3759,6 +3816,7 @@ function deleteAttendance(date, trip) {
 }
 
 function loadAttendanceForEdit(date, trip) {
+  if (lockBlocked(date, 'attendance', 'This attendance')) return;
   trip = trip || '';
   const rec = attendanceRecords.find(r => r.date === date && (r.trip || '') === trip);
   if (!rec) return;
@@ -3805,7 +3863,7 @@ function renderP2Table() {
   data.forEach(r => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td><span class="badge badge-gold">${fmtDate(r.date)}</span></td>
+      <td><span class="badge badge-gold">${fmtDate(r.date)}</span>${lockBadge(r.date, 'attendance')}</td>
       <td>${r.trip ? '<span class="badge" style="background:rgba(30,107,138,0.25);color:#7ecfed;border:1px solid rgba(30,107,138,0.5);">🕐 ' + r.trip + '</span>' : '<span style="color:var(--muted);font-size:12px;">Full Day</span>'}</td>
       <td>${r.fishingType ? '<span class="badge" style="background:rgba(255,159,67,0.2);color:var(--gold-light);border:1px solid rgba(255,159,67,0.3);">🎣 ' + r.fishingType + '</span>' : '<span style="color:var(--muted);font-size:12px;">—</span>'}${(r.paagi && r.paagi.length) ? '<br>' + r.paagi.map(p => '<span class="badge" style="background:rgba(248,113,113,0.15);color:#f87171;border:1px solid rgba(248,113,113,0.3);font-size:10px;margin-top:3px;">🎯 ' + p.name + ' ' + p.percent + '%</span>').join(' ') : ''}</td>
       <td style="font-size:13px;color:var(--muted)">${r.present.map(n => (r.weights && r.weights[n]) ? n + ' ×' + fmtWt(r.weights[n]) : n).join(', ')}</td>
@@ -4299,6 +4357,7 @@ function calculateShares() {
 
   document.getElementById('p3-results').style.display = 'block';
   hcRenderBanner(startDate, endDate);
+  lockRenderBanner(startDate, endDate);
   document.getElementById('p3-individual-panel').style.display = 'none';
   document.getElementById('group-results').style.display = 'none';
   document.getElementById('fp-results').style.display = 'none';
@@ -5207,6 +5266,19 @@ function runHealthChecks(from, to) {
     }
   });
 
+  // ---------- locked periods that changed behind the app's back ----------
+  safe('locks', function() {
+    lockActive().forEach(function(l) {
+      if (!(l.endDate >= from && l.startDate <= to)) return;
+      const d = lockDiff(l);
+      if (d.intact) return;
+      hcAdd(out, 'red', 'LOCK_CHANGED', l.startDate, 'Locked period ' + lockLabel(l) + ' has changed since it was locked',
+        d.changes.length + ' record change(s): ' + d.changes.slice(0, 4).map(function(x) { return (x.type === 'added' ? 'added ' : x.type === 'removed' ? 'removed ' : x.type === 'damaged' ? '' : 'changed ') + x.label; }).join('; ') +
+        (d.changes.length > 4 ? ' …' : '') + '. The settled figures may no longer match what was paid.',
+        l.id + '|' + d.changes.length, [{ t: 'locks', label: '🔒 Open Locks' }]);
+    });
+  });
+
   const order = { red: 0, yellow: 1, blue: 2 };
   out.sort(function(a, b) { return order[a.sev] - order[b.sev] || (a.date < b.date ? -1 : a.date > b.date ? 1 : 0); });
   return out;
@@ -5221,6 +5293,7 @@ function hcAct(i, j) {
   else if (a.t === 'addatt')   { goPage(2); document.getElementById('p2-date').value = a.date; }
   else if (a.t === 'newdaily') { goPage(1); document.getElementById('p1-date').value = a.date; }
   else if (a.t === 'pay')      { goPage(4); editPayment(a.id); }
+  else if (a.t === 'locks')    { goPage(12); }
   else if (a.t === 'mgr')      { goPage(9); mgSetTab(a.tab); const el = document.getElementById('mg-name'); if (el && a.name) { el.value = a.name; el.focus(); } }
 }
 function hcIgnore(i) {
@@ -5520,7 +5593,10 @@ function cmpFillSaved() {
   ['cmp-saved-a', 'cmp-saved-b'].forEach(function(id) {
     const sel = document.getElementById(id);
     if (!sel) return;
-    let h = '<option value="">— or pick a saved period —</option>';
+    let h = '<option value="">— or pick a locked / saved period —</option>';
+    lockActive().slice().sort(function(x, y) { return y.startDate < x.startDate ? -1 : 1; }).forEach(function(l) {
+      h += '<option value="L' + l.id + '">🔒 ' + escHtml(lockLabel(l)) + '</option>';
+    });
     savedPeriods.slice().sort(function(x, y) { return y.startDate < x.startDate ? -1 : 1; }).forEach(function(p) {
       h += '<option value="' + p.periodId + '">' + escHtml(fmtDate(p.startDate) + ' → ' + fmtDate(p.endDate)) + '</option>';
     });
@@ -5529,7 +5605,8 @@ function cmpFillSaved() {
 }
 function cmpPickSaved(which) {
   const sel = document.getElementById('cmp-saved-' + which);
-  const p = savedPeriods.find(function(x) { return String(x.periodId) === sel.value; });
+  let p = savedPeriods.find(function(x) { return String(x.periodId) === sel.value; });
+  if (!p && /^L/.test(sel.value)) p = periodLocks.find(function(x) { return 'L' + x.id === sel.value; });
   if (!p) return;
   document.getElementById('cmp-from-' + which).value = p.startDate;
   document.getElementById('cmp-to-' + which).value = p.endDate;
@@ -5702,6 +5779,292 @@ function cmpExportPDF() {
   win.document.write(html);
   win.document.close();
 }
+
+// ===== 🔒 LOCKED PERIODS =====
+// Once a period is settled and paid, lock it. Three layers of protection:
+//  1. PREVENT  — nothing dated inside a locked period can be added, edited or deleted
+//                from the app (daily records and attendance in the period; advances up to
+//                the settlement date, the same range Final Payment deducts).
+//  2. DETECT   — a fingerprint of every record is stored when the period is locked. If
+//                anything changes some other way (an automatic import, a restored old
+//                backup, a Drive load) the lock turns red and says exactly what changed.
+//  3. EXPLAIN  — the settled figures (each person's share, advances and net) are kept, so
+//                you can always show what was paid.
+// Unlocking is deliberate (a reason is saved in the lock's history) and never silent.
+let _lkOpen = {};      // which lock cards are expanded
+
+function lockActive() { return periodLocks.filter(function(l) { return l && typeof l === 'object' && l.status !== 'unlocked'; }); }
+function lockCovers(l, date, kind) {
+  if (!l || typeof date !== 'string') return false;
+  const end = kind === 'payment' ? (l.settleDate || l.endDate) : l.endDate;
+  return date >= l.startDate && date <= end;
+}
+function lockFor(date, kind) { return lockActive().find(function(l) { return lockCovers(l, date, kind); }) || null; }
+function lockLabel(l) { return fmtDate(l.startDate) + ' → ' + fmtDate(l.endDate); }
+
+// returns true (after telling the user) when the date is inside a locked period
+function lockBlocked(date, kind, what) {
+  const l = lockFor(date, kind);
+  if (!l) return false;
+  alert('🔒 ' + what + ' dated ' + fmtDate(date) + ' is inside a LOCKED period (' + lockLabel(l) + ').\n\n' +
+        'That period was settled and locked, so its records cannot be added, changed or deleted by accident.\n\n' +
+        'To change it on purpose: open 🔒 LOCKS and tap UNLOCK first.');
+  return true;
+}
+function lockBadge(date, kind) {
+  const l = lockFor(date, kind);
+  return l ? ' <span title="Locked period ' + escHtml(lockLabel(l)) + '" style="cursor:help;">🔒</span>' : '';
+}
+
+// ---------- fingerprint ----------
+function lockCanon(v) {
+  if (v === null || typeof v !== 'object') return JSON.stringify(v === undefined ? null : v);
+  if (Array.isArray(v)) return '[' + v.map(lockCanon).join(',') + ']';
+  return '{' + Object.keys(v).sort().filter(function(k) { return v[k] !== undefined; })
+    .map(function(k) { return JSON.stringify(k) + ':' + lockCanon(v[k]); }).join(',') + '}';
+}
+function lockHash(s) {      // two independent 32-bit FNV-1a passes = a 64-bit fingerprint
+  let h1 = 0x811c9dc5, h2 = 0x9747b28c;
+  for (let i = 0; i < s.length; i++) {
+    const ch = s.charCodeAt(i);
+    h1 ^= ch; h1 = Math.imul(h1, 0x01000193);
+    h2 ^= ch; h2 = Math.imul(h2, 0x85ebca6b) + i | 0;
+  }
+  return (h1 >>> 0).toString(16) + '-' + (h2 >>> 0).toString(16);
+}
+function lockFingerprint(l) {
+  const settle = l.settleDate || l.endDate;
+  const inD = function(d) { return typeof d === 'string' && d >= l.startDate && d <= l.endDate; };
+  const inP = function(d) { return typeof d === 'string' && d >= l.startDate && d <= settle; };
+  const fp = { daily: {}, attendance: {}, payments: {} }, lab = { daily: {}, attendance: {}, payments: {} };
+  const put = function(kind, key, rec, label) {
+    let k = key, n = 1;
+    while (fp[kind][k] !== undefined) { n++; k = key + '#' + n; }
+    fp[kind][k] = lockHash(lockCanon(rec));
+    lab[kind][k] = label;
+  };
+  dailyRecords.forEach(function(r) { if (r && inD(r.date)) put('daily', String(r.id !== undefined ? r.id : r.date), r, fmtDate(r.date) + ' — Daily Record'); });
+  attendanceRecords.forEach(function(r) { if (r && inD(r.date)) put('attendance', r.date + '|' + (r.trip || ''), r, fmtDate(r.date) + (r.trip ? ' (' + r.trip + ')' : '') + ' — Attendance'); });
+  paymentRecords.forEach(function(r) { if (r && inP(r.date)) put('payments', String(r.id !== undefined ? r.id : r.date + r.member), r, fmtDate(r.date) + ' — ' + r.member + ' ' + fmt(r.amount) + ' advance/payment'); });
+  return { fp: fp, lab: lab };
+}
+
+// everything that is settled at the moment of locking
+function lockSnapshot(l) {
+  const f = lockFingerprint(l);
+  const R = computeShares(l.startDate, l.endDate);
+  const shares = {};
+  Object.keys(R.shareMap).forEach(function(n) {
+    const s = R.shareMap[n];
+    if (s && (s.days > 0 || Math.abs(s.total) > 0)) shares[n] = Math.round(s.total * 100) / 100;
+  });
+  const adv = {};
+  const settle = l.settleDate || l.endDate;
+  paymentRecords.forEach(function(p) {
+    if (p && p.date >= l.startDate && p.date <= settle) adv[p.member] = (adv[p.member] || 0) + (Number(p.amount) || 0);
+  });
+  const profit = R.dailyBreakdown.reduce(function(s, d) { return s + d.profit; }, 0);
+  return {
+    fp: f.fp, lab: f.lab, shares: shares, advances: adv,
+    totals: { sales: R.totalSales, expense: R.totalExpense, profit: Math.round(profit * 100) / 100 },
+    counts: { daily: Object.keys(f.fp.daily).length, attendance: Object.keys(f.fp.attendance).length, payments: Object.keys(f.fp.payments).length }
+  };
+}
+
+// what is different now compared with the moment of locking
+function lockDiff(l) {
+  const out = { changes: [], shareDiffs: [], intact: true };
+  if (!l.snapshot) {
+    out.changes.push({ kind: 'lock', type: 'damaged', label: 'The stored settled figures for this lock are missing or damaged — use ACCEPT & LOCK AGAIN to repair it' });
+    out.intact = false;
+    return out;
+  }
+  const now = lockFingerprint(l);
+  ['daily', 'attendance', 'payments'].forEach(function(kind) {
+    const a = l.snapshot.fp[kind] || {}, b = now.fp[kind];
+    Object.keys(b).forEach(function(k) {
+      if (a[k] === undefined) out.changes.push({ kind: kind, type: 'added', label: now.lab[kind][k] });
+      else if (a[k] !== b[k]) out.changes.push({ kind: kind, type: 'changed', label: now.lab[kind][k] });
+    });
+    Object.keys(a).forEach(function(k) {
+      if (b[k] === undefined) out.changes.push({ kind: kind, type: 'removed', label: (l.snapshot.lab[kind] || {})[k] || k });
+    });
+  });
+  out.intact = out.changes.length === 0;
+  try {
+    const R = computeShares(l.startDate, l.endDate);
+    const people = {};
+    Object.keys(l.snapshot.shares).forEach(function(n) { people[n] = 1; });
+    Object.keys(R.shareMap).forEach(function(n) { people[n] = 1; });
+    Object.keys(people).forEach(function(n) {
+      const was = l.snapshot.shares[n] || 0, nowv = R.shareMap[n] ? R.shareMap[n].total : 0;
+      if (Math.abs(was - nowv) >= 0.5) out.shareDiffs.push({ name: n, was: was, now: nowv });
+    });
+  } catch (e) {}
+  return out;
+}
+
+// ---------- actions ----------
+function lockAfterChange() {
+  renderLocks();
+  lockUpdateBadge();
+  try { renderP1Table(); renderP2Table(); renderP4Table(); } catch (e) {}
+  try { hcUpdateBadge(); } catch (e) {}
+}
+function lockPreview() {
+  const el = document.getElementById('lk-preview');
+  if (!el) return;
+  const from = document.getElementById('lk-from').value, to = document.getElementById('lk-to').value, settle = document.getElementById('lk-settle').value || to;
+  if (!hcValidDate(from) || !hcValidDate(to) || from > to) { el.textContent = ''; return; }
+  const t = { startDate: from, endDate: to, settleDate: hcValidDate(settle) ? settle : to };
+  const f = lockFingerprint(t);
+  const sales = dailyRecords.filter(function(r) { return r && r.date >= from && r.date <= to; }).reduce(function(s, r) { return s + (Number(r.sales) || 0); }, 0);
+  el.textContent = 'This would lock ' + Object.keys(f.fp.daily).length + ' daily record(s), ' + Object.keys(f.fp.attendance).length +
+    ' attendance record(s) and ' + Object.keys(f.fp.payments).length + ' advance/payment(s) — sales ' + fmt(sales) + '.';
+}
+function lockCreate() {
+  const v = function(id) { return document.getElementById(id).value; };
+  const from = v('lk-from'), to = v('lk-to'), settle = v('lk-settle') || to, note = v('lk-note').trim();
+  if (!hcValidDate(from) || !hcValidDate(to) || !hcValidDate(settle)) { alert('Please choose the From, To and settlement dates.'); return; }
+  if (from > to) { alert('The "From" date must be before the "To" date.'); return; }
+  if (settle < to) { alert('The settlement date cannot be before the period end date.'); return; }
+  if (to > hcShift(-1)) { alert('This period ends in the future. Only finished periods can be locked.'); return; }
+  const clash = lockActive().find(function(l) { return from <= l.endDate && to >= l.startDate; });
+  if (clash) { alert('This period overlaps an already locked period (' + lockLabel(clash) + ').\n\nUnlock that one first, or choose different dates.'); return; }
+  const now = new Date();
+  const l = { id: Date.now(), startDate: from, endDate: to, settleDate: settle, note: note, status: 'locked',
+              lockedAt: now.toISOString(), lockedAtReadable: now.toLocaleString('en-IN'), history: [] };
+  l.snapshot = lockSnapshot(l);
+  if (l.snapshot.counts.daily === 0) { alert('There are no Daily Records in this period, so there is nothing to lock.'); return; }
+  const c = l.snapshot.counts, people = Object.keys(l.snapshot.shares).length;
+  if (!confirm('Lock ' + lockLabel(l) + '?\n\n' +
+      'This locks ' + c.daily + ' daily record(s), ' + c.attendance + ' attendance record(s) and ' + c.payments + ' advance/payment(s) (advances counted up to ' + fmtDate(settle) + ').\n' +
+      'Sales ' + fmt(l.snapshot.totals.sales) + ' · profit ' + fmt(l.snapshot.totals.profit) + ' · shares of ' + people + ' people are recorded as settled.\n\n' +
+      'None of these can be added, changed or deleted until you unlock the period. Changes made any other way are detected and shown in red.')) return;
+  l.history.push({ at: l.lockedAtReadable, action: 'Locked', note: note });
+  periodLocks.push(l);
+  saveLocks();
+  lockAfterChange();
+  showToast('🔒 Period locked — ' + lockLabel(l));
+}
+function lockUnlock(id) {
+  const l = periodLocks.find(function(x) { return x.id === id && x.status !== 'unlocked'; });
+  if (!l) return;
+  if (!confirm('Unlock ' + lockLabel(l) + '?\n\nRecords in this period can then be added, changed and deleted again. The unlock is written to the lock history.\n\nRemember to lock the period again afterwards to protect the corrected figures.')) return;
+  const reason = prompt('Why are you unlocking this period? (optional — saved in the history)', '');
+  if (reason === null) return;
+  const now = new Date();
+  l.status = 'unlocked';
+  l.unlockedAt = now.toISOString();
+  l.unlockedAtReadable = now.toLocaleString('en-IN');
+  (l.history = l.history || []).push({ at: l.unlockedAtReadable, action: 'Unlocked', note: String(reason).trim() });
+  saveLocks();
+  lockAfterChange();
+  showToast('🔓 Period unlocked — ' + lockLabel(l));
+}
+function lockAccept(id) {
+  const l = periodLocks.find(function(x) { return x.id === id && x.status !== 'unlocked'; });
+  if (!l) return;
+  if (!confirm('Accept the changes and lock ' + lockLabel(l) + ' again with TODAY\'s records?\n\nOnly do this if you know why the records changed. The old settled figures will be replaced.')) return;
+  l.snapshot = lockSnapshot(l);
+  const now = new Date().toLocaleString('en-IN');
+  (l.history = l.history || []).push({ at: now, action: 'Accepted changes and locked again', note: '' });
+  saveLocks();
+  lockAfterChange();
+  showToast('🔒 Locked again with today\'s records');
+}
+function lockToggle(id) { _lkOpen[id] = !_lkOpen[id]; renderLocks(); }
+
+function lockUpdateBadge() {
+  const b = document.getElementById('lock-badge');
+  if (!b) return;
+  try {
+    const n = lockActive().filter(function(l) { return !lockDiff(l).intact; }).length;
+    b.textContent = n ? String(n) : '';
+  } catch (e) { b.textContent = ''; }
+}
+
+// from Share Calculation: lock the period you just calculated
+function lockOpenFromShareCalc() {
+  if (!_p3StartDate || !_p3EndDate) { alert('Please calculate shares for a period first.'); return; }
+  const fp = document.getElementById('fp-settle-date');
+  document.getElementById('lk-from').value = _p3StartDate;
+  document.getElementById('lk-to').value = _p3EndDate;
+  document.getElementById('lk-settle').value = (fp && fp.value) || _p3SettleDate || _p3EndDate;
+  goPage(12);
+}
+
+// banner on Share Calculation when the period touches a locked one
+function lockRenderBanner(from, to) {
+  const el = document.getElementById('p3-lock-banner');
+  if (!el) return;
+  try {
+    const hits = lockActive().filter(function(l) { return from <= l.endDate && to >= l.startDate; });
+    if (!hits.length) { el.innerHTML = ''; return; }
+    el.innerHTML = hits.map(function(l) {
+      const d = lockDiff(l);
+      const exact = (l.startDate === from && l.endDate === to);
+      const cls = d.intact ? 'hc-green' : 'hc-red';
+      const txt = d.intact
+        ? '🔒 ' + (exact ? 'This period is locked' : 'Part of this range is locked (' + lockLabel(l) + ')') + ' — settled ' + escHtml(l.lockedAtReadable) + '. Records unchanged ✅'
+        : '🔴 Locked period ' + escHtml(lockLabel(l)) + ' has CHANGED since it was locked (' + d.changes.length + ' change' + (d.changes.length === 1 ? '' : 's') + '). The figures below may differ from what was paid.';
+      return '<div class="hc-status ' + cls + '" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px;"><span>' + txt +
+             '</span><button class="btn btn-sm hc-btn" onclick="goPage(12)">🔒 VIEW</button></div>';
+    }).join('');
+  } catch (e) { el.innerHTML = ''; }
+}
+
+// ---------- page ----------
+function renderLocks() {
+  const f = document.getElementById('lk-from');
+  if (!f) return;
+  const list = document.getElementById('lk-list');
+  const act = lockActive().slice().sort(function(a, b) { return a.startDate < b.startDate ? 1 : -1; });
+  const hist = periodLocks.filter(function(l) { return l && l.status === 'unlocked'; }).slice().sort(function(a, b) { return (a.unlockedAt || '') < (b.unlockedAt || '') ? 1 : -1; });
+  let h = '';
+  if (!act.length) h += emptyPara('No locked periods yet — lock a period after you have paid it');
+  act.forEach(function(l) {
+    const d = lockDiff(l), s = l.snapshot || { totals: {}, counts: {}, shares: {}, advances: {} };
+    const open = !!_lkOpen[l.id];
+    h += '<div class="hc-issue ' + (d.intact ? 'hc-blue' : 'hc-red') + '" style="' + (d.intact ? 'border-left-color:#4ade80;' : '') + '">' +
+      '<div class="hc-head"><strong>🔒 ' + escHtml(lockLabel(l)) + '</strong> ' +
+      (d.intact ? '<span class="badge badge-green">✅ UNCHANGED</span>' : '<span class="badge badge-red">🔴 CHANGED SINCE LOCKED</span>') + '</div>' +
+      '<div class="hc-detail">Locked ' + escHtml(l.lockedAtReadable || '') + ' · advances counted up to ' + escHtml(fmtDate(l.settleDate || l.endDate)) +
+      (l.note ? ' · “' + escHtml(l.note) + '”' : '') + '<br>' +
+      (s.counts.daily || 0) + ' daily · ' + (s.counts.attendance || 0) + ' attendance · ' + (s.counts.payments || 0) + ' advances — sales ' + fmt(s.totals.sales || 0) +
+      ', profit ' + fmt(s.totals.profit || 0) + ', ' + Object.keys(s.shares || {}).length + ' people settled</div>';
+    if (!d.intact) {
+      h += '<div class="hc-detail" style="color:#f87171;">' + d.changes.length + ' record change(s) since locking:<br>' +
+        d.changes.slice(0, 12).map(function(c) { return (c.type === 'added' ? '➕ Added: ' : c.type === 'removed' ? '➖ Removed: ' : c.type === 'damaged' ? '⚠ ' : '✎ Changed: ') + escHtml(c.label); }).join('<br>') +
+        (d.changes.length > 12 ? '<br>… and ' + (d.changes.length - 12) + ' more' : '') +
+        (d.shareDiffs.length ? '<br><br>Shares that would now come out differently:<br>' + d.shareDiffs.slice(0, 12).map(function(x) { return escHtml(x.name) + ': ' + fmt(x.was) + ' → ' + fmt(x.now); }).join('<br>') : '') + '</div>';
+    }
+    h += '<div class="hc-actions">' +
+      '<button class="btn btn-sm hc-btn" onclick="lockToggle(' + l.id + ')">' + (open ? '▲ HIDE' : '▼ SETTLED FIGURES') + '</button>' +
+      (d.intact ? '' : '<button class="btn btn-sm hc-btn" onclick="lockAccept(' + l.id + ')">↻ ACCEPT CHANGES & LOCK AGAIN</button>') +
+      '<button class="btn btn-sm" style="background:rgba(251,191,36,0.15);color:#fbbf24;border:1px solid rgba(251,191,36,0.4);" onclick="lockUnlock(' + l.id + ')">🔓 UNLOCK</button></div>';
+    if (open) {
+      const names = Object.keys(s.shares).sort(function(a, b) { return s.shares[b] - s.shares[a]; });
+      h += '<div class="table-wrap" style="margin-top:10px;"><table><thead><tr><th>Person</th><th style="text-align:right">Share</th><th style="text-align:right">Advances</th><th style="text-align:right">Net</th></tr></thead><tbody>' +
+        (names.length ? names.map(function(n) {
+          const adv = (s.advances || {})[n] || 0;
+          return '<tr><td>' + escHtml(n) + '</td><td style="text-align:right;">' + fmt(s.shares[n]) + '</td><td style="text-align:right;">' + fmt(adv) + '</td><td style="text-align:right;font-weight:700;">' + fmt(s.shares[n] - adv) + '</td></tr>';
+        }).join('') : emptyRow(4, 'No shares recorded')) + '</tbody></table></div>' +
+        '<div class="hc-detail" style="margin-top:6px;">History: ' + (l.history || []).map(function(x) { return escHtml(x.at + ' — ' + x.action + (x.note ? ' (' + x.note + ')' : '')); }).join(' · ') + '</div>';
+    }
+    h += '</div>';
+  });
+  if (hist.length) {
+    h += '<div style="margin-top:18px;font-size:12px;color:var(--muted);letter-spacing:1px;">UNLOCKED — HISTORY</div>';
+    hist.slice(0, 10).forEach(function(l) {
+      h += '<div class="hc-detail" style="padding:8px 0;border-bottom:1px dashed var(--border);">🔓 ' + escHtml(lockLabel(l)) + ' — unlocked ' + escHtml(l.unlockedAtReadable || '') +
+        ((l.history || []).slice(-1)[0] && l.history.slice(-1)[0].note ? ' (“' + escHtml(l.history.slice(-1)[0].note) + '”)' : '') + '</div>';
+    });
+  }
+  list.innerHTML = h;
+  lockPreview();
+}
+setTimeout(lockUpdateBadge, 1300);
 
 // ===== WHATSAPP SLIPS =====
 // One shared preview popup (Copy / Send on WhatsApp). Each slip builder below
@@ -5897,6 +6260,7 @@ function addPayment() {
   if (!date)   { alert('Please select a date.'); return; }
   if (amount <= 0) { alert('Please enter a valid amount.'); return; }
 
+  if (lockBlocked(date, 'payment', 'An advance/payment')) return;
   paymentRecords.push({ id: Date.now(), member, date, type: 'advance', amount, notes });
   paymentRecords.sort((a,b) => a.date.localeCompare(b.date));
   save(KEY_PAYMENT, paymentRecords);
@@ -5912,6 +6276,8 @@ function addPayment() {
 }
 
 function deletePayment(id) {
+  const _lp = paymentRecords.find(p => p.id === id);
+  if (_lp && lockBlocked(_lp.date, 'payment', 'This advance/payment')) return;
   if (!confirm('Delete this payment?')) return;
   paymentRecords = paymentRecords.filter(p => p.id !== id);
   save(KEY_PAYMENT, paymentRecords);
@@ -5930,7 +6296,7 @@ function renderP4Table() {
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td><span class="badge badge-gold">${fmtDate(p.date)}</span></td>
+      <td><span class="badge badge-gold">${fmtDate(p.date)}</span>${lockBadge(p.date, 'payment')}</td>
       <td><strong>${p.member}</strong></td>
       <td class="adv-pending">${fmt(p.amount)}</td>
       <td style="color:var(--muted);font-style:italic">${p.notes || '—'}</td>
@@ -5987,6 +6353,7 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
 function editDailyRecord(id) {
   const rec = dailyRecords.find(r => r.id === id);
   if (!rec) return;
+  if (lockBlocked(rec.date, 'daily', 'This Daily Record')) return;
   document.getElementById('edit-daily-id').value = id;
   document.getElementById('edit-daily-date').value = rec.date;
 
@@ -6042,6 +6409,9 @@ function saveEditDaily() {
   const id   = parseInt(document.getElementById('edit-daily-id').value);
   const date = document.getElementById('edit-daily-date').value;
   if (!date) { alert('Please select a date.'); return; }
+  const _lo = dailyRecords.find(r => r.id === id);
+  if (_lo && lockBlocked(_lo.date, 'daily', 'This Daily Record')) return;
+  if (lockBlocked(date, 'daily', 'A Daily Record')) return;
 
   // Read sale items with all fields
   const saleItems = [];
@@ -6170,6 +6540,7 @@ function saveEditDaily() {
 function editPayment(id) {
   const rec = paymentRecords.find(p => p.id === id);
   if (!rec) return;
+  if (lockBlocked(rec.date, 'payment', 'This advance/payment')) return;
   document.getElementById('edit-pay-id').value     = id;
   const _epm = document.getElementById('edit-pay-member');
   if (!Array.prototype.some.call(_epm.options, o => o.value === rec.member)) {
@@ -6197,6 +6568,8 @@ function saveEditPayment() {
 
   const idx = paymentRecords.findIndex(p => p.id === id);
   if (idx < 0) return;
+  if (lockBlocked(paymentRecords[idx].date, 'payment', 'This advance/payment')) return;
+  if (lockBlocked(date, 'payment', 'An advance/payment')) return;
   paymentRecords[idx] = { id, member, date, type, amount, notes };
   paymentRecords.sort((a, b) => a.date.localeCompare(b.date));
   save(KEY_PAYMENT, paymentRecords);
@@ -6332,7 +6705,8 @@ function getAllData() {
     tractorPays,
     agentComms,
     agentPays,
-    lists
+    lists,
+    periodLocks
   };
 }
 
@@ -6363,6 +6737,10 @@ function applyAllData(data) {
   save(KEY_TRACTORPAYS,  tractorPays);
   save(KEY_AGENTCOMM,    agentComms);
   save(KEY_AGENTPAYS,    agentPays);
+  if (Array.isArray(data.periodLocks)) {   // older backups have no locks — keep the current ones (they protect settled periods)
+    periodLocks = lockLoadList(data.periodLocks);
+    saveLocks();
+  }
   if (data.lists) {   // older backups have no lists — keep the current ones
     lists = sanitizeLists(data.lists, buildDefaultLists());
     saveLists(); applyListsToConstants(); refreshListDropdowns(); buildAttendanceGrid();
@@ -6529,7 +6907,8 @@ const BACKUP_SETS = [
   ['creditSales', 'Credit sales'],            ['creditPays', 'Credit payments'],
   ['retailers', 'Customers'],                 ['tractorTrips', 'Tractor trips'],
   ['tractorPays', 'Tractor payments'],        ['agentComms', 'Agent commissions'],
-  ['agentPays', 'Agent payments']
+  ['agentPays', 'Agent payments'],
+  ['periodLocks', 'Locked periods']
 ];
 
 function reloadApp() { setTimeout(function() { location.reload(); }, 900); }
@@ -8950,6 +9329,7 @@ function closeMoreSheet() {
     <button class="more-item" data-page="9" onclick="goPage(9)"><span class="more-ico">⚙</span> Manage Lists</button>
     <button class="more-item" data-page="10" onclick="goPage(10)"><span class="more-ico">🩺</span> Data Health Check</button>
     <button class="more-item" data-page="11" onclick="goPage(11)"><span class="more-ico">📈</span> Compare Two Periods</button>
+    <button class="more-item" data-page="12" onclick="goPage(12)"><span class="more-ico">🔒</span> Locked Periods</button>
 
     <div style="border-top:1px solid var(--border);margin:14px 0 12px;"></div>
     <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;">&#9729; GOOGLE DRIVE &amp; BACKUP</div>
