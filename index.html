@@ -585,6 +585,23 @@
 
 
 
+  /* ===== DATA HEALTH CHECK ===== */
+  .hc-status { padding: 12px 16px; border-radius: 10px; font-weight: 700; font-size: 14px; margin-bottom: 14px; border: 1px solid; }
+  .hc-status.hc-red    { background: rgba(248,113,113,0.12); color: #f87171; border-color: rgba(248,113,113,0.45); }
+  .hc-status.hc-yellow { background: rgba(251,191,36,0.10);  color: #fbbf24; border-color: rgba(251,191,36,0.40); }
+  .hc-status.hc-green  { background: rgba(74,222,128,0.10);  color: #4ade80; border-color: rgba(74,222,128,0.40); }
+  .hc-issue { border: 1px solid var(--border); border-left: 4px solid; border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; background: rgba(255,255,255,0.02); }
+  .hc-issue.hc-red { border-left-color: #f87171; }
+  .hc-issue.hc-yellow { border-left-color: #fbbf24; }
+  .hc-issue.hc-blue { border-left-color: #7ecfed; }
+  .hc-head { font-size: 14px; margin-bottom: 4px; }
+  .hc-detail { font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 8px; }
+  .hc-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .hc-btn { background: rgba(255,159,67,0.15); color: var(--gold-light); border: 1px solid var(--border); }
+  .hc-btn.hc-ignore { background: transparent; color: var(--muted); }
+  #health-badge { background: #f87171; color: #0d1117; border-radius: 10px; padding: 0 6px; margin-left: 4px; font-weight: 700; font-size: 11px; }
+  #health-badge:empty { display: none; }
+
   /* ===== WHATSAPP SLIP BUTTON ===== */
   .btn-wa { background: rgba(37,211,102,0.15); color: #25d366; border: 1px solid rgba(37,211,102,0.45); }
   .btn-wa:hover { background: rgba(37,211,102,0.28); }
@@ -732,6 +749,7 @@
       <input type="file" accept=".json,.txt,application/json,text/plain" id="import-file-input" style="display:none" onchange="importData(event)">
     </label>
     <button id="undo-restore-btn" class="btn btn-sm" style="display:none;background:rgba(251,191,36,0.18);color:#fbbf24;border:1px solid rgba(251,191,36,0.45);" onclick="undoLastRestore()" title="Go back to your data as it was just before the last restore">↩ UNDO RESTORE</button>
+    <button id="health-btn" class="btn btn-sm" style="background:rgba(74,222,128,0.15);color:#4ade80;border:1px solid rgba(74,222,128,0.4);" onclick="showPage(10)" title="Check your records for mistakes before paying shares">🩺 CHECK<span id="health-badge"></span></button>
     <button class="btn btn-sm" style="background:rgba(255,159,67,0.2);color:#ff9f43;border:1px solid rgba(255,159,67,0.4);" onclick="showPage(9)" title="Add or edit crew, suppliers, fish names, categories">⚙ MANAGE</button>
     <button class="btn btn-sm" style="background:rgba(192,57,43,0.2);color:#e74c3c;border:1px solid rgba(192,57,43,0.4);" onclick="logout()">🔒 LOGOUT</button>
   </div>
@@ -998,6 +1016,7 @@
   </div>
 
   <div id="p3-results" style="display:none">
+    <div id="p3-health-banner" style="margin-bottom:14px;"></div>
     <div class="stats-grid" id="p3-stats"></div>
 
     <div style="text-align:center;margin:18px 0;">
@@ -1419,6 +1438,29 @@
       <button class="btn btn-primary" onclick="mgSaveEdit()">✓ SAVE</button>
     </div>
   </div>
+</div>
+
+<!-- ===== PAGE 10: DATA HEALTH CHECK ===== -->
+<div class="page" id="page10">
+  <div class="page-title">🩺 Data Health Check</div>
+  <div class="card">
+    <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:14px;">
+      Looks through your records for mistakes that would give wrong shares or wrong ledgers — especially useful when entries arrive automatically.
+      It only <strong style="color:var(--text);">reads</strong> your data; nothing is changed. Tap a button on any item to jump straight to the record.
+    </div>
+    <div class="form-row" style="align-items:flex-end;">
+      <div class="form-group"><label>From</label><input type="date" id="hc-from"></div>
+      <div class="form-group"><label>To</label><input type="date" id="hc-to"></div>
+      <div class="form-group" style="justify-content:flex-end;"><button class="btn btn-primary" onclick="hcRun()">🩺 RUN CHECK</button></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+      <button class="btn btn-sm hc-btn" onclick="hcQuick(7)">Last 7 days</button>
+      <button class="btn btn-sm hc-btn" onclick="hcQuick(30)">Last 30 days</button>
+      <button class="btn btn-sm hc-btn" onclick="hcQuick('month')">This month</button>
+      <button class="btn btn-sm hc-btn" onclick="hcQuick('all')">All data</button>
+    </div>
+  </div>
+  <div id="hc-results"></div>
 </div>
 
 <!-- WHATSAPP SLIP PREVIEW -->
@@ -2457,6 +2499,7 @@ function showPage(n) {
   const _navBtn = document.querySelectorAll('.nav-btn')[n-1];
   if (_navBtn) _navBtn.classList.add('active');
   if (n === 9) renderManager();
+  if (n === 10) hcOnOpen();
   if (n === 1) renderP1Table();
   if (n === 2) renderP2Table();
   if (n === 3) renderSavedPeriods();
@@ -4206,6 +4249,7 @@ function calculateShares() {
   renderSavedPeriods();
 
   document.getElementById('p3-results').style.display = 'block';
+  hcRenderBanner(startDate, endDate);
   document.getElementById('p3-individual-panel').style.display = 'none';
   document.getElementById('group-results').style.display = 'none';
   document.getElementById('fp-results').style.display = 'none';
@@ -4727,6 +4771,527 @@ function mgSaveEdit() {
   _mgEditRef = null;
   mgCommit('✓ Saved — ' + newName);
 }
+
+// ===== 🩺 DATA HEALTH CHECK =====
+// Read-only. Looks through the records for mistakes that would give wrong shares or
+// wrong ledgers — most useful when entries arrive automatically (Google Keep skill).
+// 🔴 red = fix before paying   🟡 yellow = please check   🔵 blue = for your information
+const HC_KEY_IGNORED = 'aafb_health_ignored';     // issues you chose to ignore (kept on this device only)
+let _hcIssues = [];
+let _hcIgnoredCount = 0;
+
+function hcIgnoredMap() {
+  try { return JSON.parse(localStorage.getItem(HC_KEY_IGNORED) || '{}') || {}; } catch (e) { return {}; }
+}
+function hcValidDate(s) {
+  if (typeof s !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const d = new Date(s + 'T00:00:00Z');
+  return !isNaN(d.getTime()) && d.toISOString().slice(0, 10) === s;
+}
+function hcNum(x) { return typeof x === 'number' && isFinite(x); }
+function hcMedian(arr) {
+  const a = arr.slice().sort(function(x, y) { return x - y; });
+  const n = a.length;
+  if (!n) return 0;
+  return n % 2 ? a[(n - 1) / 2] : (a[n / 2 - 1] + a[n / 2]) / 2;
+}
+function hcShift(daysAgo) {      // date string `daysAgo` days before today (negative = future)
+  const d = new Date(today() + 'T00:00:00Z');
+  d.setUTCDate(d.getUTCDate() - daysAgo);
+  return d.toISOString().slice(0, 10);
+}
+function hcAdd(list, sev, code, date, title, detail, keyExtra, actions) {
+  list.push({ sev: sev, code: code, date: date || '', title: title, detail: detail || '',
+              key: code + '|' + (date || '') + '|' + (keyExtra === undefined ? '' : keyExtra), actions: actions || [] });
+}
+
+function runHealthChecks(from, to) {
+  const out = [];
+  const A = function(x) { return Array.isArray(x) ? x : []; };
+  const inR = function(d) { return hcValidDate(d) && d >= from && d <= to; };
+  const safe = function(name, fn) {
+    try { fn(); }
+    catch (e) { hcAdd(out, 'blue', 'HC_ERR', '', 'One check could not run (' + name + ')', String(e && e.message ? e.message : e), name); }
+  };
+  const daily = A(dailyRecords).filter(function(r) { return r && typeof r === 'object' && inR(r.date); });
+  const att   = A(attendanceRecords).filter(function(r) { return r && typeof r === 'object' && inR(r.date); });
+  const pays  = A(paymentRecords).filter(function(r) { return r && typeof r === 'object' && inR(r.date); });
+  const sum = function(arr, f) { return arr.reduce(function(s, x) { return s + (Number(f(x)) || 0); }, 0); };
+  const tomorrow = hcShift(-1);        // allow for the UTC / IST date difference
+  const attTrips = function(date) { return att.filter(function(a) { return a.date === date; }); };
+
+  // ---------- records whose date is invalid vanish from every report: check ALL data ----------
+  safe('dates', function() {
+    const sets = [['Daily record', dailyRecords], ['Attendance', attendanceRecords], ['Advance/payment', paymentRecords],
+      ['Supplier sale', fishSales], ['Supplier payment', supplierPays], ['Credit sale', creditSales], ['Credit payment', creditPays],
+      ['Tractor trip', tractorTrips], ['Tractor payment', tractorPays], ['Agent commission', agentComms], ['Agent payment', agentPays]];
+    let total = 0, shown = 0;
+    sets.forEach(function(s) {
+      A(s[1]).forEach(function(r, i) {
+        if (!r || typeof r !== 'object' || !hcValidDate(r.date)) {
+          total++;
+          if (shown < 15) {
+            shown++;
+            hcAdd(out, 'red', 'BAD_DATE', '', s[0] + ' has an invalid date',
+              'Its date is "' + (r && r.date) + '". A record like this is left out of every report and total.', s[0] + i);
+          }
+        }
+      });
+    });
+    if (total > shown) hcAdd(out, 'red', 'BAD_DATE_MORE', '', (total - shown) + ' more records have invalid dates', '', 'more');
+  });
+
+  // ---------- numbers / ids ----------
+  safe('numbers', function() {
+    daily.forEach(function(r) {
+      const acts = r.id !== undefined && r.id !== null ? [{ t: 'daily', id: r.id }] : [];
+      if (r.id === undefined || r.id === null) hcAdd(out, 'red', 'NO_ID', r.date, 'Daily Record has no id', 'The app cannot edit or delete a record without an id.', r.date + (r.sales || ''), []);
+      let notNum = !hcNum(r.sales) || !hcNum(r.expense), neg = (r.sales < 0) || (r.expense < 0);
+      A(r.saleItems).concat(A(r.expenseItems)).forEach(function(i) {
+        if (!i || !hcNum(i.amount)) notNum = true; else if (i.amount < 0) neg = true;
+      });
+      if (notNum) hcAdd(out, 'red', 'NOT_NUMBER', r.date, 'An amount is not a proper number', 'A sale or expense amount on this day is text or empty instead of a number, which breaks totals and shares.', String(r.id), acts);
+      if (neg)    hcAdd(out, 'red', 'NEGATIVE', r.date, 'A negative amount', 'A sale or expense on this day is below zero.', String(r.id), acts);
+    });
+    pays.forEach(function(p) {
+      const acts = p.id !== undefined && p.id !== null ? [{ t: 'pay', id: p.id }] : [];
+      if (!hcNum(p.amount) || p.amount <= 0) hcAdd(out, 'red', 'PAY_AMOUNT', p.date, 'Advance/payment for ' + p.member + ' has a bad amount', 'The amount is "' + p.amount + '".', String(p.id) + p.member, acts);
+      if (p.id === undefined || p.id === null) hcAdd(out, 'red', 'NO_ID', p.date, 'Advance/payment for ' + p.member + ' has no id', 'The app cannot edit or delete it without an id.', p.date + p.member + p.amount, []);
+    });
+  });
+
+  // ---------- duplicates ----------
+  safe('duplicates', function() {
+    const byDate = {};
+    daily.forEach(function(r) { (byDate[r.date] = byDate[r.date] || []).push(r); });
+    Object.keys(byDate).forEach(function(d) {
+      if (byDate[d].length > 1) hcAdd(out, 'red', 'DUP_DAILY', d, 'Two Daily Records for the same date',
+        'Sales and expenses of this day are counted twice in reports and shares.', d,
+        byDate[d].filter(function(r) { return r.id !== undefined; }).map(function(r, k) { return { t: 'daily', id: r.id, label: '✎ Open record ' + (k + 1) }; }));
+    });
+    const seen = {};
+    att.forEach(function(a) { const k = a.date + '|' + (a.trip || ''); seen[k] = (seen[k] || 0) + 1; });
+    Object.keys(seen).forEach(function(k) {
+      if (seen[k] > 1) {
+        const p = k.split('|');
+        hcAdd(out, 'red', 'DUP_ATT', p[0], 'Two attendance records for the same ' + (p[1] ? p[1] + ' trip' : 'day'),
+          'The crew would be counted twice.', k, [{ t: 'att', date: p[0], trip: p[1] }]);
+      }
+    });
+    // advances that look entered twice
+    const adv = {};
+    pays.forEach(function(p) { const k = p.member + '|' + p.date + '|' + p.amount; (adv[k] = adv[k] || []).push(p); });
+    Object.keys(adv).forEach(function(k) {
+      if (adv[k].length > 1) hcAdd(out, 'yellow', 'DUP_ADVANCE', adv[k][0].date, 'Possible duplicate advance for ' + adv[k][0].member,
+        adv[k].length + ' entries with the same person, date and amount ' + fmt(adv[k][0].amount) + '. Ignore this if it really was paid twice.', k,
+        adv[k][0].id !== undefined ? [{ t: 'pay', id: adv[k][0].id }] : []);
+    });
+  });
+
+  // ---------- attendance ----------
+  safe('attendance', function() {
+    att.forEach(function(a) {
+      const trip = a.trip || '';
+      const k = a.date + '|' + trip;
+      const acts = [{ t: 'att', date: a.date, trip: trip }];
+      const label = trip ? ' (' + trip + ')' : '';
+      const present = A(a.present);
+      if (present.length === 0) hcAdd(out, 'red', 'NOBODY', a.date, 'Attendance has nobody present' + label, 'No crew are marked, so that trip\'s profit cannot be shared with anyone.', k, acts);
+      const cnt = {};
+      present.forEach(function(n) { cnt[n] = (cnt[n] || 0) + 1; });
+      Object.keys(cnt).forEach(function(n) {
+        if (cnt[n] > 1) hcAdd(out, 'red', 'DUP_NAME', a.date, n + ' is listed twice' + label, 'That person would count as two shares.', k + n, acts);
+      });
+      const paagi = A(a.paagi);
+      if (paagi.length) {
+        const total = paagi.reduce(function(s, p) { return s + (Number(p && p.percent) || 0); }, 0);
+        if (Math.abs(total - 100) > 0.01) hcAdd(out, 'red', 'PAAGI_SUM', a.date, 'Paagi percentages add up to ' + (Math.round(total * 100) / 100) + '%, not 100%' + label,
+          'The Paagi share would be paid too much or too little.', k, acts);
+        paagi.forEach(function(p) {
+          if (p && present.indexOf(p.name) === -1) hcAdd(out, 'yellow', 'PAAGI_ABSENT', a.date, p.name + ' is a Paagi but is not marked present' + label,
+            'Normally the Paagi is also on the boat. Check the attendance.', k + p.name, acts);
+        });
+        if (a.fishingType && a.fishingType !== 'Squid') hcAdd(out, 'yellow', 'PAAGI_NOT_SQUID', a.date, 'Paagi set on a ' + a.fishingType + ' day' + label,
+          'Paagi (cast net) is normally only for Squid fishing.', k, acts);
+      } else if (a.fishingType === 'Squid') {
+        hcAdd(out, 'yellow', 'SQUID_NO_PAAGI', a.date, 'Squid fishing but no Paagi selected' + label,
+          'If someone cast the net, add them so they get the extra Paagi share.', k, acts);
+      }
+      if (!a.fishingType) hcAdd(out, 'yellow', 'NO_TYPE', a.date, 'Attendance has no fishing type' + label, 'Reports show the fishing type for each day.', k, acts);
+    });
+  });
+
+  // ---------- names that are not in your lists ----------
+  safe('crew-names', function() {
+    const known = {};
+    SHAREHOLDERS.forEach(function(n) { known[n] = 1; });
+    const unknown = {};
+    const note = function(n, date, where) {
+      if (!n || known[n]) return;
+      const u = unknown[n] = unknown[n] || { count: 0, first: date, where: {} };
+      u.count++; if (date < u.first) u.first = date; u.where[where] = 1;
+    };
+    att.forEach(function(a) { A(a.present).forEach(function(n) { note(n, a.date, 'attendance'); }); A(a.paagi).forEach(function(p) { note(p && p.name, a.date, 'Paagi'); }); });
+    pays.forEach(function(p) { note(p.member, p.date, 'advances'); });
+    Object.keys(unknown).forEach(function(n) {
+      hcAdd(out, 'red', 'UNKNOWN_CREW', unknown[n].first, '"' + n + '" is not in your Crew list',
+        'Used in ' + unknown[n].count + ' record(s) (' + Object.keys(unknown[n].where).join(', ') + '). They get a share in Share Calculation but will be missing from Final Payment.',
+        n, [{ t: 'mgr', tab: 'crew', name: n, label: '➕ Add "' + n + '" to Crew' }]);
+    });
+  });
+
+  // ---------- each day: attendance present? totals add up? ----------
+  safe('daily-vs-attendance', function() {
+    const attDates = {};
+    att.forEach(function(a) { attDates[a.date] = 1; });
+    const dailyDates = {};
+    daily.forEach(function(r) { dailyDates[r.date] = 1; });
+    daily.forEach(function(r) {
+      const acts = [{ t: 'addatt', date: r.date }];
+      if (r.id !== undefined && r.id !== null) acts.push({ t: 'daily', id: r.id });
+      if ((r.sales || 0) > 0 && !attDates[r.date]) hcAdd(out, 'red', 'NO_ATT', r.date, 'Sales of ' + fmt(r.sales) + ' but no attendance',
+        'Nobody is marked present, so this day\'s profit is not shared with anyone (its expenses still count).', String(r.id), acts);
+      // totals
+      const s = sum(A(r.saleItems), function(i) { return i && i.amount; });
+      const e = sum(A(r.expenseItems), function(i) { return i && i.amount; });
+      const dacts = r.id !== undefined && r.id !== null ? [{ t: 'daily', id: r.id }] : [];
+      if (hcNum(r.sales) && Math.abs(s - r.sales) > 0.5) hcAdd(out, 'red', 'SALES_TOTAL', r.date, 'Sales total does not match its lines',
+        'The day says ' + fmt(r.sales) + ' but the sale lines add up to ' + fmt(s) + '.', String(r.id), dacts);
+      if (hcNum(r.expense) && Math.abs(e - r.expense) > 0.5) hcAdd(out, 'red', 'EXP_TOTAL', r.date, 'Expense total does not match its lines',
+        'The day says ' + fmt(r.expense) + ' but the expense lines add up to ' + fmt(e) + '.', String(r.id), dacts);
+      // multi-trip days: every sale line should say which trip it belongs to
+      const trips = attTrips(r.date).map(function(a) { return a.trip || ''; });
+      if (trips.length > 1) {
+        const bad = A(r.saleItems).filter(function(i) { return i && (i.amount || 0) > 0 && !(i.trip && trips.indexOf(i.trip) !== -1); });
+        if (bad.length) hcAdd(out, 'yellow', 'UNTAGGED', r.date, bad.length + ' sale line(s) have no trip on a multi-trip day',
+          'Untagged money is split between the trips in proportion to their tagged sales instead of paying the crew who caught it.', String(r.id), dacts);
+      }
+    });
+    Object.keys(attDates).forEach(function(d) {
+      if (!dailyDates[d]) {
+        const first = attTrips(d)[0];
+        hcAdd(out, 'yellow', 'ATT_NO_DAILY', d, 'Attendance but no Daily Record',
+          'If the boat went out, add that day\'s expenses (and sales) in Daily Records.', d,
+          [{ t: 'att', date: d, trip: first ? (first.trip || '') : '' }, { t: 'newdaily', date: d }]);
+      }
+    });
+  });
+
+  // ---------- inside each day's lines ----------
+  safe('daily-lines', function() {
+    const supSet = { Local: 1, Auction: 1 };
+    namesOf('suppliers', true).forEach(function(n) { supSet[n] = 1; });
+    const fishSet = {}, catSet = {}, agentSet = {}, tractorSet = {};
+    namesOf('fish', true).forEach(function(n) { fishSet[n] = 1; });
+    namesOf('expcats', true).forEach(function(n) { catSet[n] = 1; });
+    namesOf('agents', true).forEach(function(n) { agentSet[n] = 1; });
+    namesOf('tractors', true).forEach(function(n) { tractorSet[n] = 1; });
+    const groups = {};
+    const note = function(tab, name, date) {
+      if (!name) return;
+      const g = groups[tab + '|' + name] = groups[tab + '|' + name] || { tab: tab, name: name, count: 0, first: date };
+      g.count++; if (date < g.first) g.first = date;
+    };
+    daily.forEach(function(r) {
+      const acts = r.id !== undefined && r.id !== null ? [{ t: 'daily', id: r.id }] : [];
+      const lines = {};
+      A(r.saleItems).forEach(function(i) {
+        if (!i || typeof i !== 'object') return;
+        if (i.fishname && !fishSet[i.fishname]) note('fish', i.fishname, r.date);
+        if (i.supplier && !supSet[i.supplier]) note('suppliers', i.supplier, r.date);
+        if (i.auctionAgent && !agentSet[i.auctionAgent]) note('agents', i.auctionAgent, r.date);
+        if (i.qty > 0 && i.rate > 0 && hcNum(i.amount) && Math.abs(i.qty * i.rate - i.amount) > Math.max(1, i.amount * 0.01)) {
+          hcAdd(out, 'yellow', 'QTY_RATE', r.date, (i.fishname || 'A sale') + ': qty × rate does not match the amount',
+            i.qty + ' × ' + i.rate + ' = ' + fmt(i.qty * i.rate) + ' but the amount is ' + fmt(i.amount) + '.', r.id + (i.fishname || '') + i.amount, acts);
+        }
+        if (i.supplier === 'Auction' && !i.auctionAgent && i.amount > 0) {
+          hcAdd(out, 'yellow', 'AUCTION_NO_AGENT', r.date, 'Auction sale with no agent', 'No 2% commission was added for ' + fmt(i.amount) + '.', r.id + (i.fishname || '') + i.amount, acts);
+        }
+        const lk = [i.fishname, i.supplier, i.qty, i.rate, i.amount, i.trip].join('|');
+        lines[lk] = (lines[lk] || 0) + 1;
+      });
+      Object.keys(lines).forEach(function(lk) {
+        if (lines[lk] > 1) hcAdd(out, 'yellow', 'DUP_LINES', r.date, 'The same sale line appears ' + lines[lk] + ' times',
+          'Identical fish, supplier, quantity, rate and amount. Ignore this if the sale really was repeated.', r.id + lk, acts);
+      });
+      A(r.expenseItems).forEach(function(i) {
+        if (!i || typeof i !== 'object') return;
+        if (!i.cat && i.amount > 0) hcAdd(out, 'yellow', 'NO_CAT', r.date, 'An expense of ' + fmt(i.amount) + ' has no category', 'The category breakdown cannot count it properly.', r.id + (i.notes || '') + i.amount, acts);
+        else if (i.cat && !catSet[i.cat]) note('expcats', i.cat, r.date);
+        if (i.expSupplier && !supSet[i.expSupplier]) note('suppliers', i.expSupplier, r.date);
+        if (i.tractorProvider && !tractorSet[i.tractorProvider]) note('tractors', i.tractorProvider, r.date);
+        if (i.cat === 'Tractor' && i.amount > 0 && (!i.tractorProvider || !(i.tractorTrips > 0))) {
+          hcAdd(out, 'yellow', 'TRACTOR_INCOMPLETE', r.date, 'Tractor expense without provider or trips', 'Without them it is not added to the Tractor Trips page.', r.id + i.amount, acts);
+        }
+        if (i.expQty > 0 && i.expRate > 0 && hcNum(i.amount) && Math.abs(i.expQty * i.expRate - i.amount) > Math.max(1, i.amount * 0.01)) {
+          hcAdd(out, 'yellow', 'QTY_RATE', r.date, (i.cat || 'An expense') + ': qty × rate does not match the amount',
+            i.expQty + ' × ' + i.expRate + ' = ' + fmt(i.expQty * i.expRate) + ' but the amount is ' + fmt(i.amount) + '.', r.id + (i.cat || '') + i.amount, acts);
+        }
+      });
+    });
+    const tabLabel = { fish: 'Fish Names', suppliers: 'Suppliers', expcats: 'Expense Categories', agents: 'Auction Agents', tractors: 'Tractor Providers' };
+    Object.keys(groups).forEach(function(k) {
+      const g = groups[k];
+      hcAdd(out, 'yellow', 'UNKNOWN_LIST', g.first, '"' + g.name + '" is not in your ' + tabLabel[g.tab] + ' list',
+        'Used ' + g.count + ' time(s). It still works, but it will not show in dropdowns. Add it in ⚙ Manage if it is correct, or fix the spelling.', k,
+        [{ t: 'mgr', tab: g.tab, name: g.name, label: '➕ Add "' + g.name + '"' }]);
+    });
+  });
+
+  // ---------- unusual values ----------
+  safe('outliers', function() {
+    const rates = {};
+    A(dailyRecords).forEach(function(r) {
+      A(r && r.saleItems).forEach(function(i) {
+        if (i && i.fishname && i.qty > 0 && hcNum(i.rate) && i.rate > 0) (rates[i.fishname] = rates[i.fishname] || []).push(i.rate);
+      });
+    });
+    daily.forEach(function(r) {
+      const acts = r.id !== undefined && r.id !== null ? [{ t: 'daily', id: r.id }] : [];
+      A(r.saleItems).forEach(function(i) {
+        const arr = i && rates[i.fishname];
+        if (!arr || arr.length < 6 || !(i.rate > 0)) return;
+        const med = hcMedian(arr);
+        if (i.rate > med * 3 || i.rate < med / 3) hcAdd(out, 'yellow', 'RATE_OUTLIER', r.date, i.fishname + ' rate ' + fmt(i.rate) + ' looks unusual',
+          'The usual rate is about ' + fmt(med) + ' per kg (from ' + arr.length + ' sales). It may be a typing mistake.', r.id + i.fishname + i.rate, acts);
+      });
+    });
+    const ex = {};
+    A(dailyRecords).forEach(function(r) {
+      A(r && r.expenseItems).forEach(function(i) {
+        if (i && i.cat && i.cat !== 'Agent Commission' && hcNum(i.amount) && i.amount > 0) (ex[i.cat] = ex[i.cat] || []).push(i.amount);
+      });
+    });
+    daily.forEach(function(r) {
+      const acts = r.id !== undefined && r.id !== null ? [{ t: 'daily', id: r.id }] : [];
+      A(r.expenseItems).forEach(function(i) {
+        const arr = i && ex[i.cat];
+        if (!arr || arr.length < 8 || !(i.amount >= 1000) || i.cat === 'Agent Commission') return;
+        const med = hcMedian(arr);
+        if (i.amount > med * 4) hcAdd(out, 'yellow', 'EXP_OUTLIER', r.date, i.cat + ' expense ' + fmt(i.amount) + ' is much higher than usual',
+          'The usual amount is about ' + fmt(med) + ' (from ' + arr.length + ' entries). Ignore this if it was a bulk purchase.', r.id + i.cat + i.amount, acts);
+      });
+    });
+    const counts = A(attendanceRecords).map(function(a) { return A(a && a.present).length; }).filter(function(n) { return n > 0; });
+    if (counts.length >= 8) {
+      const med = hcMedian(counts);
+      if (med >= 6) att.forEach(function(a) {
+        const n = A(a.present).length;
+        if (n > 0 && n < med * 0.5) hcAdd(out, 'yellow', 'FEW_CREW', a.date, 'Only ' + n + ' crew marked present',
+          'Usually about ' + Math.round(med) + '. Some names may be missing.', a.date + '|' + (a.trip || ''), [{ t: 'att', date: a.date, trip: a.trip || '' }]);
+      });
+    }
+  });
+
+  // ---------- ledgers that should match each day ----------
+  safe('sync', function() {
+    daily.forEach(function(r) {
+      if (r.id === undefined || r.id === null) return;
+      const mine = function(f) { return f && f.fromDaily && f.dailyRecId === r.id; };
+      const acts = [{ t: 'daily', id: r.id }];
+      const note = ' Older records made before auto-sync existed can show this — ignore it if so.';
+      const items = A(r.saleItems), exps = A(r.expenseItems);
+      const expSup = sum(items.filter(function(i) { return i && i.supplier && i.supplier !== 'Local' && i.supplier !== 'Auction'; }), function(i) { return i.amount; });
+      const actSup = sum(A(fishSales).filter(mine), function(f) { return f.amount; });
+      if (Math.abs(expSup - actSup) > 0.5) hcAdd(out, 'yellow', 'SYNC_SUPPLIER', r.date, 'Supplier ledger does not match this day\'s sales',
+        'The day has ' + fmt(expSup) + ' of supplier sales but the Fish Sales ledger has ' + fmt(actSup) + '.' + note, String(r.id), acts);
+      const expSP = sum(exps.filter(function(i) { return i && i.expSupplier; }), function(i) { return i.amount; });
+      const actSP = sum(A(supplierPays).filter(function(f) { return mine(f) && f.isExpense; }), function(f) { return f.amount; });
+      if (Math.abs(expSP - actSP) > 0.5) hcAdd(out, 'yellow', 'SYNC_SUPPLIER_PAY', r.date, 'Supplier payments do not match this day\'s expenses',
+        'The day has ' + fmt(expSP) + ' of supplier-related expenses but the ledger has ' + fmt(actSP) + '.' + note, String(r.id), acts);
+      const expTr = sum(exps.filter(function(i) { return i && i.cat === 'Tractor' && i.tractorProvider && i.tractorTrips > 0; }), function(i) { return i.amount; });
+      const actTr = sum(A(tractorTrips).filter(mine), function(t) { return t.amount; });
+      if (Math.abs(expTr - actTr) > 0.5) hcAdd(out, 'yellow', 'SYNC_TRACTOR', r.date, 'Tractor Trips page does not match this day\'s expenses',
+        'The day has ' + fmt(expTr) + ' of tractor expense but the Tractor Trips page has ' + fmt(actTr) + '.' + note, String(r.id), acts);
+      const byAgent = {};
+      items.forEach(function(i) { if (i && i.supplier === 'Auction' && i.auctionAgent) byAgent[i.auctionAgent] = (byAgent[i.auctionAgent] || 0) + (Number(i.amount) || 0); });
+      let expCom = 0;
+      Object.keys(byAgent).forEach(function(a) { expCom += Math.round(byAgent[a] * AGENT_COMM_RATE * 100) / 100; });
+      const actCom = sum(A(agentComms).filter(mine), function(a) { return a.commission; });
+      const expLine = sum(exps.filter(function(i) { return i && i.cat === 'Agent Commission'; }), function(i) { return i.amount; });
+      if (Math.abs(expCom - actCom) > 0.05 || Math.abs(expCom - expLine) > 0.05) hcAdd(out, 'yellow', 'SYNC_AGENT', r.date, 'Agent commission does not match this day\'s auction sales',
+        '2% of the auction sales is ' + fmt(expCom) + ', the Agent page has ' + fmt(actCom) + ' and the day\'s expenses include ' + fmt(expLine) + '.' + note, String(r.id), acts);
+    });
+  });
+
+  // ---------- dates in the future ----------
+  safe('future', function() {
+    [['Daily record', dailyRecords, 'daily'], ['Attendance', attendanceRecords, 'att'], ['Advance/payment', paymentRecords, 'pay']].forEach(function(s) {
+      A(s[1]).forEach(function(r) {
+        if (!r || !hcValidDate(r.date) || r.date <= tomorrow) return;
+        const acts = s[2] === 'att' ? [{ t: 'att', date: r.date, trip: r.trip || '' }] : (r.id !== undefined ? [{ t: s[2], id: r.id }] : []);
+        hcAdd(out, 'yellow', 'FUTURE', r.date, s[0] + ' is dated in the future', 'Probably a typing mistake in the date (today is ' + fmtDate(today()) + ').', s[0] + r.date + (r.id || ''), acts);
+      });
+    });
+  });
+
+  // ---------- information only ----------
+  safe('info', function() {
+    const zero = daily.filter(function(r) { return (r.sales || 0) === 0 && (r.expense || 0) > 0; });
+    if (zero.length) hcAdd(out, 'blue', 'ZERO_CATCH', zero[0].date, zero.length + ' day(s) with expenses but no sales',
+      zero.slice(0, 8).map(function(r) { return fmtDate(r.date) + ' (' + fmt(r.expense) + ')'; }).join(', ') + (zero.length > 8 ? ' …' : '') +
+      '. These costs are shared by every day\'s profit — good to know when crew ask why a share is lower.', 'zc' + zero.length);
+    const dates = {};
+    daily.forEach(function(r) { dates[r.date] = 1; });
+    att.forEach(function(a) { dates[a.date] = 1; });
+    const ds = Object.keys(dates).sort();
+    if (ds.length > 1) {
+      const gaps = [];
+      let cur = new Date(ds[0] + 'T00:00:00Z');
+      const end = new Date(ds[ds.length - 1] + 'T00:00:00Z');
+      while (cur < end) {
+        cur.setUTCDate(cur.getUTCDate() + 1);
+        const k = cur.toISOString().slice(0, 10);
+        if (!dates[k] && k < ds[ds.length - 1]) gaps.push(k);
+      }
+      if (gaps.length) hcAdd(out, 'blue', 'GAP', gaps[0], gaps.length + ' day(s) with no records at all',
+        gaps.slice(0, 10).map(fmtDate).join(', ') + (gaps.length > 10 ? ' …' : '') + '. Fine if the boat did not go out — otherwise entries may be missing.', 'gap' + gaps.length);
+    }
+    const noW = att.filter(function(a) { return a.weights === undefined && A(a.present).some(function(n) { return crewWeight(n) !== 1; }); });
+    if (noW.length) {
+      const names = {};
+      noW.forEach(function(a) { A(a.present).forEach(function(n) { if (crewWeight(n) !== 1) names[n] = 1; }); });
+      hcAdd(out, 'blue', 'NO_WEIGHTS', noW[0].date, noW.length + ' attendance record(s) have no saved share weights',
+        Object.keys(names).slice(0, 5).join(', ') + ' now ha' + (Object.keys(names).length === 1 ? 's a share weight' : 've share weights') +
+        ', but these records were saved without weights, so everyone counts ×1 in them. That is right for older records. If they should count with weights, open the record and tick "re-apply today\'s weights".',
+        'nw' + noW.length, [{ t: 'att', date: noW[0].date, trip: noW[0].trip || '' }]);
+    }
+  });
+
+  const order = { red: 0, yellow: 1, blue: 2 };
+  out.sort(function(a, b) { return order[a.sev] - order[b.sev] || (a.date < b.date ? -1 : a.date > b.date ? 1 : 0); });
+  return out;
+}
+
+// ---------- page ----------
+function hcAct(i, j) {
+  const a = _hcIssues[i] && _hcIssues[i].actions[j];
+  if (!a) return;
+  if (a.t === 'daily')         { goPage(1); editDailyRecord(a.id); }
+  else if (a.t === 'att')      { goPage(2); loadAttendanceForEdit(a.date, a.trip || ''); }
+  else if (a.t === 'addatt')   { goPage(2); document.getElementById('p2-date').value = a.date; }
+  else if (a.t === 'newdaily') { goPage(1); document.getElementById('p1-date').value = a.date; }
+  else if (a.t === 'pay')      { goPage(4); editPayment(a.id); }
+  else if (a.t === 'mgr')      { goPage(9); mgSetTab(a.tab); const el = document.getElementById('mg-name'); if (el && a.name) { el.value = a.name; el.focus(); } }
+}
+function hcIgnore(i) {
+  const it = _hcIssues[i];
+  if (!it) return;
+  const m = hcIgnoredMap();
+  m[it.key] = 1;
+  try { localStorage.setItem(HC_KEY_IGNORED, JSON.stringify(m)); } catch (e) {}
+  hcRun();
+}
+function hcResetIgnored() {
+  localStorage.removeItem(HC_KEY_IGNORED);
+  hcRun();
+}
+function hcQuick(kind) {
+  let from, to = hcShift(0);
+  if (kind === 'month')    from = to.slice(0, 8) + '01';
+  else if (kind === 'all') {
+    const ds = [];
+    [dailyRecords, attendanceRecords, paymentRecords].forEach(function(arr) { (Array.isArray(arr) ? arr : []).forEach(function(r) { if (r && hcValidDate(r.date)) ds.push(r.date); }); });
+    ds.sort();
+    from = ds.length ? ds[0] : to;
+    if (ds.length && ds[ds.length - 1] > to) to = ds[ds.length - 1];
+  } else from = hcShift(kind - 1);
+  document.getElementById('hc-from').value = from;
+  document.getElementById('hc-to').value = to;
+  hcRun();
+}
+function hcRun() {
+  const from = document.getElementById('hc-from').value, to = document.getElementById('hc-to').value;
+  if (!hcValidDate(from) || !hcValidDate(to)) { alert('Please choose both dates.'); return; }
+  if (from > to) { alert('The "From" date must be before the "To" date.'); return; }
+  renderHealth(from, to);
+}
+function hcOnOpen() {
+  if (!document.getElementById('hc-from').value) hcQuick(30);
+  else hcRun();
+}
+function hcOpenForRange(from, to) {
+  document.getElementById('hc-from').value = from;
+  document.getElementById('hc-to').value = to;
+  goPage(10);
+}
+
+function renderHealth(from, to) {
+  const ig = hcIgnoredMap();
+  const all = runHealthChecks(from, to);
+  const list = all.filter(function(i) { return !ig[i.key]; });
+  _hcIssues = list;
+  _hcIgnoredCount = all.length - list.length;
+  const cnt = function(s) { return list.filter(function(i) { return i.sev === s; }).length; };
+  const red = cnt('red'), yel = cnt('yellow'), blu = cnt('blue');
+  const box = document.getElementById('hc-results');
+  let status;
+  if (red)      status = '<div class="hc-status hc-red">🔴 ' + red + ' problem' + (red === 1 ? '' : 's') + ' to fix before paying shares</div>';
+  else if (yel) status = '<div class="hc-status hc-yellow">🟡 No serious problems, but ' + yel + ' thing' + (yel === 1 ? '' : 's') + ' to check</div>';
+  else          status = '<div class="hc-status hc-green">🟢 All clear — nothing wrong found from ' + escHtml(fmtDate(from)) + ' to ' + escHtml(fmtDate(to)) + '</div>';
+  let h = status +
+    '<div class="stats-grid" style="margin-bottom:16px;">' +
+      '<div class="stat-card"><div class="stat-label">🔴 Fix before paying</div><div class="stat-value red">' + red + '</div></div>' +
+      '<div class="stat-card"><div class="stat-label">🟡 Please check</div><div class="stat-value" style="color:#fbbf24;">' + yel + '</div></div>' +
+      '<div class="stat-card"><div class="stat-label">🔵 For your information</div><div class="stat-value" style="color:#7ecfed;">' + blu + '</div></div>' +
+    '</div>';
+  const sections = [['red', '🔴 Fix before paying'], ['yellow', '🟡 Please check'], ['blue', '🔵 For your information']];
+  sections.forEach(function(sec) {
+    const items = list.map(function(it, idx) { return { it: it, idx: idx }; }).filter(function(x) { return x.it.sev === sec[0]; });
+    if (!items.length) return;
+    h += '<div class="card"><div class="card-title">' + sec[1] + ' (' + items.length + ')</div>';
+    items.forEach(function(x) {
+      const it = x.it;
+      let btns = '';
+      it.actions.forEach(function(a, j) {
+        const lbl = a.label || ({ daily: '✎ Open day', att: '✎ Open attendance', addatt: '➕ Add attendance', newdaily: '➕ Add Daily Record', pay: '✎ Open advance' }[a.t] || 'Open');
+        btns += '<button class="btn btn-sm hc-btn" onclick="hcAct(' + x.idx + ',' + j + ')">' + escHtml(lbl) + '</button> ';
+      });
+      btns += '<button class="btn btn-sm hc-btn hc-ignore" onclick="hcIgnore(' + x.idx + ')" title="Hide this one — it is not a mistake">🙈 Ignore</button>';
+      h += '<div class="hc-issue hc-' + it.sev + '">' +
+        '<div class="hc-head">' + (it.date ? '<span class="badge badge-gold">' + escHtml(fmtDate(it.date)) + '</span> ' : '') + '<strong>' + escHtml(it.title) + '</strong></div>' +
+        (it.detail ? '<div class="hc-detail">' + escHtml(it.detail) + '</div>' : '') +
+        '<div class="hc-actions">' + btns + '</div></div>';
+    });
+    h += '</div>';
+  });
+  if (_hcIgnoredCount > 0) {
+    h += '<div style="text-align:center;font-size:12px;color:var(--muted);margin:10px 0 20px;">' + _hcIgnoredCount + ' ignored item' + (_hcIgnoredCount === 1 ? '' : 's') +
+         ' hidden — <a href="#" style="color:var(--gold-light);" onclick="hcResetIgnored();return false;">show them again</a></div>';
+  }
+  box.innerHTML = h;
+  hcUpdateBadge();
+}
+
+// small count on the top-bar button: serious problems in the last 30 days
+function hcUpdateBadge() {
+  const b = document.getElementById('health-badge');
+  if (!b) return;
+  try {
+    const ig = hcIgnoredMap();
+    const red = runHealthChecks(hcShift(30), hcShift(-1)).filter(function(i) { return i.sev === 'red' && !ig[i.key]; }).length;
+    b.textContent = red ? String(red) : '';
+  } catch (e) { b.textContent = ''; }
+}
+
+// banner at the top of Share Calculation results
+function hcRenderBanner(from, to) {
+  const el = document.getElementById('p3-health-banner');
+  if (!el) return;
+  try {
+    const ig = hcIgnoredMap();
+    const list = runHealthChecks(from, to).filter(function(i) { return !ig[i.key]; });
+    const red = list.filter(function(i) { return i.sev === 'red'; }).length;
+    const yel = list.filter(function(i) { return i.sev === 'yellow'; }).length;
+    let cls, txt;
+    if (red)      { cls = 'hc-red';    txt = '🔴 The health check found ' + red + ' problem' + (red === 1 ? '' : 's') + ' in this period — fix before paying shares.'; }
+    else if (yel) { cls = 'hc-yellow'; txt = '🟡 The health check found ' + yel + ' thing' + (yel === 1 ? '' : 's') + ' to check in this period.'; }
+    else          { cls = 'hc-green';  txt = '🟢 Health check: all clear for this period.'; }
+    el.innerHTML = '<div class="hc-status ' + cls + '" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:0;">' +
+      '<span>' + txt + '</span><button class="btn btn-sm hc-btn" onclick="hcOpenForRange(\'' + from + '\',\'' + to + '\')">🩺 VIEW</button></div>';
+  } catch (e) { el.innerHTML = ''; }
+}
+setTimeout(hcUpdateBadge, 1200);
 
 // ===== WHATSAPP SLIPS =====
 // One shared preview popup (Copy / Send on WhatsApp). Each slip builder below
@@ -7973,6 +8538,7 @@ function closeMoreSheet() {
     <button class="more-item" data-page="7" onclick="goPage(7)"><span class="more-ico"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="11" height="8"/><path d="M13 11h4l3 3v2h-7z"/><circle cx="6" cy="18" r="1.6"/><circle cx="16.5" cy="18" r="1.6"/></svg></span> Tractor Trips</button>
     <button class="more-item" data-page="8" onclick="goPage(8)"><span class="more-ico"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg></span> Agent Commission</button>
     <button class="more-item" data-page="9" onclick="goPage(9)"><span class="more-ico">⚙</span> Manage Lists</button>
+    <button class="more-item" data-page="10" onclick="goPage(10)"><span class="more-ico">🩺</span> Data Health Check</button>
 
     <div style="border-top:1px solid var(--border);margin:14px 0 12px;"></div>
     <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;">&#9729; GOOGLE DRIVE &amp; BACKUP</div>
