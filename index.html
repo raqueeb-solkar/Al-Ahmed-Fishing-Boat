@@ -726,13 +726,24 @@
       ☁ LOAD FROM DRIVE
     </button>
     <button class="btn btn-sm" style="background:rgba(100,100,100,0.2);color:#aaa;border:1px solid rgba(100,100,100,0.3)" onclick="exportData()">⬇ LOCAL BACKUP</button>
+    <button class="btn btn-wa btn-sm" onclick="shareBackup()" title="Send the backup file to WhatsApp or any app (keep it in your own chat — it contains all business data)">📤 SHARE BACKUP</button>
     <label class="btn btn-sm" style="background:rgba(100,100,100,0.2);color:#aaa;border:1px solid rgba(100,100,100,0.3);cursor:pointer;margin:0;">
       ⬆ LOCAL RESTORE
-      <input type="file" accept=".json" id="import-file-input" style="display:none" onchange="importData(event)">
+      <input type="file" accept=".json,.txt,application/json,text/plain" id="import-file-input" style="display:none" onchange="importData(event)">
     </label>
+    <button id="undo-restore-btn" class="btn btn-sm" style="display:none;background:rgba(251,191,36,0.18);color:#fbbf24;border:1px solid rgba(251,191,36,0.45);" onclick="undoLastRestore()" title="Go back to your data as it was just before the last restore">↩ UNDO RESTORE</button>
     <button class="btn btn-sm" style="background:rgba(255,159,67,0.2);color:#ff9f43;border:1px solid rgba(255,159,67,0.4);" onclick="showPage(9)" title="Add or edit crew, suppliers, fish names, categories">⚙ MANAGE</button>
     <button class="btn btn-sm" style="background:rgba(192,57,43,0.2);color:#e74c3c;border:1px solid rgba(192,57,43,0.4);" onclick="logout()">🔒 LOGOUT</button>
   </div>
+</div>
+
+<!-- BACKUP REMINDER (shown when the last backup file is 7+ days old) -->
+<div id="backup-reminder" style="display:none;background:rgba(255,159,67,0.1);border-bottom:1px solid rgba(255,159,67,0.35);padding:10px 20px;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--text);">
+  <span style="font-size:16px;">💾</span>
+  <span id="backup-reminder-text" style="flex:1;min-width:200px;line-height:1.5;"></span>
+  <button class="btn btn-sm" style="background:rgba(255,159,67,0.2);color:#ff9f43;border:1px solid rgba(255,159,67,0.45);" onclick="exportData()">⬇ BACKUP NOW</button>
+  <button class="btn btn-wa btn-sm" onclick="shareBackup()">📤 SHARE</button>
+  <button class="btn btn-sm" style="background:transparent;color:var(--muted);border:1px solid var(--border);" onclick="snoozeBackupReminder()">LATER</button>
 </div>
 
 <!-- ===== PAGE 1: DAILY RECORDS ===== -->
@@ -5507,6 +5518,7 @@ async function gdriveLoad(silent) {
         'Are you sure?';
       if (!confirm(msg)) return;
     }
+    if (!silent && !saveSafetyCopy('Before loading from Google Drive')) return;
     applyAllData(data);
     const ts = data.savedAtReadable || new Date().toLocaleString('en-IN');
     localStorage.setItem('aafb_last_export', ts);
@@ -5526,93 +5538,206 @@ function scheduleAutoSave() {
   gdriveAutoSaveTimer = setTimeout(function() { gdriveSave(false); }, 3000);
 }
 
-function exportData() {
-  const data = {
-    version: 2,
-    exportedAt: new Date().toISOString(),
-    exportedAtReadable: new Date().toLocaleString('en-IN'),
-    dailyRecords,
-    attendanceRecords,
-    paymentRecords,
-    savedPeriods,
-    lists
-  };
+// ===== LOCAL BACKUP / RESTORE =====
+// Local backup uses the SAME two functions as Google Drive: getAllData() to save and
+// applyAllData() to restore, so the two can never drift apart again. Restore only
+// replaces the sections that are inside the file (older partial backups still work),
+// and a safety copy of the current data is kept first so a restore can be undone.
+const KEY_PRERESTORE     = 'aafb_prerestore';        // safety copy taken right before any restore
+const KEY_LAST_BACKUP_TS = 'aafb_last_backup_ts';    // when the last complete backup file was made
+const KEY_BACKUP_SNOOZE  = 'aafb_backup_snooze';
+const BACKUP_REMIND_DAYS = 7;
+const BACKUP_SETS = [
+  ['dailyRecords', 'Daily records'],          ['attendanceRecords', 'Attendance'],
+  ['paymentRecords', 'Advances & payments'],  ['savedPeriods', 'Saved periods'],
+  ['fishSales', 'Supplier sales'],            ['supplierPays', 'Supplier payments'],
+  ['creditSales', 'Credit sales'],            ['creditPays', 'Credit payments'],
+  ['retailers', 'Customers'],                 ['tractorTrips', 'Tractor trips'],
+  ['tractorPays', 'Tractor payments'],        ['agentComms', 'Agent commissions'],
+  ['agentPays', 'Agent payments']
+];
 
-  const json = JSON.stringify(data, null, 2);
+function reloadApp() { setTimeout(function() { location.reload(); }, 900); }
+
+function buildBackupObject() {
+  const data = getAllData();
+  data.exportedAt = new Date().toISOString();
+  data.exportedAtReadable = new Date().toLocaleString('en-IN');
+  data.backupFormat = 3;        // 3 = complete (everything Google Drive saves)
+  return data;
+}
+function backupFileName(ext) { return 'AlAhmed-Backup-' + new Date().toISOString().slice(0, 10) + '.' + ext; }
+
+function markBackupDone() {
+  localStorage.setItem(KEY_LAST_BACKUP_TS, String(Date.now()));
+  localStorage.setItem('aafb_last_export', new Date().toLocaleString('en-IN'));
+  localStorage.removeItem(KEY_BACKUP_SNOOZE);
+  updateSyncLabel();
+  checkBackupReminder();
+}
+
+function downloadBackup() {
+  const json = JSON.stringify(buildBackupObject(), null, 2);
   const blob = new Blob([json], { type: 'application/json' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
-  const dateStr = new Date().toISOString().slice(0,10);
-  a.href     = url;
-  a.download = 'AlAhmed-Backup-' + dateStr + '.json';
+  a.href = url;
+  a.download = backupFileName('json');
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+  markBackupDone();
+}
 
-  const ts = new Date().toLocaleString('en-IN');
-  localStorage.setItem('aafb_last_export', ts);
-  updateSyncLabel();
-  alert('Backup exported! Send this file via WhatsApp to sync with another device. On the other device tap Import Backup and select this file.');
+function exportData() {
+  downloadBackup();
+  alert('✓ Complete backup saved — daily records, attendance, advances, supplier, credit, tractor and agent data, and your lists.\n\nKeep the file safe (for example in your own WhatsApp "message yourself" chat or Google Drive). On another device tap LOCAL RESTORE and pick this file.');
+}
+
+// Share the backup straight to WhatsApp (or any app) from a phone. Chrome only allows
+// a few file types in the share sheet and .json is not one of them, so the shared copy
+// is a .txt file holding the same JSON — LOCAL RESTORE accepts it.
+async function shareBackup() {
+  const obj = buildBackupObject();
+  try {
+    const file = new File([JSON.stringify(obj)], backupFileName('txt'), { type: 'text/plain' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: 'Al Ahmed Fishing Boat backup',
+        text: 'Al Ahmed Fishing Boat — complete backup (' + obj.exportedAtReadable + ')'
+      });
+      markBackupDone();
+      showToast('✓ Backup shared');
+      return;
+    }
+  } catch (e) {
+    if (e && e.name === 'AbortError') return;     // you closed the share sheet
+  }
+  downloadBackup();
+  alert('This device cannot share files directly, so the complete backup was downloaded instead. Send that file yourself from your Downloads.');
+}
+
+// ---- restore: work out exactly what a file would replace and what it would keep ----
+function planRestore(data) {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) return { valid: false, reason: 'it is not an Al Ahmed backup' };
+  const cur = getAllData();
+  const apply = {}, replace = [], keep = [];
+  for (let i = 0; i < BACKUP_SETS.length; i++) {
+    const key = BACKUP_SETS[i][0], label = BACKUP_SETS[i][1];
+    if (data[key] === undefined) { keep.push(label + ' (' + cur[key].length + ')'); continue; }
+    if (!Array.isArray(data[key]) || !data[key].every(x => x && typeof x === 'object')) {
+      return { valid: false, reason: 'the "' + label + '" section looks damaged' };
+    }
+    apply[key] = data[key];
+    replace.push(label + ' (' + data[key].length + ')');
+  }
+  if (data.lists !== undefined) {
+    if (!data.lists || typeof data.lists !== 'object') return { valid: false, reason: 'the lists section looks damaged' };
+    apply.lists = data.lists;
+    replace.push('Crew / supplier / fish lists');
+  }
+  if (replace.length === 0) return { valid: false, reason: 'no Al Ahmed data was found in it' };
+  return { valid: true, apply: apply, replace: replace, keep: keep };
+}
+
+// Keep a copy of the current data before any restore so it can be undone.
+function saveSafetyCopy(reason) {
+  try {
+    localStorage.setItem(KEY_PRERESTORE, JSON.stringify({
+      savedAt: Date.now(), savedAtReadable: new Date().toLocaleString('en-IN'), reason: reason, data: getAllData()
+    }));
+    updateUndoButton();
+    return true;
+  } catch (e) {
+    return confirm('A safety copy of your current data could not be saved (phone storage is full).\n\nContinue the restore WITHOUT a safety copy?');
+  }
+}
+
+function hasSafetyCopy() { return !!localStorage.getItem(KEY_PRERESTORE); }
+function updateUndoButton() {
+  ['undo-restore-btn', 'undo-restore-btn-m'].forEach(function(id) {
+    const b = document.getElementById(id);
+    if (b) b.style.display = hasSafetyCopy() ? '' : 'none';
+  });
+}
+
+function undoLastRestore() {
+  let snap = null;
+  try { snap = JSON.parse(localStorage.getItem(KEY_PRERESTORE)); } catch (e) {}
+  if (!snap || !snap.data) { alert('There is nothing to undo.'); updateUndoButton(); return; }
+  if (!confirm('Undo the last restore?\n\nYour data goes back to how it was on ' + snap.savedAtReadable +
+               ' (just before the restore).\nAnything you entered after the restore will be lost.')) return;
+  applyAllData(snap.data);
+  localStorage.removeItem(KEY_PRERESTORE);
+  updateUndoButton();
+  showToast('↩ Restore undone — reloading…');
+  reloadApp();
 }
 
 function importData(event) {
   const file = event.target.files[0];
   if (!file) return;
-
   const reader = new FileReader();
   reader.onload = function(e) {
     try {
-      const data = JSON.parse(e.target.result);
+      let data;
+      try { data = JSON.parse(e.target.result); }
+      catch (err) { throw new Error('The file could not be read — it is not a valid backup.'); }
 
-      if (!data.version || (!data.dailyRecords && !data.attendanceRecords)) {
-        alert('Invalid backup file. Please use a file exported from Al Ahmed Fishing Boat app.');
+      const plan = planRestore(data);
+      if (!plan.valid) {
+        alert('This file cannot be restored: ' + plan.reason + '.\n\nPlease choose a backup file made by the Al Ahmed Fishing Boat app.');
         event.target.value = '';
         return;
       }
-
-      const exportDate = data.exportedAtReadable || data.exportedAt || 'Unknown';
-      const dr  = (data.dailyRecords      || []).length;
-      const ar  = (data.attendanceRecords || []).length;
-      const pr  = (data.paymentRecords    || []).length;
-      const spr = (data.savedPeriods      || []).length;
-      const counts = dr + ' daily, ' + ar + ' attendance, ' + pr + ' payments, ' + spr + ' periods';
-
-      if (!confirm('Import backup from: ' + exportDate + ' | Contains: ' + counts + ' | This will REPLACE all current data. Continue?')) {
-        event.target.value = '';
-        return;
+      const when = data.exportedAtReadable || data.savedAtReadable || data.exportedAt || data.savedAt || 'an unknown date';
+      let msg = 'Restore the backup saved on ' + when + '?\n\nWILL BE REPLACED with the file\'s data:\n• ' + plan.replace.join('\n• ');
+      if (plan.keep.length) {
+        msg += '\n\nKEPT AS THEY ARE (not in this file):\n• ' + plan.keep.join('\n• ') +
+               '\n\n(This file is from an older version of the app, so it does not contain everything.)';
       }
+      msg += '\n\nA safety copy of your current data is saved first, so you can UNDO the restore.';
+      if (!confirm(msg)) { event.target.value = ''; return; }
+      if (!saveSafetyCopy('Before restoring a backup file (' + when + ')')) { event.target.value = ''; return; }
 
-      dailyRecords      = data.dailyRecords      || [];
-      attendanceRecords = data.attendanceRecords || [];
-      paymentRecords    = data.paymentRecords    || [];
-      savedPeriods      = data.savedPeriods      || [];
-      if (data.lists) {
-        lists = sanitizeLists(data.lists, buildDefaultLists());
-        saveLists(); applyListsToConstants(); refreshListDropdowns(); buildAttendanceGrid();
-      }
-
-      save(KEY_DAILY,   dailyRecords);
-      save(KEY_ATTEND,  attendanceRecords);
-      save(KEY_PAYMENT, paymentRecords);
-      save(KEY_PERIODS, savedPeriods);
-
-      renderP1Table();
-      renderP2Table();
-      renderP4Table();
-      renderP4Summary();
-      renderSavedPeriods();
-      updateSyncLabel();
-
+      applyAllData(Object.assign({}, getAllData(), plan.apply));
       event.target.value = '';
-      alert('Import successful! ' + counts + ' records synced.');
-    } catch(err) {
-      alert('Failed to import. File may be corrupted. Error: ' + err.message);
+      showToast('✓ Backup restored — reloading…');
+      reloadApp();
+    } catch (err) {
+      alert('Failed to restore. ' + err.message);
       event.target.value = '';
     }
   };
   reader.readAsText(file);
 }
+
+// ---- reminder banner ----
+function checkBackupReminder() {
+  const box = document.getElementById('backup-reminder');
+  if (!box) return;
+  const hide = function() { box.style.display = 'none'; };
+  if (!dailyRecords.length && !attendanceRecords.length && !paymentRecords.length) return hide();   // nothing worth backing up yet
+  const ts = parseInt(localStorage.getItem(KEY_LAST_BACKUP_TS) || '0', 10);
+  const days = ts ? Math.floor((Date.now() - ts) / 86400000) : null;
+  if (days !== null && days < BACKUP_REMIND_DAYS) return hide();
+  const snooze = parseInt(localStorage.getItem(KEY_BACKUP_SNOOZE) || '0', 10);
+  if (snooze && Date.now() < snooze) return hide();
+  let text;
+  if (days !== null)                              text = 'Your last backup file is ' + days + ' day' + (days === 1 ? '' : 's') + ' old. Make a fresh one — it protects you if the phone is lost or the browser data is cleared.';
+  else if (localStorage.getItem('aafb_last_export')) text = 'Older backup files did not include supplier, credit, tractor and agent data. Please make a fresh complete backup.';
+  else                                            text = 'No backup file has been saved yet. Make one now — it protects you if the phone is lost or the browser data is cleared.';
+  document.getElementById('backup-reminder-text').textContent = text;
+  box.style.display = 'flex';
+}
+function snoozeBackupReminder() {
+  localStorage.setItem(KEY_BACKUP_SNOOZE, String(Date.now() + 86400000));     // ask again tomorrow
+  const box = document.getElementById('backup-reminder');
+  if (box) box.style.display = 'none';
+}
+setTimeout(function() { checkBackupReminder(); updateUndoButton(); }, 800);
 
 
 // ===== PASSWORD LOCK =====
@@ -7857,10 +7982,12 @@ function closeMoreSheet() {
       <button class="btn btn-sm" style="background:rgba(30,107,138,0.25);color:#7ecfed;border:1px solid rgba(30,107,138,0.5);" onclick="closeMoreSheet();gdriveLoad();">&#9729; LOAD</button>
       <button class="btn btn-sm" style="background:rgba(255,159,67,0.2);color:#ff9f43;border:1px solid rgba(255,159,67,0.4);" onclick="closeMoreSheet();toggleCalculator();">&#129518; CALC</button>
       <button class="btn btn-sm" style="background:rgba(100,100,100,0.2);color:#aaa;border:1px solid rgba(100,100,100,0.3);" onclick="closeMoreSheet();exportData();">&#11015; BACKUP</button>
+      <button class="btn btn-wa btn-sm" onclick="closeMoreSheet();shareBackup();">&#128228; SHARE BACKUP</button>
       <label class="btn btn-sm" style="background:rgba(100,100,100,0.2);color:#aaa;border:1px solid rgba(100,100,100,0.3);cursor:pointer;margin:0;text-align:center;">
         &#11014; RESTORE
-        <input type="file" accept=".json" style="display:none" onchange="closeMoreSheet();importData(event)">
+        <input type="file" accept=".json,.txt,application/json,text/plain" style="display:none" onchange="closeMoreSheet();importData(event)">
       </label>
+      <button id="undo-restore-btn-m" class="btn btn-sm" style="display:none;background:rgba(251,191,36,0.18);color:#fbbf24;border:1px solid rgba(251,191,36,0.45);" onclick="closeMoreSheet();undoLastRestore();">&#8617; UNDO RESTORE</button>
     </div>
     <button class="btn btn-sm" style="background:rgba(192,57,43,0.2);color:#e74c3c;border:1px solid rgba(192,57,43,0.4);width:100%;margin-top:8px;" onclick="closeMoreSheet();logout();">&#128274; LOGOUT</button>
     <button class="btn btn-secondary" style="width:100%;margin-top:10px;" onclick="closeMoreSheet()">CLOSE</button>
