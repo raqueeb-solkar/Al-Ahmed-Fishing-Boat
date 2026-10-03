@@ -585,6 +585,10 @@
 
 
 
+  /* ===== WHATSAPP SLIP BUTTON ===== */
+  .btn-wa { background: rgba(37,211,102,0.15); color: #25d366; border: 1px solid rgba(37,211,102,0.45); }
+  .btn-wa:hover { background: rgba(37,211,102,0.28); }
+
   /* ===== VISUAL POLISH: empty states ===== */
   .empty-state-cell { text-align: center; color: var(--muted); padding: 28px 16px; font-style: italic; }
   .empty-state-cell .es-icon { display: block; margin: 0 auto 8px; opacity: 0.45; }
@@ -1082,6 +1086,7 @@
                 <th>Advances Taken (₹)</th>
                 <th>Net Payable (₹)</th>
                 <th>Status</th>
+                <th>Slip</th>
               </tr>
             </thead>
             <tbody id="fp-tbody"></tbody>
@@ -1133,6 +1138,7 @@
           <div style="font-size:13px; color:var(--muted); margin-top:4px;" id="ind-period"></div>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-wa btn-sm" onclick="slipTripWise()">💬 WHATSAPP SLIP</button>
           <button class="btn btn-primary btn-sm" onclick="exportToPDF()">⬇ EXPORT PDF</button>
           <button class="btn btn-sm" style="background:rgba(26,122,74,0.25);color:#52d48a;border:1px solid rgba(26,122,74,0.5);" onclick="exportToCSV()">⬇ EXPORT CSV (Excel)</button>
           <button class="btn btn-danger btn-sm" onclick="closeIndividual()">✕ CLOSE</button>
@@ -1341,6 +1347,19 @@
 </div>
 
 <!-- EDIT MODAL: Payment -->
+<!-- WHATSAPP SLIP PREVIEW -->
+<div class="modal-overlay" id="modal-slip" onclick="if(event.target===this)closeModal('modal-slip')">
+  <div class="modal">
+    <div class="modal-title" id="slip-title">💬 WhatsApp Slip</div>
+    <pre id="slip-preview" style="white-space:pre-wrap;word-break:break-word;background:rgba(13,17,23,0.8);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.6;max-height:50vh;overflow-y:auto;color:var(--text);margin-bottom:14px;"></pre>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('modal-slip')">CLOSE</button>
+      <button class="btn btn-sm" style="background:rgba(255,159,67,0.15);color:var(--gold-light);border:1px solid var(--border);" onclick="copySlip()">📋 COPY</button>
+      <button class="btn btn-wa" onclick="sendSlipWhatsApp()">💬 SEND ON WHATSAPP</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-payment">
   <div class="modal">
     <div class="modal-title">✎ EDIT PAYMENT RECORD</div>
@@ -1581,6 +1600,7 @@
 
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <button class="btn btn-primary" onclick="exportSupplierLedgerPDF()">⬇ EXPORT PDF</button>
+        <button class="btn btn-wa" onclick="slipSupplierLedger()">💬 WHATSAPP SLIP</button>
         <button class="btn btn-sm" style="background:rgba(26,122,74,0.25);color:#52d48a;border:1px solid rgba(26,122,74,0.5);" onclick="exportSupplierLedgerCSV()">⬇ EXPORT CSV (Excel)</button>
       </div>
     </div>
@@ -4179,6 +4199,165 @@ function emptyPara(text) {
   return '<div class="empty-state-cell" style="padding:14px 0;">' + '<svg class="es-icon" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l2-7h12l2 7"/><path d="M4 13h5a1 1 0 0 1 1 1 2 2 0 0 0 4 0 1 1 0 0 1 1-1h5v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/></svg>' + '<span class="es-text">' + text + '</span></div>';
 }
 
+
+// ===== WHATSAPP SLIPS =====
+// One shared preview popup (Copy / Send on WhatsApp). Each slip builder below
+// only assembles the text and calls showSlip(). No phone numbers are stored
+// yet, so WhatsApp opens its contact picker (wa.me/?text=...).
+const SLIP_LINE = '━━━━━━━━━━━━━━━━━━━━';
+let _slipText = '';
+
+function showSlip(title, text) {
+  _slipText = text;
+  document.getElementById('slip-title').textContent = title;
+  document.getElementById('slip-preview').textContent = text;
+  document.getElementById('modal-slip').classList.add('open');
+}
+
+function copySlip() {
+  function done() { showToast('✓ Slip copied — paste it in WhatsApp'); }
+  function fallbackCopy() {
+    const ta = document.createElement('textarea');
+    ta.value = _slipText;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); done(); }
+    catch (e) { alert('Copy failed — please select the text and copy it manually.'); }
+    document.body.removeChild(ta);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(_slipText).then(done).catch(fallbackCopy);
+  } else {
+    fallbackCopy();
+  }
+}
+
+function sendSlipWhatsApp() {
+  const url = 'https://wa.me/?text=' + encodeURIComponent(_slipText);
+  // Very long slips can exceed what a WhatsApp link accepts — copy instead.
+  if (url.length > 6000) {
+    copySlip();
+    alert('This slip is long, so it was copied instead.\nOpen WhatsApp and paste it into the chat.');
+    return;
+  }
+  window.open(url, '_blank');
+}
+
+// 1. Crew settlement slip (Final Payment)
+function slipSettlement(sh) {
+  if (!_fpData) { alert('Please calculate Final Payment first.'); return; }
+  const r = _fpData.rows.find(x => x.sh === sh);
+  if (!r) return;
+  const paagi = (_p3ShareMap && _p3ShareMap[sh] && _p3ShareMap[sh].paagiBonus) ? _p3ShareMap[sh].paagiBonus : 0;
+  let t = '⚓ *AL AHMED FISHING BOAT*\n📜 *CREW SETTLEMENT SLIP*\n' + SLIP_LINE + '\n';
+  t += '👤 *Shareholder:* ' + sh + '\n';
+  t += '📅 *Period:* ' + fmtDate(_fpData.startDate) + ' to ' + fmtDate(_fpData.endDate) + '\n';
+  t += '⏱️ *Advances Cutoff:* ' + fmtDate(_fpData.settleDate) + '\n';
+  t += '🚤 *Trips Fished:* ' + r.days + ' trips\n' + SLIP_LINE + '\n';
+  t += '💰 *Share Earned:* ' + fmt(r.shareEarned) + '\n';
+  if (paagi > 0) t += '🎯 *Paagi Bonus Included:* ' + fmt(paagi) + '\n';
+  t += '📉 *Advances Deducted:* -' + fmt(r.advTotal) + '\n';
+  r.advances.forEach(function(a) {
+    t += '   • ' + fmtDate(a.date) + ': ' + fmt(a.amount) + (a.notes ? ' (' + a.notes + ')' : '') + '\n';
+  });
+  t += SLIP_LINE + '\n';
+  if (r.net > 0)      t += '✅ *NET CASH PAYABLE:* *' + fmt(r.net) + '*\n';
+  else if (r.net < 0) t += '⚠️ *AMOUNT TO BE RETURNED:* *' + fmt(Math.abs(r.net)) + '*\n';
+  else                t += '✅ *FULLY SETTLED:* *₹0*\n';
+  t += SLIP_LINE + '\n_Alhamdulillah · Al Ahmed Fleet Management_';
+  showSlip('📜 Crew Settlement Slip — ' + sh, t);
+}
+
+// 2. Trip-wise share statement (individual View Detail)
+function slipTripWise() {
+  const d = window._indData;
+  if (!d) { alert('Please open a shareholder detail first.'); return; }
+  let t = '⚓ *AL AHMED FISHING BOAT*\n📊 *TRIP-WISE SHARE STATEMENT*\n' + SLIP_LINE + '\n';
+  t += '👤 *Crew Member:* ' + d.name + '\n';
+  t += '📅 *Period:* ' + fmtDate(d.startDate) + ' to ' + fmtDate(d.endDate) + ' (' + d.daysPresent + ' trips)\n';
+  t += SLIP_LINE + '\n*Daily Breakdown:*\n';
+  (d.dailyRows || []).forEach(function(r, i) {
+    t += (i + 1) + '. ' + fmtDate(r.date) + ' [' + (r.trip || 'Full Day') + ']' +
+         (r.fishingType ? ' (' + r.fishingType + ')' : '') + ': *' + fmt(r.earned) + '*' +
+         (r.paagiBonus ? ' [🎯 Paagi ' + r.paagiPercent + '%: +' + fmt(r.paagiBonus) + ']' : '') + '\n';
+  });
+  t += SLIP_LINE + '\n✨ *TOTAL SHARE EARNED:* *' + fmt(d.totalShareEarned) + '*\n' + SLIP_LINE + '\n_Al Ahmed Fleet Management_';
+  showSlip('📊 Trip-Wise Statement — ' + d.name, t);
+}
+
+// 3. Customer credit / outstanding reminder (Credit Tracking)
+function slipCredit(retailer) {
+  const sales = creditSales.filter(s => s.retailer === retailer && s.payType === 'credit');
+  const pays  = creditPays.filter(p => p.retailer === retailer);
+  const totalCredit = sales.reduce((s, r) => s + r.amount, 0);
+  const totalPaid   = pays.reduce((s, r) => s + r.amount, 0);
+  const outstanding = totalCredit - totalPaid;
+  const lastPay = pays.length ? pays.map(p => p.date).sort().pop() : null;
+  let t = '🐟 *AL AHMED FISHING BOAT*\n📋 *ACCOUNT STATEMENT / PAYMENT REMINDER*\n' + SLIP_LINE + '\n';
+  t += '🏪 *Customer:* ' + retailer + '\n';
+  t += '📦 *Total Credit Purchases:* ' + fmt(totalCredit) + '\n';
+  t += '💵 *Total Payments Received:* ' + fmt(totalPaid) + '\n';
+  t += '🕒 *Last Payment Date:* ' + (lastPay ? fmtDate(lastPay) : '—') + '\n' + SLIP_LINE + '\n';
+  if (outstanding > 0) {
+    t += '⚠️ *OUTSTANDING BALANCE DUE:* *' + fmt(outstanding) + '*\n' + SLIP_LINE + '\n';
+    t += 'Kindly arrange payment at your earliest convenience. Thank you for your partnership.\n';
+  } else if (outstanding < 0) {
+    t += '⬆️ *EXCESS PAID:* *' + fmt(Math.abs(outstanding)) + '*\n' + SLIP_LINE + '\n';
+  } else {
+    t += '✅ *ACCOUNT CLEARED — NO BALANCE DUE*\n' + SLIP_LINE + '\n';
+  }
+  t += '_Al Ahmed Fleet Management_';
+  showSlip('📋 Account Reminder — ' + retailer, t);
+}
+
+// 4. Supplier ledger summary — shared text builder
+function supplierSlipText(name, periodLabel, totalSales, totalPaid) {
+  const pending = totalSales - totalPaid;
+  let t = '🐟 *AL AHMED FISHING BOAT*\n📑 *SUPPLIER LEDGER STATEMENT*\n' + SLIP_LINE + '\n';
+  t += '🏢 *Supplier:* ' + name + '\n';
+  t += '📅 *Period:* ' + periodLabel + '\n' + SLIP_LINE + '\n';
+  t += '🐟 *Total Fish Sales:* ' + fmt(totalSales) + '\n';
+  t += '💰 *Payments Received:* ' + fmt(totalPaid) + '\n' + SLIP_LINE + '\n';
+  if (pending > 0)      t += '⚖️ *Current Balance:* *Pending ' + fmt(pending) + '*\n';
+  else if (pending < 0) t += '⚖️ *Current Balance:* *Excess paid ' + fmt(Math.abs(pending)) + '*\n';
+  else                  t += '⚖️ *Current Balance:* *Cleared ✅*\n';
+  t += SLIP_LINE + '\n_Al Ahmed Fleet Management_';
+  return t;
+}
+
+// 4a. From a supplier balance card — everything up to today
+function slipSupplier(sup) {
+  const totalSales = fishSales.filter(r => r.supplier === sup).reduce((s, r) => s + r.amount, 0);
+  const totalPaid  = supplierPays.filter(r => r.supplier === sup).reduce((s, r) => s + r.amount, 0);
+  showSlip('📑 Supplier Statement — ' + sup,
+    supplierSlipText(sup, 'Till ' + fmtDate(today()), totalSales, totalPaid));
+}
+
+// 4b. From the date-range ledger
+function slipSupplierLedger() {
+  const d = _fsLedgerData;
+  if (!d) { alert('Please generate the ledger first.'); return; }
+  const name = d.supplier || 'All Suppliers';
+  showSlip('📑 Supplier Statement — ' + name,
+    supplierSlipText(name, fmtDate(d.fromDate) + ' to ' + fmtDate(d.toDate), d.totalSales, d.totalPaid));
+}
+
+// 5. Advance / payment acknowledgment (Advances & Payments)
+function slipAdvance(id) {
+  const p = paymentRecords.find(x => x.id === id);
+  if (!p) return;
+  let t = '⚓ *AL AHMED FISHING BOAT*\n💳 *PAYMENT / ADVANCE ACKNOWLEDGMENT*\n' + SLIP_LINE + '\n';
+  t += '👤 *Shareholder:* ' + p.member + '\n';
+  t += '📅 *Date:* ' + fmtDate(p.date) + '\n';
+  t += '🏷 *Type:* ' + String(p.type || 'advance').toUpperCase() + '\n';
+  t += '💰 *Amount:* *' + fmt(p.amount) + '*\n';
+  if (p.notes) t += '📝 *Notes:* ' + p.notes + '\n';
+  t += SLIP_LINE + '\n_Al Ahmed Fleet Management_';
+  showSlip('💳 Advance Acknowledgment — ' + p.member, t);
+}
+
 function showToast(msg) {
   let toast = document.getElementById('global-toast');
   if (!toast) {
@@ -4260,6 +4439,7 @@ function renderP4Table() {
       <td class="adv-pending">${fmt(p.amount)}</td>
       <td style="color:var(--muted);font-style:italic">${p.notes || '—'}</td>
       <td style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-wa btn-sm" onclick="slipAdvance(${p.id})">💬</button>
         <button class="btn btn-edit btn-sm" onclick="editPayment(${p.id})">✎ EDIT</button>
         <button class="btn btn-danger btn-sm" onclick="deletePayment(${p.id})">✕ DEL</button>
       </td>
@@ -5022,6 +5202,7 @@ function calculateFinalPayment() {
       <td class="adv-pending">${fmt(r.advTotal)}</td>
       <td class="${r.net >= 0 ? 'result-positive' : 'adv-pending'}" style="font-size:15px;font-weight:700;">${r.net < 0 ? '-' : ''}${fmt(Math.abs(r.net))}</td>
       <td>${status}</td>
+      <td><button class="btn btn-wa btn-sm" data-sh="${r.sh}" onclick="slipSettlement(this.dataset.sh)">💬 SLIP</button></td>
     `;
     tbody.appendChild(tr);
   });
@@ -5034,6 +5215,7 @@ function calculateFinalPayment() {
     <td class="result-positive" style="font-weight:700;">${fmt(totalShareAll)}</td>
     <td class="adv-pending" style="font-weight:700;">${fmt(totalAdvAll)}</td>
     <td class="${totalNetAll >= 0 ? 'result-positive' : 'adv-pending'}" style="font-size:16px;font-weight:700;">${totalNetAll < 0 ? '-' : ''}${fmt(Math.abs(totalNetAll))}</td>
+    <td></td>
     <td></td>
   `;
   tbody.appendChild(totTr);
@@ -5535,6 +5717,9 @@ function renderSupplierCards() {
       </div>
       <div style="margin-top:8px;text-align:center;">
         <span style="font-size:10px;font-weight:700;color:${statusColor};letter-spacing:1px;">${statusText}</span>
+      </div>
+      <div style="margin-top:10px;text-align:center;">
+        <button class="btn btn-wa btn-sm" data-sup="${sup}" onclick="slipSupplier(this.dataset.sup)">💬 SLIP</button>
       </div>
     `;
     container.appendChild(card);
@@ -6556,7 +6741,7 @@ function renderCreditSummary() {
       '<td style="text-align:right;color:#7ecfed;font-weight:700;">' + fmt(totalPaid) + '</td>' +
       '<td style="text-align:right;font-size:15px;font-weight:700;color:' + statusColor + ';">' + (outstanding < 0 ? '-' : '') + fmt(Math.abs(outstanding)) + ' ' + statusBadge + '</td>' +
       '<td style="color:var(--muted);">' + (lastPay ? fmtDate(lastPay) : '—') + '</td>' +
-      '<td><button class="btn btn-sm" style="background:rgba(255,159,67,0.15);color:var(--gold-light);border:1px solid var(--border);" onclick="showRetailerLedger(this.dataset.r)" data-r="' + retailer.replace(/"/g, '&quot;') + '">📒 LEDGER</button></td>';
+      '<td><button class="btn btn-sm" style="background:rgba(255,159,67,0.15);color:var(--gold-light);border:1px solid var(--border);" onclick="showRetailerLedger(this.dataset.r)" data-r="' + retailer.replace(/"/g, '&quot;') + '">📒 LEDGER</button> <button class="btn btn-wa btn-sm" onclick="slipCredit(this.dataset.r)" data-r="' + retailer.replace(/"/g, '&quot;') + '">💬 SLIP</button></td>';
     tbody.appendChild(tr);
   });
 }
