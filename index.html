@@ -916,6 +916,7 @@
 
     <div class="card-title">Select Present Shareholders</div>
     <div class="checkbox-grid" id="shareholder-checks"></div>
+    <div id="p2-weights-note" style="display:none;border:1px solid rgba(255,159,67,0.35);border-radius:10px;padding:12px 14px;margin-top:12px;background:rgba(255,159,67,0.04);"></div>
     <br>
     <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:8px;">
       <button class="btn btn-primary" onclick="saveAttendance()">✓ SAVE ATTENDANCE</button>
@@ -1009,7 +1010,7 @@
               <th>Profit (₹)</th>
               <th>Paagi (Cast Net)</th>
               <th>Shareholders</th>
-              <th>Share/Person (₹)</th>
+              <th title="Value of one normal (×1) share. Crew with a share weight earn this × their weight.">Share/Person (₹)</th>
             </tr>
           </thead>
           <tbody id="p3-daily-tbody"></tbody>
@@ -1372,7 +1373,8 @@
     <div style="font-size:12px;color:var(--muted);line-height:1.8;">
       <strong style="color:var(--text);">Archive</strong> hides a name from new entries but keeps every old record and report unchanged.<br>
       <strong style="color:var(--text);">Delete</strong> is only offered for names that were never used in any record.<br>
-      A name that is already used in records cannot be renamed — this protects your history.
+      A name that is already used in records cannot be renamed — this protects your history.<br>
+      <strong style="color:var(--text);">Share weight</strong> applies to attendance you record <em>from now on</em>. To apply a new weight to an older attendance record, open it with EDIT in Shareholder Attendance and tick “re-apply today's weights”.
     </div>
   </div>
 </div>
@@ -2204,7 +2206,7 @@
 // SUPPLIERS / AUCTION_AGENTS so past records and reports never change; pickers
 // use namesOf(key) which returns active items only.
 const KEY_LISTS = 'aafb_lists';
-const WEIGHTS_ENABLED = false;           // switched on together with share weights
+const WEIGHTS_ENABLED = true;            // share weights (×1 = normal). Snapshotted per attendance record.
 const LOCKED_EXPCATS = ['Tractor', 'Agent Commission', 'Other'];   // have special logic
 
 function buildDefaultLists() {
@@ -2316,6 +2318,8 @@ function escHtml(s) {
 }
 function crewPhone(name)     { const i = listItem('crew', name);      return i ? i.phone : ''; }
 function supplierPhone(name) { const i = listItem('suppliers', name); return i ? i.phone : ''; }
+function crewWeight(name) { const i = listItem('crew', name); return (i && i.weight > 0) ? i.weight : 1; }
+function fmtWt(w) { return String(parseFloat(Number(w).toFixed(2))); }
 function waNumber(phone) {
   let d = String(phone || '').replace(/\D/g, '');
   if (!d) return '';
@@ -3032,7 +3036,7 @@ function crossCheckDate() {
         '<button class="btn btn-sm" style="background:rgba(255,159,67,0.15);color:var(--gold-light);border:1px solid var(--border);" onclick="goPage(2);loadAttendanceForEdit(\'' + date + '\',\'' + (r.trip||'') + '\')">✎ EDIT</button>' +
         '</div>' +
         '<div style="font-size:13px;margin-bottom:4px;"><span style="color:var(--muted);">Fishing Type:</span> <strong>' + (r.fishingType||'—') + '</strong> &nbsp; <span style="color:var(--muted);">Present:</span> <strong>' + (r.present?r.present.length:0) + '</strong></div>' +
-        '<div style="font-size:12px;color:var(--muted);">' + (r.present?r.present.join(', '):'—') + '</div>' +
+        '<div style="font-size:12px;color:var(--muted);">' + (r.present?r.present.map(n => (r.weights && r.weights[n]) ? n + ' ×' + fmtWt(r.weights[n]) : n).join(', '):'—') + '</div>' +
         '</div>';
     });
     attBox.innerHTML = html;
@@ -3460,7 +3464,8 @@ function buildAttendanceGrid(extraNames) {
     const div = document.createElement('div');
     div.className = 'checkbox-item' + (keep[sh] ? ' checked' : '');
     div.dataset.name = sh;
-    div.innerHTML = '<input type="checkbox"><div class="check-box">' + (keep[sh] ? '✓' : '') + '</div><span>' + escHtml(sh) + '</span>';
+    div.innerHTML = '<input type="checkbox"><div class="check-box">' + (keep[sh] ? '✓' : '') + '</div><span>' + escHtml(sh) +
+      (WEIGHTS_ENABLED && crewWeight(sh) !== 1 ? ' <em style="color:var(--gold-light);font-style:normal;font-size:11px;">×' + fmtWt(crewWeight(sh)) + '</em>' : '') + '</span>';
     div.onclick = () => toggleCheck(div);
     grid.appendChild(div);
   });
@@ -3541,6 +3546,36 @@ function updatePaagiRemaining() {
   }
 }
 
+// ---- share weights: info shown while editing an existing attendance record ----
+function showWeightsNote(rec) {
+  const box = document.getElementById('p2-weights-note');
+  if (!box) return;
+  const saved = rec.weights || {};
+  const savedNames = Object.keys(saved);
+  const diff = (rec.present || []).filter(n => (saved[n] || 1) !== crewWeight(n));
+  let h = '<div style="font-size:12px;font-weight:700;color:var(--gold-light);margin-bottom:6px;">⚖ SHARE WEIGHTS ON THIS RECORD</div>';
+  h += '<div style="font-size:12px;color:var(--muted);line-height:1.7;">' +
+       (savedNames.length ? 'Saved weights: ' + savedNames.map(n => escHtml(n) + ' ×' + fmtWt(saved[n])).join(', ')
+                          : 'Everyone on this record has a normal share (×1).') + '</div>';
+  if (diff.length) {
+    h += '<label style="display:flex;align-items:flex-start;gap:8px;margin-top:8px;font-size:12px;color:var(--text);cursor:pointer;">' +
+         '<input type="checkbox" id="p2-reapply-weights" style="margin-top:2px;"> <span>Re-apply today\'s weights from ⚙ Manage to everyone on this record (' +
+         diff.map(n => escHtml(n) + ' → ×' + fmtWt(crewWeight(n))).join(', ') +
+         '). Leave unticked to keep this record exactly as it was saved.</span></label>';
+  }
+  box.innerHTML = h;
+  box.style.display = 'block';
+}
+function hideWeightsNote() {
+  const b = document.getElementById('p2-weights-note');
+  if (b) { b.style.display = 'none'; b.innerHTML = ''; }
+}
+// Share units of the PRESENT crew on a trip when weights are used (null when everyone is ×1)
+function weightedUnits(d) {
+  if (!d.weights || !Object.keys(d.weights).length) return null;
+  return fmtWt(d.totalUnits - ((d.paagi && d.paagi.length) ? 1 : 0));
+}
+
 function clearAll() {
   document.querySelectorAll('.checkbox-item').forEach(d => {
     d.classList.remove('checked');
@@ -3593,17 +3628,33 @@ function saveAttendance() {
   }
 
   const existing = attendanceRecords.findIndex(r => r.date === date && (r.trip || '') === trip);
+  const oldRec = existing >= 0 ? attendanceRecords[existing] : null;
   if (existing >= 0) {
     if (!confirm('Attendance for this date' + (trip ? ' (' + trip + ' trip)' : '') + ' exists. Replace?')) return;
     attendanceRecords.splice(existing, 1);
   }
 
-  attendanceRecords.push({ date, trip, fishingType, present, paagi });
+  // Share weights are SNAPSHOTTED into the record, so changing a weight later in
+  // ⚙ MANAGE never alters a period that was already recorded. When an existing
+  // record is edited, people who were already on it keep the weight they had
+  // (unless "re-apply today's weights" is ticked); newly added people get today's weight.
+  const _re = document.getElementById('p2-reapply-weights');
+  const reapply = !!(_re && _re.checked);
+  const weights = {};
+  present.forEach(function(name) {
+    let wt;
+    if (oldRec && !reapply && (oldRec.present || []).indexOf(name) !== -1) wt = (oldRec.weights && oldRec.weights[name]) || 1;
+    else wt = crewWeight(name);
+    if (wt !== 1) weights[name] = wt;
+  });
+
+  attendanceRecords.push({ date, trip, fishingType, present, paagi, weights });
   attendanceRecords.sort((a,b) => a.date.localeCompare(b.date) || (a.trip||'').localeCompare(b.trip||''));
   save(KEY_ATTEND, attendanceRecords);
 
   clearAll();
   buildAttendanceGrid();
+  hideWeightsNote();
   renderP2Table();
   showToast('✓ Attendance saved — ' + fmtDate(date) + (trip ? ' | ' + trip + ' Trip' : '') + (fishingType ? ' | ' + fishingType + ' Fishing' : '') + (paagi.length ? ' | Paagi: ' + paagi.map(p=>p.name+' '+p.percent+'%').join(', ') : ''));
 }
@@ -3649,6 +3700,7 @@ function loadAttendanceForEdit(date, trip) {
     if (inp) { inp.style.display = 'inline-block'; inp.value = p.percent; }
   });
   updatePaagiRemaining();
+  showWeightsNote(rec);
   window.scrollTo(0, 0);
 }
 
@@ -3665,7 +3717,7 @@ function renderP2Table() {
       <td><span class="badge badge-gold">${fmtDate(r.date)}</span></td>
       <td>${r.trip ? '<span class="badge" style="background:rgba(30,107,138,0.25);color:#7ecfed;border:1px solid rgba(30,107,138,0.5);">🕐 ' + r.trip + '</span>' : '<span style="color:var(--muted);font-size:12px;">Full Day</span>'}</td>
       <td>${r.fishingType ? '<span class="badge" style="background:rgba(255,159,67,0.2);color:var(--gold-light);border:1px solid rgba(255,159,67,0.3);">🎣 ' + r.fishingType + '</span>' : '<span style="color:var(--muted);font-size:12px;">—</span>'}${(r.paagi && r.paagi.length) ? '<br>' + r.paagi.map(p => '<span class="badge" style="background:rgba(248,113,113,0.15);color:#f87171;border:1px solid rgba(248,113,113,0.3);font-size:10px;margin-top:3px;">🎯 ' + p.name + ' ' + p.percent + '%</span>').join(' ') : ''}</td>
-      <td style="font-size:13px;color:var(--muted)">${r.present.join(', ')}</td>
+      <td style="font-size:13px;color:var(--muted)">${r.present.map(n => (r.weights && r.weights[n]) ? n + ' ×' + fmtWt(r.weights[n]) : n).join(', ')}</td>
       <td><span class="badge badge-green">${r.present.length}</span></td>
       <td style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn btn-sm" style="background:rgba(30,107,138,0.3);color:#7ecfed;border:1px solid rgba(30,107,138,0.5)" onclick="loadAttendanceForEdit('${r.date}','${r.trip || ''}')">✎ EDIT</button>
@@ -3824,7 +3876,9 @@ function exportShareTransparencyPDF() {
       '<td style="text-align:right;color:#888;">' + (d.ratio*100).toFixed(1) + '%</td>' +
       '<td style="text-align:right;color:#c0392b;">&#8377;' + fmtN(d.allocExpense) + '</td>' +
       '<td style="text-align:right;color:#1a7a4a;font-weight:700;">&#8377;' + fmtN(d.profit) + '</td>' +
-      '<td style="text-align:center;">' + d.numPresent + '</td>' +
+      '<td style="text-align:center;">' + d.numPresent +
+        (weightedUnits(d) !== null ? '<div style="color:#a06a1a;font-size:9px;">⚖ ' + weightedUnits(d) + ' units</div>' : '') +
+        ((d.paagi && d.paagi.length) ? '<div style="color:#c0392b;font-size:9px;">+1 Paagi</div>' : '') + '</td>' +
       '<td style="text-align:right;color:#0a5c2e;font-weight:700;">&#8377;' + fmtN(d.sharePerPerson) + '</td>' +
       '</tr>';
   });
@@ -3851,6 +3905,9 @@ function exportShareTransparencyPDF() {
     catHtml += '<tr><td>' + r.cat + '</td><td style="text-align:right;color:#c0392b;font-weight:700;">&#8377;' + fmtN(r.amount) + '</td><td style="text-align:right;color:#888;">' + pct.toFixed(1) + '%</td></tr>';
   });
   catHtml += '<tr style="background:#0a1628;"><td style="color:#ff9f43;font-weight:700;">TOTAL EXPENSE</td><td style="text-align:right;color:#fca5a5;font-weight:700;">&#8377;' + fmtN(catGrandTotal) + '</td><td style="text-align:right;color:#ff9f43;">100%</td></tr>';
+
+  const anyWeighted = _p3DailyBreakdown.some(d => weightedUnits(d) !== null);
+  const anyPaagi = _p3DailyBreakdown.some(d => d.paagi && d.paagi.length);
 
   var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Share Transparency Report</title>' +
     '<style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,Helvetica,sans-serif;color:#1a1a2e;background:#fff;padding:26px;font-size:13px;}table{width:100%;border-collapse:collapse;margin-bottom:18px;}th{background:#0a1628;color:#ff9f43;font-size:9px;text-transform:uppercase;padding:8px 10px;text-align:left;font-weight:700;}td{padding:7px 10px;border-bottom:1px solid #e8e0d0;}tr:nth-child(even) td{background:#faf7f0;}@media print{body{padding:14px;}@page{margin:11mm;size:A4;}}</style>' +
@@ -3881,6 +3938,8 @@ function exportShareTransparencyPDF() {
     '1. Expenses like petrol, ice, food and tractor are <strong>shared fairly across the whole period</strong>, not charged only to the day they happened — because one trip\'s petrol or ice often supports more than one fishing day.<br>' +
     '2. Every day\'s share of expense = that day\'s sales × the <strong>period expense ratio</strong> (' + (ratio*100).toFixed(2) + '% for this period) — shown in the "Alloc. Expense" column below. This is a fair, consistent formula applied equally to every single day.<br>' +
     '3. <strong>Share per person</strong> = (that day\'s profit after its fair expense share) ÷ <strong>number of crew present that day</strong>. A day with a big catch but more crew present will still give a smaller per-person share than a smaller catch with fewer crew — this is not a mistake, it is simple division.<br>' +
+    (anyWeighted ? '3a. <strong>Weighted shares:</strong> some crew members carry a share weight (shown as "⚖ units"). A weight of ×1.25 means that person earns 1.25 normal shares for the day; the day\'s profit is divided by the total share <em>units</em> present instead of the head-count.<br>' : '') +
+    (anyPaagi ? '3b. <strong>Paagi (cast net, squid fishing):</strong> the Paagi role earns <strong>one extra normal share</strong> that day (shown as "+1 Paagi"). If more than one person cast the net, that single share is split between them by the agreed percentage. This is why the per-person share on squid days is the profit divided by (crew + 1).<br>' : '') +
     '4. The category table below shows exactly where every rupee of expense went — nothing is hidden.' +
     '</div></div>' +
 
@@ -3946,9 +4005,19 @@ function calculateShares() {
     // than one person cast the net, that single share is split between them
     // by the percentage set in attendance, on top of their normal presence share.
     const paagiList = (attend && attend.paagi && attend.paagi.length) ? attend.paagi : [];
-    const shareDivisor = numPresent + (paagiList.length > 0 ? 1 : 0);
-    const sharePerPerson = shareDivisor > 0 ? profit / shareDivisor : 0;
-    const paagiShareUnit = sharePerPerson; // the "+1" share, same value as everyone else's
+    // Share weights: each present person counts as `weight` share units (1 = normal).
+    // They come from the attendance record (a snapshot), so old periods never change.
+    const wmap = (attend && attend.weights) ? attend.weights : {};
+    const weightsUsed = {};
+    let presentUnits = 0;
+    present.forEach(function(n) {
+      const wt = (wmap[n] > 0) ? wmap[n] : 1;
+      presentUnits += wt;
+      if (wt !== 1) weightsUsed[n] = wt;
+    });
+    const shareDivisor = presentUnits + (paagiList.length > 0 ? 1 : 0);
+    const sharePerPerson = shareDivisor > 0 ? profit / shareDivisor : 0;   // value of ONE normal (×1) share
+    const paagiShareUnit = sharePerPerson; // the "+1" share — always one normal share, regardless of anyone's weight
     const paagiBreakdown = paagiList.map(function(p) {
       return { name: p.name, percent: p.percent, bonus: paagiShareUnit * (p.percent / 100) };
     });
@@ -3962,6 +4031,8 @@ function calculateShares() {
       allocExpense,
       profit,
       numPresent,
+      totalUnits: shareDivisor,
+      weights: weightsUsed,
       sharePerPerson: sharePerPerson,
       present: present,
       paagi: paagiBreakdown
@@ -4014,7 +4085,7 @@ function calculateShares() {
     d.present.forEach(sh => {
       if (!shareMap[sh]) shareMap[sh] = { days: 0, total: 0 };
       shareMap[sh].days++;
-      shareMap[sh].total += d.sharePerPerson;
+      shareMap[sh].total += d.sharePerPerson * ((d.weights && d.weights[sh]) || 1);
     });
     // Paagi bonus — additional, on top of the normal presence share above
     (d.paagi || []).forEach(function(p) {
@@ -4060,7 +4131,7 @@ function calculateShares() {
       <td class="result-negative">${fmt(d.allocExpense)}</td>
       <td class="result-positive">${fmt(d.profit)}</td>
       <td>${(d.paagi && d.paagi.length) ? d.paagi.map(p => '<span class="badge" style="background:rgba(248,113,113,0.15);color:#f87171;border:1px solid rgba(248,113,113,0.3);margin:1px;">🎯 ' + p.name + ' ' + p.percent + '% (' + fmt(p.bonus) + ')</span>').join(' ') : '<span style="color:var(--muted);font-size:11px;">—</span>'}</td>
-      <td><span class="badge badge-green">${d.numPresent}</span>${(d.paagi && d.paagi.length) ? ' <span style="color:#f87171;font-size:10px;">+1 Paagi share</span>' : ''}</td>
+      <td><span class="badge badge-green">${d.numPresent}</span>${weightedUnits(d) !== null ? ' <span style="color:var(--gold-light);font-size:10px;">⚖ ' + weightedUnits(d) + ' units</span>' : ''}${(d.paagi && d.paagi.length) ? ' <span style="color:#f87171;font-size:10px;">+1 Paagi share</span>' : ''}</td>
       <td class="result-positive">${fmt(d.sharePerPerson)}</td>
     `;
     dtbody.appendChild(tr);
@@ -4158,17 +4229,18 @@ function showIndividual(name) {
     if (!wasPresent && !paagiEntry) return;
 
     daysPresent++;
-    const baseShare = wasPresent ? d.sharePerPerson : 0;
+    const wt = wasPresent ? ((d.weights && d.weights[name]) || 1) : 1;
+    const baseShare = wasPresent ? d.sharePerPerson * wt : 0;
     const paagiBonus = paagiEntry ? paagiEntry.bonus : 0;
     const dayTotal = baseShare + paagiBonus;
     totalShareEarned += dayTotal;
-    dailyRows.push({ date: d.date, earned: dayTotal, baseShare: baseShare, paagiBonus: paagiBonus, paagiPercent: paagiEntry ? paagiEntry.percent : 0, fishingType: d.fishingType || '', trip: d.trip || '' });
+    dailyRows.push({ date: d.date, earned: dayTotal, weight: wt, baseShare: baseShare, paagiBonus: paagiBonus, paagiPercent: paagiEntry ? paagiEntry.percent : 0, fishingType: d.fishingType || '', trip: d.trip || '' });
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td><span class="badge badge-gold">${fmtDate(d.date)}</span>${d.trip ? ' <span class="badge" style="background:rgba(30,107,138,0.25);color:#7ecfed;border:1px solid rgba(30,107,138,0.5);">🕐 ' + d.trip + '</span>' : ''}</td>
       <td>${d.fishingType ? '<span class="badge" style="background:rgba(255,159,67,0.15);color:var(--gold-light);">🎣 ' + d.fishingType + '</span>' : '<span style="color:var(--muted);font-size:11px;">—</span>'}</td>
-      <td style="text-align:right;">${wasPresent ? fmt(baseShare) : '<span style="color:var(--muted);font-size:11px;">—</span>'}</td>
+      <td style="text-align:right;">${wasPresent ? fmt(baseShare) + (wt !== 1 ? ' <span style="color:var(--gold-light);font-size:11px;">×' + fmtWt(wt) + '</span>' : '') : '<span style="color:var(--muted);font-size:11px;">—</span>'}</td>
       <td style="text-align:right;">${paagiEntry ? '<span style="color:#f87171;font-weight:700;">🎯 ' + paagiEntry.percent + '% = ' + fmt(paagiBonus) + '</span>' : '<span style="color:var(--muted);font-size:11px;">—</span>'}</td>
       <td class="result-positive" style="text-align:right;font-size:15px;font-weight:700;">${fmt(dayTotal)}</td>
     `;
@@ -4213,7 +4285,7 @@ function exportToPDF() {
   (d.dailyRows||[]).forEach(function(r) {
     shareRows += '<tr><td>' + pdfD(r.date) + (r.trip ? ' <span style="color:#1e6b8a;font-size:11px;font-weight:700;">(' + r.trip + ')</span>' : '') + '</td>' +
       '<td style="color:#c9a84c;font-size:12px;">' + (r.fishingType ? '🎣 ' + r.fishingType : '—') + '</td>' +
-      '<td style="text-align:right;color:#444;">' + (r.baseShare ? '&#8377;' + fmtN(r.baseShare) : '—') + '</td>' +
+      '<td style="text-align:right;color:#444;">' + (r.baseShare ? '&#8377;' + fmtN(r.baseShare) + (r.weight && r.weight !== 1 ? ' <span style="color:#a06a1a;font-size:10px;">×' + r.weight + '</span>' : '') : '—') + '</td>' +
       '<td style="text-align:right;color:#c0392b;">' + (r.paagiBonus ? r.paagiPercent + '% = &#8377;' + fmtN(r.paagiBonus) : '—') + '</td>' +
       '<td style="text-align:right;color:#1a7a4a;font-size:15px;font-weight:700;">&#8377;' + fmtN(r.earned) + '</td></tr>';
   });
@@ -4295,15 +4367,15 @@ function exportToCSV() {
   lines.push([]);
 
   // Table header
-  lines.push(['Date', 'Trip', 'Share Earned (Rs)']);
+  lines.push(['Date', 'Trip', 'Weight', 'Share (Rs)', 'Paagi Bonus (Rs)', 'Share Earned (Rs)']);
 
   // Daily rows
   (d.dailyRows || []).forEach(function(r) {
-    lines.push([pdfD(r.date), r.trip || 'Full Day', r.earned]);
+    lines.push([pdfD(r.date), r.trip || 'Full Day', r.weight || 1, r.baseShare || 0, r.paagiBonus || 0, r.earned]);
   });
 
   // Total row
-  lines.push(['TOTAL (' + d.daysPresent + ' trips)', '', d.totalShareEarned]);
+  lines.push(['TOTAL (' + d.daysPresent + ' trips)', '', '', '', '', d.totalShareEarned]);
 
   // Build CSV
   const csv = lines.map(function(row) {
@@ -4432,7 +4504,7 @@ function emptyPara(text) {
 let _mgTab = 'crew';
 let _mgEditRef = null;     // { key, idx } while the edit popup is open
 const MG_DEFS = {
-  crew:      { label: 'Crew',               hint: 'Crew, boats and owner shares. Archive someone who has left — their old records and reports stay exactly as they were. Add a phone number to send WhatsApp slips straight to them.' },
+  crew:      { label: 'Crew',               hint: 'Crew, boats and owner shares. Share weight: 1 = normal share, 1.25 = a quarter more, 0.5 = half. The weight is saved with each attendance record when you save it, so changing it later never changes past periods. Archive someone who has left — old records stay exactly as they were. Add a phone number to send WhatsApp slips straight to them.' },
   suppliers: { label: 'Suppliers',          hint: 'Fish suppliers / buyers. "Local" and "Auction" are built-in sale types and are not listed here.' },
   fish:      { label: 'Fish Names',         hint: 'Fish names shown in the Daily Records sales dropdown.' },
   expcats:   { label: 'Expense Categories', hint: 'Tractor, Agent Commission and Other have built-in logic and are locked.' },
@@ -4731,6 +4803,7 @@ function slipTripWise() {
   (d.dailyRows || []).forEach(function(r, i) {
     t += (i + 1) + '. ' + fmtDate(r.date) + ' [' + (r.trip || 'Full Day') + ']' +
          (r.fishingType ? ' (' + r.fishingType + ')' : '') + ': *' + fmt(r.earned) + '*' +
+         (r.weight && r.weight !== 1 ? ' (×' + fmtWt(r.weight) + ' share)' : '') +
          (r.paagiBonus ? ' [🎯 Paagi ' + r.paagiPercent + '%: +' + fmt(r.paagiBonus) + ']' : '') + '\n';
   });
   t += SLIP_LINE + '\n✨ *TOTAL SHARE EARNED:* *' + fmt(d.totalShareEarned) + '*\n' + SLIP_LINE + '\n_Al Ahmed Fleet Management_';
@@ -5848,13 +5921,9 @@ function calculateGroup() {
 
   selected.forEach(sh => {
     // Share earned
-    let days = 0, shareEarned = 0;
-    _p3DailyBreakdown.forEach(d => {
-      if (d.present.includes(sh)) {
-        days++;
-        shareEarned += d.sharePerPerson;
-      }
-    });
+    // Same per-person totals as the main calculation (includes share weights and Paagi bonus)
+    const _sm = (_p3ShareMap && _p3ShareMap[sh]) ? _p3ShareMap[sh] : { days: 0, total: 0 };
+    let days = _sm.days, shareEarned = _sm.total;
     // Carry forward
     const carry = getCarryForward(sh, startDate);
     // Advances (from cutoff to settle date)
