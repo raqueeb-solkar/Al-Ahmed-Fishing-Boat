@@ -730,6 +730,7 @@
       ⬆ LOCAL RESTORE
       <input type="file" accept=".json" id="import-file-input" style="display:none" onchange="importData(event)">
     </label>
+    <button class="btn btn-sm" style="background:rgba(255,159,67,0.2);color:#ff9f43;border:1px solid rgba(255,159,67,0.4);" onclick="showPage(9)" title="Add or edit crew, suppliers, fish names, categories">⚙ MANAGE</button>
     <button class="btn btn-sm" style="background:rgba(192,57,43,0.2);color:#e74c3c;border:1px solid rgba(192,57,43,0.4);" onclick="logout()">🔒 LOGOUT</button>
   </div>
 </div>
@@ -1347,10 +1348,71 @@
 </div>
 
 <!-- EDIT MODAL: Payment -->
+<!-- ===== PAGE 9: MANAGE LISTS ===== -->
+<div class="page" id="page9">
+  <div class="page-title">⚙ Manage Lists</div>
+
+  <div class="card">
+    <div id="mg-tabs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"></div>
+    <div id="mg-hint" style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6;"></div>
+    <div class="form-row" id="mg-form" style="align-items:flex-end;"></div>
+  </div>
+
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead id="mg-thead"></thead>
+        <tbody id="mg-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:rgba(255,159,67,0.3);">
+    <div class="card-title">How this works</div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.8;">
+      <strong style="color:var(--text);">Archive</strong> hides a name from new entries but keeps every old record and report unchanged.<br>
+      <strong style="color:var(--text);">Delete</strong> is only offered for names that were never used in any record.<br>
+      A name that is already used in records cannot be renamed — this protects your history.
+    </div>
+  </div>
+</div>
+
+<!-- MANAGE: EDIT POPUP -->
+<div class="modal-overlay" id="modal-mg-edit" onclick="if(event.target===this)closeModal('modal-mg-edit')">
+  <div class="modal">
+    <div class="modal-title" id="mg-edit-title">✎ Edit</div>
+    <div class="form-group" style="margin-bottom:14px">
+      <label>Name</label>
+      <input type="text" id="mg-e-name" maxlength="40">
+      <div id="mg-e-note" style="font-size:11px;color:var(--muted);margin-top:4px;"></div>
+    </div>
+    <div class="form-group" id="mg-e-phone-wrap" style="margin-bottom:14px">
+      <label>WhatsApp Phone (optional)</label>
+      <input type="tel" id="mg-e-phone" placeholder="e.g. 9876543210">
+    </div>
+    <div class="form-group" id="mg-e-weight-wrap" style="margin-bottom:14px">
+      <label>Share Weight (1 = normal share)</label>
+      <input type="number" id="mg-e-weight" step="0.05" min="0.1" max="5">
+    </div>
+    <div class="form-group" id="mg-e-owner-wrap" style="margin-bottom:14px">
+      <label>Owner Group</label>
+      <select id="mg-e-owner" style="padding:10px 12px;background:rgba(13,17,23,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;">
+        <option value="0">No</option>
+        <option value="1">Yes — boat / engine / owner share</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('modal-mg-edit')">CANCEL</button>
+      <button class="btn btn-primary" onclick="mgSaveEdit()">✓ SAVE</button>
+    </div>
+  </div>
+</div>
+
 <!-- WHATSAPP SLIP PREVIEW -->
 <div class="modal-overlay" id="modal-slip" onclick="if(event.target===this)closeModal('modal-slip')">
   <div class="modal">
     <div class="modal-title" id="slip-title">💬 WhatsApp Slip</div>
+    <div id="slip-to" style="font-size:11px;color:var(--muted);margin-bottom:8px;"></div>
     <pre id="slip-preview" style="white-space:pre-wrap;word-break:break-word;background:rgba(13,17,23,0.8);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.6;max-height:50vh;overflow-y:auto;color:var(--text);margin-bottom:14px;"></pre>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('modal-slip')">CLOSE</button>
@@ -2134,18 +2196,185 @@
 
 <script>
 // ===== DATA =====
-const SHAREHOLDERS = [
-  'Azim','Taasir','Maqsood','Ittifaque','Zubair','Sufiyan',
-  'IrfanW','IrfanS','Shafi','Riyaz','Salim','Maqbool','Maazin',
-  'Sagir','Parvez','Nazim','Sarfaraz','Munim','Affan','Altamash','Azman','Sahel','Ayyan','Aman','Paagi','Zaid','Zihan','Tandel 1','Tandel 2','Owner',
-  'Al Muhammad Boat','Al Muhammad Boat Engine',
-  'Al Bahar Boat','Al Bahar Boat Engine',
-  'Maryam Boat','Maryam Boat Engine',
-  'Safiya Boat','Safiya Boat Engine',
-  'Al Ahmed Boat','Al Ahmed Boat Engine',
-  'Net A 1','Net A 2','Net R 1','Net R 2',
-  'Dhanda 1','Dhanda 2'
-];
+// ===== EDITABLE LISTS =====
+// Crew, suppliers, fish names, expense categories, tractor providers and auction
+// agents are managed from the ⚙ MANAGE page. The values below are only the
+// STARTING DEFAULTS (identical to the lists that used to be hardcoded) and are
+// used only until the owner saves a list. Archived items stay in SHAREHOLDERS /
+// SUPPLIERS / AUCTION_AGENTS so past records and reports never change; pickers
+// use namesOf(key) which returns active items only.
+const KEY_LISTS = 'aafb_lists';
+const WEIGHTS_ENABLED = false;           // switched on together with share weights
+const LOCKED_EXPCATS = ['Tractor', 'Agent Commission', 'Other'];   // have special logic
+
+function buildDefaultLists() {
+  const crewNames = [
+    'Azim','Taasir','Maqsood','Ittifaque','Zubair','Sufiyan',
+    'IrfanW','IrfanS','Shafi','Riyaz','Salim','Maqbool','Maazin',
+    'Sagir','Parvez','Nazim','Sarfaraz','Munim','Affan','Altamash','Azman','Sahel','Ayyan','Aman','Paagi','Zaid','Zihan','Tandel 1','Tandel 2','Owner',
+    'Al Muhammad Boat','Al Muhammad Boat Engine',
+    'Al Bahar Boat','Al Bahar Boat Engine',
+    'Maryam Boat','Maryam Boat Engine',
+    'Safiya Boat','Safiya Boat Engine',
+    'Al Ahmed Boat','Al Ahmed Boat Engine',
+    'Net A 1','Net A 2','Net R 1','Net R 2',
+    'Dhanda 1','Dhanda 2'
+  ];
+  const ownerNames = [
+    'Owner',
+    'Al Muhammad Boat','Al Muhammad Boat Engine',
+    'Al Bahar Boat','Al Bahar Boat Engine',
+    'Maryam Boat','Maryam Boat Engine',
+    'Safiya Boat','Safiya Boat Engine',
+    'Al Ahmed Boat','Al Ahmed Boat Engine',
+    'Net R 1','Net R 2',
+    'Dhanda 1','Dhanda 2'
+  ];
+  const plain = n => ({ name: n, archived: false });
+  return {
+    crew: crewNames.map(n => ({ name: n, phone: '', weight: 1, owner: ownerNames.indexOf(n) !== -1, archived: false })),
+    suppliers: ['A Gift','MGM','Noori Fish','Noori Squid','Mansoori','AFF','Farook','Chawan','Gulshad']
+      .map(n => ({ name: n, phone: '', archived: false })),
+    fish: ['Tawar','Popat','Morosa','Popti','Harya','Dhandas','Karli','Gobra','Squid','Bangda','Tarli','Pomfret','White',
+           'Surmai','Goti Squid','ATF','Taar Masa','Return Waqti','Fishmeal','Other'].map(plain),
+    expcats: ['Petrol','Ice','Waqti','Tractor','Engine Oil','2T Oil','Bhatta','Nashta','Dinner','Lunch','Water','Cold Drink',
+              'Rickshaw Petrol Rent','Tempo Rent','Bangda','Agent Commission','Other']
+      .map(n => ({ name: n, archived: false, locked: LOCKED_EXPCATS.indexOf(n) !== -1 })),
+    tractors: ['Kakade','AAT','Mayuresh'].map(plain),
+    agents: ['Baba','Sunny','Nazir Chickte','Zaheer Chickte','Anjum Mahaldar','Rizwan','Arai','Saeed Chickte','Sagir Mahaldar','Other'].map(plain)
+  };
+}
+
+// Accepts anything (old backup, hand-edited JSON) and returns a clean lists object.
+function sanitizeLists(src, defaults) {
+  const out = {};
+  Object.keys(defaults).forEach(function(key) {
+    const arr = (src && Array.isArray(src[key])) ? src[key] : null;
+    if (!arr) { out[key] = defaults[key]; return; }
+    const seen = {};
+    out[key] = [];
+    arr.forEach(function(it) {
+      if (!it || typeof it.name !== 'string') return;
+      const name = it.name.trim();
+      if (!name || seen[name.toLowerCase()]) return;
+      seen[name.toLowerCase()] = true;
+      const item = { name: name, archived: !!it.archived };
+      if (key === 'crew') {
+        item.phone = String(it.phone || '');
+        const w = parseFloat(it.weight);
+        item.weight = (w > 0 && w <= 5) ? w : 1;
+        item.owner = !!it.owner;
+      }
+      if (key === 'suppliers') item.phone = String(it.phone || '');
+      if (key === 'expcats') item.locked = LOCKED_EXPCATS.indexOf(name) !== -1;
+      out[key].push(item);
+    });
+  });
+  // locked expense categories must always exist and stay active
+  LOCKED_EXPCATS.forEach(function(n) {
+    const f = out.expcats.find(i => i.name === n);
+    if (!f) out.expcats.push({ name: n, archived: false, locked: true });
+    else { f.locked = true; f.archived = false; }
+  });
+  return out;
+}
+
+function loadLists() {
+  const defaults = buildDefaultLists();
+  try {
+    const raw = localStorage.getItem(KEY_LISTS);
+    if (!raw) return defaults;
+    return sanitizeLists(JSON.parse(raw), defaults);
+  } catch (e) { return defaults; }
+}
+let lists = loadLists();
+
+// Derived arrays used all over the app. They hold EVERYTHING (active + archived)
+// so history and reports stay complete. Mutated in place, never reassigned.
+const SHAREHOLDERS = [];
+const OWNER_SHARES = [];
+const SUPPLIERS = [];
+const AUCTION_AGENTS = [];
+function applyListsToConstants() {
+  SHAREHOLDERS.length = 0;   lists.crew.forEach(i => SHAREHOLDERS.push(i.name));
+  OWNER_SHARES.length = 0;   lists.crew.forEach(i => { if (i.owner) OWNER_SHARES.push(i.name); });
+  SUPPLIERS.length = 0;      SUPPLIERS.push('Local', 'Auction'); lists.suppliers.forEach(i => SUPPLIERS.push(i.name));
+  AUCTION_AGENTS.length = 0; lists.agents.forEach(i => AUCTION_AGENTS.push(i.name));
+}
+applyListsToConstants();
+
+function saveLists() { save(KEY_LISTS, lists); }
+
+// ---- accessors ----
+function namesOf(key, includeArchived) {
+  return lists[key].filter(i => includeArchived || !i.archived).map(i => i.name);
+}
+function listItem(key, name) { return lists[key].find(i => i.name === name) || null; }
+function withSel(names, sel) { return (sel && names.indexOf(sel) === -1) ? names.concat([sel]) : names; }
+function escHtml(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function crewPhone(name)     { const i = listItem('crew', name);      return i ? i.phone : ''; }
+function supplierPhone(name) { const i = listItem('suppliers', name); return i ? i.phone : ''; }
+function waNumber(phone) {
+  let d = String(phone || '').replace(/\D/g, '');
+  if (!d) return '';
+  if (d.length === 11 && d.charAt(0) === '0') d = d.slice(1);
+  if (d.length === 10) d = '91' + d;            // Indian mobile
+  return d;
+}
+
+// ---- <option> builders for JS-built rows ----
+function optsHtml(names, sel, prefix) {
+  return names.map(n => '<option value="' + escHtml(n) + '"' + (n === sel ? ' selected' : '') + '>' + (prefix || '') + escHtml(n) + '</option>').join('');
+}
+function fishOptionsHtml(sel)        { return optsHtml(withSel(namesOf('fish'), sel), sel); }
+function expCatOptionsHtml(sel)      { return optsHtml(withSel(namesOf('expcats'), sel), sel); }
+function agentOptionsHtml(sel)       { return optsHtml(withSel(namesOf('agents'), sel), sel); }
+function tractorOptionsHtml(sel)     { return optsHtml(withSel(namesOf('tractors'), sel), sel, '🚜 '); }
+function expSupplierOptionsHtml(sel) { return '<option value="">— No Supplier —</option>' + optsHtml(withSel(namesOf('suppliers'), sel), sel); }
+function defaultTractor()            { return namesOf('tractors')[0] || ''; }
+function makeSaleSupplierOptions(selected) {
+  return '<option value="">— Select —</option>' + optsHtml(withSel(['Local', 'Auction'].concat(namesOf('suppliers')), selected), selected);
+}
+
+// ---- fill the <select> elements that live in the static HTML ----
+function fillSelectById(id, names, o) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const prev = el.value;
+  let html = '';
+  if (o && o.first) html += '<option value="' + escHtml(o.first[0]) + '">' + escHtml(o.first[1]) + '</option>';
+  else if (o && o.keepFirst && el.options.length) html += el.options[0].outerHTML;
+  names.forEach(n => { html += '<option value="' + escHtml(n) + '">' + escHtml(n) + '</option>'; });
+  el.innerHTML = html;
+  if (prev && Array.prototype.some.call(el.options, op => op.value === prev)) el.value = prev;
+}
+function refreshListDropdowns() {
+  const fixed = ['Local', 'Auction'];
+  const supA = namesOf('suppliers'), supAll = namesOf('suppliers', true);
+  fillSelectById('fs-supplier',        supA,                    { first: ['', '— Select Supplier —'] });
+  fillSelectById('fp2-supplier',       fixed.concat(supA),      { first: ['', '— Select Supplier —'] });
+  fillSelectById('fs-pay-filter',      fixed.concat(supAll),    { first: ['', 'All Suppliers'] });
+  fillSelectById('fs-ledger-supplier', fixed.concat(supAll),    { first: ['', '— All Suppliers —'] });
+  fillSelectById('fs-filter-supplier', fixed.concat(supAll),    { first: ['', 'All Suppliers'] });
+  fillSelectById('esp-supplier',       fixed.concat(supAll),    {});
+  const trA = namesOf('tractors'), trAll = namesOf('tractors', true);
+  fillSelectById('tt-provider',        trA,                     {});
+  fillSelectById('tt-pay-provider',    trA,                     {});
+  fillSelectById('tt-filter-provider', trAll,                   { first: ['', 'All Providers'] });
+  fillSelectById('tt-log-filter',      trAll,                   { first: ['', 'All Providers'] });
+  const agA = namesOf('agents'), agAll = namesOf('agents', true);
+  fillSelectById('ag-pay-agent',       agA,                     { first: ['', '— Select Agent —'] });
+  fillSelectById('ag-filter-agent',    agAll,                   { first: ['', 'All Agents'] });
+  fillSelectById('ag-log-filter',      agAll,                   { first: ['', 'All Agents'] });
+  const crA = namesOf('crew'), crAll = namesOf('crew', true);
+  fillSelectById('p4-member',          crA,                     { keepFirst: true });
+  fillSelectById('p4-filter-member',   crAll,                   { keepFirst: true });
+  fillSelectById('edit-pay-member',    crA,                     {});
+  fillSelectById('adv-stmt-member',    crAll,                   { keepFirst: true });
+}
+
 
 // Fishing trips within a single day. An empty trip ('') means the boat went out
 // once that day — every record created before multi-trip support is stored that way.
@@ -2210,7 +2439,9 @@ function showPage(n) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('page' + n).classList.add('active');
-  document.querySelectorAll('.nav-btn')[n-1].classList.add('active');
+  const _navBtn = document.querySelectorAll('.nav-btn')[n-1];
+  if (_navBtn) _navBtn.classList.add('active');
+  if (n === 9) renderManager();
   if (n === 1) renderP1Table();
   if (n === 2) renderP2Table();
   if (n === 3) renderSavedPeriods();
@@ -2253,16 +2484,6 @@ document.getElementById('p1-date').value = today();
 document.getElementById('xd-date').value = today();
 
 // ---- Dynamic row builders ----
-function makeSaleSupplierOptions(selected) {
-  return ['','Local','Auction','A Gift','MGM','Noori Fish','Noori Squid','Mansoori','AFF','Farook','Chawan','Gulshad']
-    .map(function(s) {
-      const val = s;
-      const label = s === '' ? '— Select —' : s;
-      const sel = selected && selected === val ? 'selected' : '';
-      return '<option value="' + val + '" ' + sel + '>' + label + '</option>';
-    }).join('');
-}
-
 function makeItemRow(containerId, type) {
   const container = document.getElementById(containerId);
   const rowId = Date.now() + Math.random();
@@ -2277,7 +2498,7 @@ function makeItemRow(containerId, type) {
       '<div style="display:grid;grid-template-columns:1.2fr 1fr 1.1fr 75px 90px 100px auto;gap:6px;align-items:center;">' +
       '<select data-field="fishname" onchange="updatePreview()"' +
       ' style="background:rgba(13,17,23,0.9);border:1px solid rgba(26,122,74,0.4);border-radius:6px;padding:8px 8px;color:var(--white);font-size:13px;width:100%">' +
-      '<option value="">— Fish Name —</option><option value="Tawar">Tawar</option><option value="Popat">Popat</option><option value="Morosa">Morosa</option><option value="Popti">Popti</option><option value="Harya">Harya</option><option value="Dhandas">Dhandas</option><option value="Karli">Karli</option><option value="Gobra">Gobra</option><option value="Squid">Squid</option><option value="Bangda">Bangda</option><option value="Tarli">Tarli</option><option value="Pomfret">Pomfret</option><option value="White">White</option><option value="Surmai">Surmai</option><option value="Goti Squid">Goti Squid</option><option value="ATF">ATF</option><option value="Taar Masa">Taar Masa</option><option value="Return Waqti">Return Waqti</option><option value="Fishmeal">Fishmeal</option><option value="Other">Other</option></select>' +
+      '<option value="">— Fish Name —</option>' + fishOptionsHtml('') + '</select>' +
       '<input type="text" placeholder="Notes..." data-field="salenotes"' +
       ' style="background:rgba(13,17,23,0.8);border:1px solid rgba(26,122,74,0.3);border-radius:6px;padding:8px 8px;color:var(--muted);font-size:13px;width:100%"' +
       ' oninput="updatePreview()">' +
@@ -2306,7 +2527,7 @@ function makeItemRow(containerId, type) {
       '<div class="auction-extra" style="display:none;flex-direction:column;gap:6px;margin-top:6px;padding:8px;background:rgba(30,107,138,0.08);border:1px solid rgba(30,107,138,0.3);border-radius:6px;">' +
       '<div style="display:grid;grid-template-columns:1fr 210px;gap:6px;">' +
       '<select data-field="auctionagent" onchange="updatePreview()" style="background:rgba(13,17,23,0.9);border:1px solid rgba(30,107,138,0.5);border-radius:6px;padding:8px;color:#7ecfed;font-size:13px;font-weight:700;width:100%">' +
-      '<option value="">\u2014 Select Auction Agent \u2014</option><option value="Baba">Baba</option><option value="Sunny">Sunny</option><option value="Nazir Chickte">Nazir Chickte</option><option value="Zaheer Chickte">Zaheer Chickte</option><option value="Anjum Mahaldar">Anjum Mahaldar</option><option value="Rizwan">Rizwan</option><option value="Arai">Arai</option><option value="Saeed Chickte">Saeed Chickte</option><option value="Sagir Mahaldar">Sagir Mahaldar</option><option value="Other">Other</option></select>' +
+      '<option value="">\u2014 Select Auction Agent \u2014</option>' + agentOptionsHtml('') + '</select>' +
       '<div style="display:flex;align-items:center;font-size:12px;color:var(--muted);padding-left:4px;">Commission 2% = <strong style="color:#e74c3c;margin-left:4px;" data-field="agentcomm">\u20b90</strong></div>' +
       '</div>' +
       '<div style="display:grid;grid-template-columns:1fr 150px;gap:6px;">' +
@@ -2323,11 +2544,9 @@ function makeItemRow(containerId, type) {
   } else {
     // Expense row: category dropdown + tractor fields (when selected) + supplier + amount
     div.style.cssText = 'margin-bottom:8px;';
-    const expCatOpts = ['Petrol','Ice','Waqti','Tractor','Engine Oil','2T Oil','Bhatta','Nashta','Dinner','Lunch','Water','Cold Drink','Rickshaw Petrol Rent','Tempo Rent','Bangda','Agent Commission','Other']
-      .map(c => '<option value="' + c + '">' + c + '</option>').join('');
+    const expCatOpts = expCatOptionsHtml('');
     const expCatSelect = '<option value="">— Select Category —</option>' + expCatOpts;
-    const expSupOpts = ['','A Gift','MGM','Noori Fish','Mansoori','AFF','Farook','Chawan','Gulshad']
-      .map(s => '<option value="' + s + '">' + (s||'— No Supplier —') + '</option>').join('');
+    const expSupOpts = expSupplierOptionsHtml('');
     div.innerHTML =
       '<div style="display:grid;grid-template-columns:130px 1fr 70px 80px 1fr 110px auto;gap:5px;align-items:center;">' +
       '<select data-field="expcat" onchange="updateExpCatLabel(this);updatePreview();"' +
@@ -2353,7 +2572,7 @@ function makeItemRow(containerId, type) {
       '</div>' +
       '<div class="tractor-extra" style="display:none;grid-template-columns:1fr 1fr 140px;gap:6px;margin-top:6px;padding:8px;background:rgba(255,159,67,0.06);border:1px solid rgba(255,159,67,0.25);border-radius:6px;">' +
       '<select data-field="tractorprovider" style="background:rgba(13,17,23,0.9);border:1px solid rgba(255,159,67,0.4);border-radius:6px;padding:8px;color:#ff9f43;font-size:13px;font-weight:700;width:100%">' +
-      '<option value="Kakade">\ud83d\ude9c Kakade</option><option value="AAT">\ud83d\ude9c AAT</option><option value="Mayuresh">\ud83d\ude9c Mayuresh</option></select>' +
+      tractorOptionsHtml('') + '</select>' +
       '<input type="number" data-field="tractortrips" value="2" min="1" placeholder="No. of Trips"' +
       ' style="background:rgba(13,17,23,0.8);border:1px solid rgba(255,159,67,0.4);border-radius:6px;padding:8px;color:#ff9f43;font-size:15px;font-weight:700;width:100%"' +
       ' oninput="tractorAutoCalc(this)">' +
@@ -2365,7 +2584,7 @@ function makeItemRow(containerId, type) {
 }
 
 const AGENT_COMM_RATE = 0.02; // 2% commission
-const AUCTION_AGENTS = ['Baba','Sunny','Nazir Chickte','Zaheer Chickte','Anjum Mahaldar','Rizwan','Arai','Saeed Chickte','Sagir Mahaldar','Other'];
+// AUCTION_AGENTS is derived from the Agents list (⚙ MANAGE → Auction Agents)
 
 // Build commission records + expense lines from auction sale items. Returns array of expense items to append.
 function syncAgentCommissions(recId, date, saleItems) {
@@ -2611,7 +2830,7 @@ function makeEditItemRow(containerId, item, amount, type) {
     div.innerHTML =
       '<div style="display:grid;grid-template-columns:1.2fr 1fr 1.1fr 65px 80px 90px auto;gap:5px;align-items:center;">' +
       '<select data-field="fishname" style="background:rgba(13,17,23,0.9);border:1px solid rgba(26,122,74,0.4);border-radius:6px;padding:7px 6px;color:var(--white);font-size:13px;width:100%">' +
-      '<option value="">— Fish Name —</option>' + '<option value="Tawar">Tawar</option><option value="Popat">Popat</option><option value="Morosa">Morosa</option><option value="Popti">Popti</option><option value="Harya">Harya</option><option value="Dhandas">Dhandas</option><option value="Karli">Karli</option><option value="Gobra">Gobra</option><option value="Squid">Squid</option><option value="Bangda">Bangda</option><option value="Tarli">Tarli</option><option value="Pomfret">Pomfret</option><option value="White">White</option><option value="Surmai">Surmai</option><option value="Goti Squid">Goti Squid</option><option value="ATF">ATF</option><option value="Taar Masa">Taar Masa</option><option value="Return Waqti">Return Waqti</option><option value="Fishmeal">Fishmeal</option><option value="Other">Other</option>'.replace('value="' + (fishname||'XXX_NO_MATCH') + '">', 'value="' + (fishname||'') + '" selected>') + '</select>' +
+      '<option value="">— Fish Name —</option>' + fishOptionsHtml(fishname) + '</select>' +
       '<input type="text" data-field="salenotes" value="' + (salenotes||'').replace(/"/g,'&quot;') + '" placeholder="Notes..."' +
       ' style="background:rgba(13,17,23,0.8);border:1px solid rgba(26,122,74,0.3);border-radius:6px;padding:7px 6px;color:var(--muted);font-size:12px;width:100%">' +
       '<select data-field="supplier" onchange="updateAuctionAgent(this)" style="background:rgba(13,17,23,0.9);border:1px solid rgba(26,122,74,0.4);border-radius:6px;padding:7px 5px;color:var(--white);font-size:12px;width:100%">' +
@@ -2636,7 +2855,7 @@ function makeEditItemRow(containerId, item, amount, type) {
       '<div style="display:grid;grid-template-columns:1fr 190px;gap:5px;">' +
       '<select data-field="auctionagent" style="background:rgba(13,17,23,0.9);border:1px solid rgba(30,107,138,0.5);border-radius:6px;padding:7px;color:#7ecfed;font-size:12px;font-weight:700;width:100%">' +
       '<option value="">\u2014 Select Auction Agent \u2014</option>' +
-      '<option value="Baba">Baba</option><option value="Sunny">Sunny</option><option value="Nazir Chickte">Nazir Chickte</option><option value="Zaheer Chickte">Zaheer Chickte</option><option value="Anjum Mahaldar">Anjum Mahaldar</option><option value="Rizwan">Rizwan</option><option value="Arai">Arai</option><option value="Saeed Chickte">Saeed Chickte</option><option value="Sagir Mahaldar">Sagir Mahaldar</option><option value="Other">Other</option>'.replace('value="' + (auctAgent||'ZZNONE') + '">', 'value="' + (auctAgent||'') + '" selected>') + '</select>' +
+      agentOptionsHtml(auctAgent) + '</select>' +
       '<div style="display:flex;align-items:center;font-size:11px;color:var(--muted);padding-left:4px;">Comm 2% = <strong style="color:#e74c3c;margin-left:4px;">\u20b9' + Math.round((amt||0)*0.02) + '</strong></div>' +
       '</div>' +
       '<div style="display:grid;grid-template-columns:1fr 140px;gap:5px;">' +
@@ -2658,13 +2877,11 @@ function makeEditItemRow(containerId, item, amount, type) {
     const custom = isObj ? (item.custom || item.notes || (typeof item === 'string' ? item : '')) : (item || '');
     const expSup = isObj ? (item.expSupplier || '') : '';
     const amt    = isObj ? (item.amount || amount || '') : (amount || '');
-    const tractorProv  = isObj ? (item.tractorProvider || 'Kakade') : 'Kakade';
+    const tractorProv  = isObj ? (item.tractorProvider || defaultTractor()) : defaultTractor();
     const tractorTripsV = isObj ? (item.tractorTrips || 2) : 2;
     const isTractor = cat === 'Tractor';
-    const expCatOpts = ['Petrol','Ice','Waqti','Tractor','Engine Oil','2T Oil','Bhatta','Nashta','Dinner','Lunch','Water','Cold Drink','Rickshaw Petrol Rent','Tempo Rent','Bangda','Agent Commission','Other']
-      .map(function(c) { return '<option value="' + c + '"' + (c===cat?' selected':'') + '>' + c + '</option>'; }).join('');
-    const expSupOpts = ['','A Gift','MGM','Noori Fish','Mansoori','AFF','Farook','Chawan','Gulshad']
-      .map(function(s) { return '<option value="' + s + '"' + (s===expSup?' selected':'') + '>' + (s||'— No Supplier —') + '</option>'; }).join('');
+    const expCatOpts = expCatOptionsHtml(cat);
+    const expSupOpts = expSupplierOptionsHtml(expSup);
     const expQtyV  = isObj ? (item.expQty  || '') : '';
     const expRateV = isObj ? (item.expRate || '') : '';
     div.style.cssText = 'margin-bottom:6px;';
@@ -2687,9 +2904,7 @@ function makeEditItemRow(containerId, item, amount, type) {
       '</div>' +
       '<div class="tractor-extra" style="display:' + (isTractor?'grid':'none') + ';grid-template-columns:1fr 1fr 140px;gap:6px;margin-top:5px;padding:7px;background:rgba(255,159,67,0.06);border:1px solid rgba(255,159,67,0.25);border-radius:6px;">' +
       '<select data-field="tractorprovider" style="background:rgba(13,17,23,0.9);border:1px solid rgba(255,159,67,0.4);border-radius:6px;padding:7px;color:#ff9f43;font-size:13px;font-weight:700;width:100%">' +
-      '<option value="Kakade"' + (tractorProv==='Kakade'?' selected':'') + '>\ud83d\ude9c Kakade</option>' +
-      '<option value="AAT"' + (tractorProv==='AAT'?' selected':'') + '>\ud83d\ude9c AAT</option>' +
-      '<option value="Mayuresh"' + (tractorProv==='Mayuresh'?' selected':'') + '>\ud83d\ude9c Mayuresh</option></select>' +
+      tractorOptionsHtml(tractorProv) + '</select>' +
       '<input type="number" data-field="tractortrips" value="' + tractorTripsV + '" min="1" placeholder="Trips"' +
       ' style="background:rgba(13,17,23,0.8);border:1px solid rgba(255,159,67,0.4);border-radius:6px;padding:7px;color:#ff9f43;font-size:14px;font-weight:700;width:100%"' +
       ' oninput="tractorAutoCalc(this)">' +
@@ -3230,16 +3445,27 @@ function exportP1CSV() {
 // ===== PAGE 2 =====
 document.getElementById('p2-date').value = today();
 
-// Build checkboxes
-const grid = document.getElementById('shareholder-checks');
-SHAREHOLDERS.forEach(sh => {
-  const div = document.createElement('div');
-  div.className = 'checkbox-item';
-  div.dataset.name = sh;
-  div.innerHTML = `<input type="checkbox"><div class="check-box"></div><span>${sh}</span>`;
-  div.onclick = () => toggleCheck(div);
-  grid.appendChild(div);
-});
+// Build the attendance checkbox grid from the ACTIVE crew list. extraNames lets
+// edit-mode also show an archived person who was present on an old record, so
+// editing that record never silently drops them.
+function buildAttendanceGrid(extraNames) {
+  const grid = document.getElementById('shareholder-checks');
+  if (!grid) return;
+  const keep = {};
+  Array.prototype.forEach.call(grid.querySelectorAll('.checkbox-item.checked'), d => { keep[d.dataset.name] = true; });
+  grid.innerHTML = '';
+  const names = namesOf('crew');
+  (extraNames || []).forEach(n => { if (names.indexOf(n) === -1) names.push(n); });
+  names.forEach(sh => {
+    const div = document.createElement('div');
+    div.className = 'checkbox-item' + (keep[sh] ? ' checked' : '');
+    div.dataset.name = sh;
+    div.innerHTML = '<input type="checkbox"><div class="check-box">' + (keep[sh] ? '✓' : '') + '</div><span>' + escHtml(sh) + '</span>';
+    div.onclick = () => toggleCheck(div);
+    grid.appendChild(div);
+  });
+}
+buildAttendanceGrid();
 
 function toggleCheck(div) {
   div.classList.toggle('checked');
@@ -3377,6 +3603,7 @@ function saveAttendance() {
   save(KEY_ATTEND, attendanceRecords);
 
   clearAll();
+  buildAttendanceGrid();
   renderP2Table();
   showToast('✓ Attendance saved — ' + fmtDate(date) + (trip ? ' | ' + trip + ' Trip' : '') + (fishingType ? ' | ' + fishingType + ' Fishing' : '') + (paagi.length ? ' | Paagi: ' + paagi.map(p=>p.name+' '+p.percent+'%').join(', ') : ''));
 }
@@ -3398,6 +3625,7 @@ function loadAttendanceForEdit(date, trip) {
   if (tripEl) tripEl.value = rec.trip || '';
   document.getElementById('p2-fishing-type').value = rec.fishingType || '';
   togglePaagiSection();
+  buildAttendanceGrid(rec.present);
   clearAll();
   rec.present.forEach(name => {
     const div = document.querySelector(`.checkbox-item[data-name="${name}"]`);
@@ -4200,17 +4428,239 @@ function emptyPara(text) {
 }
 
 
+// ===== ⚙ MANAGE PAGE — add / edit / archive / delete list items =====
+let _mgTab = 'crew';
+let _mgEditRef = null;     // { key, idx } while the edit popup is open
+const MG_DEFS = {
+  crew:      { label: 'Crew',               hint: 'Crew, boats and owner shares. Archive someone who has left — their old records and reports stay exactly as they were. Add a phone number to send WhatsApp slips straight to them.' },
+  suppliers: { label: 'Suppliers',          hint: 'Fish suppliers / buyers. "Local" and "Auction" are built-in sale types and are not listed here.' },
+  fish:      { label: 'Fish Names',         hint: 'Fish names shown in the Daily Records sales dropdown.' },
+  expcats:   { label: 'Expense Categories', hint: 'Tractor, Agent Commission and Other have built-in logic and are locked.' },
+  tractors:  { label: 'Tractor Providers',  hint: 'Tractor service providers used in Tractor Trips and in Daily Records expenses.' },
+  agents:    { label: 'Auction Agents',     hint: 'Agents who earn the 2% commission on auction sales.' }
+};
+
+function mgNameError(key, name, exceptIdx) {
+  name = (name || '').trim();
+  if (!name) return 'Please enter a name.';
+  if (name.length > 40) return 'Name is too long (maximum 40 characters).';
+  if (!/^[\p{L}\p{N} .\-()\/,_+]+$/u.test(name)) return 'Use only letters, numbers, spaces and . - ( ) / , _ +';
+  const dup = lists[key].some((it, i) => i !== exceptIdx && it.name.toLowerCase() === name.toLowerCase());
+  if (dup) return '"' + name + '" already exists in this list.';
+  if (key === 'suppliers' && (name.toLowerCase() === 'local' || name.toLowerCase() === 'auction')) return '"Local" and "Auction" are built-in sale types.';
+  return '';
+}
+function mgPhoneClean(p) { return String(p || '').replace(/[^\d+]/g, ''); }
+function mgPhoneError(p) {
+  const d = mgPhoneClean(p).replace(/^\+/, '');
+  if (!d) return '';
+  if (d.length < 10 || d.length > 15) return 'Phone number looks wrong. Use a 10-digit mobile number or a full international number.';
+  return '';
+}
+
+// How many saved records use this name? (decides whether it can be renamed / deleted)
+function mgUsageCount(key, name) {
+  let n = 0;
+  if (key === 'crew') {
+    attendanceRecords.forEach(r => { if ((r.present || []).indexOf(name) !== -1) n++; (r.paagi || []).forEach(p => { if (p.name === name) n++; }); });
+    paymentRecords.forEach(p => { if (p.member === name) n++; });
+  } else if (key === 'suppliers') {
+    fishSales.forEach(r => { if (r.supplier === name) n++; });
+    supplierPays.forEach(r => { if (r.supplier === name) n++; });
+    dailyRecords.forEach(r => {
+      (r.saleItems || []).forEach(i => { if (i.supplier === name) n++; });
+      (r.expenseItems || []).forEach(i => { if (i.expSupplier === name) n++; });
+    });
+  } else if (key === 'fish') {
+    dailyRecords.forEach(r => (r.saleItems || []).forEach(i => { if (i.fishname === name) n++; }));
+  } else if (key === 'expcats') {
+    dailyRecords.forEach(r => (r.expenseItems || []).forEach(i => { if (i.cat === name) n++; }));
+  } else if (key === 'tractors') {
+    tractorTrips.forEach(t => { if (t.provider === name) n++; });
+    tractorPays.forEach(p => { if (p.provider === name) n++; });
+    dailyRecords.forEach(r => (r.expenseItems || []).forEach(i => { if (i.tractorProvider === name) n++; }));
+  } else if (key === 'agents') {
+    agentComms.forEach(a => { if (a.agent === name) n++; });
+    agentPays.forEach(p => { if (p.agent === name) n++; });
+    dailyRecords.forEach(r => (r.saleItems || []).forEach(i => { if (i.auctionAgent === name) n++; }));
+    creditSales.forEach(s => { if (s.agent === name) n++; });
+  }
+  return n;
+}
+
+function renderManager() { renderMgTabs(); renderMgForm(); renderMgTable(); }
+
+function mgSetTab(k) { _mgTab = k; renderManager(); }
+
+function renderMgTabs() {
+  document.getElementById('mg-tabs').innerHTML = Object.keys(MG_DEFS).map(function(k) {
+    const active = lists[k].filter(i => !i.archived).length;
+    const on = (k === _mgTab);
+    return '<button class="btn btn-sm" onclick="mgSetTab(\'' + k + '\')" style="' +
+      (on ? 'background:rgba(255,159,67,0.25);color:var(--gold-light);border:1px solid var(--gold);'
+          : 'background:transparent;color:var(--muted);border:1px solid var(--border);') + '">' +
+      MG_DEFS[k].label + ' <span style="opacity:.7;">(' + active + ')</span></button>';
+  }).join('');
+  document.getElementById('mg-hint').textContent = MG_DEFS[_mgTab].hint;
+}
+
+function renderMgForm() {
+  const k = _mgTab;
+  let h = '<div class="form-group"><label>New Name</label><input type="text" id="mg-name" maxlength="40" placeholder="Type a name to add" onkeydown="if(event.key===\'Enter\')mgAdd()"></div>';
+  if (k === 'crew' || k === 'suppliers') h += '<div class="form-group"><label>WhatsApp Phone (optional)</label><input type="tel" id="mg-phone" placeholder="e.g. 9876543210"></div>';
+  if (k === 'crew' && WEIGHTS_ENABLED) h += '<div class="form-group"><label>Share Weight</label><input type="number" id="mg-weight" value="1" step="0.05" min="0.1" max="5"></div>';
+  if (k === 'crew') h += '<div class="form-group"><label>Owner Group</label><select id="mg-owner" style="padding:10px 12px;background:rgba(13,17,23,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;"><option value="0">No</option><option value="1">Yes — boat / engine / owner share</option></select></div>';
+  h += '<div class="form-group" style="justify-content:flex-end;"><button class="btn btn-primary" onclick="mgAdd()">+ ADD</button></div>';
+  document.getElementById('mg-form').innerHTML = h;
+}
+
+function renderMgTable() {
+  const k = _mgTab, items = lists[k];
+  const crew = (k === 'crew'), sup = (k === 'suppliers');
+  document.getElementById('mg-thead').innerHTML = '<tr><th>Name</th>' +
+    ((crew || sup) ? '<th>Phone</th>' : '') +
+    (crew && WEIGHTS_ENABLED ? '<th style="text-align:right">Weight</th>' : '') +
+    (crew ? '<th>Owner Group</th>' : '') +
+    '<th>Status</th><th>Actions</th></tr>';
+  const tbody = document.getElementById('mg-tbody');
+  if (items.length === 0) { tbody.innerHTML = emptyRow(6, 'Nothing here yet — add the first one above'); return; }
+  tbody.innerHTML = '';
+  items.forEach(function(it, idx) {
+    const used = mgUsageCount(k, it.name);
+    const status = it.archived
+      ? '<span class="badge" style="background:rgba(124,136,152,0.2);color:var(--muted);">⏸ ARCHIVED</span>'
+      : '<span class="badge badge-green">● ACTIVE</span>';
+    let actions = '<button class="btn btn-edit btn-sm" onclick="mgOpenEdit(\'' + k + '\',' + idx + ')">✎ EDIT</button> ';
+    if (!it.locked) actions += '<button class="btn btn-sm" style="background:rgba(255,159,67,0.12);color:var(--gold-light);border:1px solid var(--border);" onclick="mgToggleArchive(\'' + k + '\',' + idx + ')">' + (it.archived ? '▶ RESTORE' : '⏸ ARCHIVE') + '</button> ';
+    if (!it.locked && used === 0) actions += '<button class="btn btn-danger btn-sm" onclick="mgDelete(\'' + k + '\',' + idx + ')">🗑</button>';
+    const tr = document.createElement('tr');
+    if (it.archived) tr.style.opacity = '0.6';
+    tr.innerHTML =
+      '<td><strong>' + escHtml(it.name) + '</strong>' +
+        (it.locked ? ' <span class="badge badge-gold" style="font-size:10px;">🔒 built-in</span>' : '') +
+        (used > 0 ? '<div style="font-size:10px;color:var(--muted);">used in ' + used + ' record' + (used === 1 ? '' : 's') + '</div>' : '') + '</td>' +
+      ((crew || sup) ? '<td style="color:var(--muted);">' + (it.phone ? escHtml(it.phone) : '—') + '</td>' : '') +
+      (crew && WEIGHTS_ENABLED ? '<td style="text-align:right;font-family:\'JetBrains Mono\',monospace;">×' + (it.weight || 1) + '</td>' : '') +
+      (crew ? '<td>' + (it.owner ? '<span class="badge badge-gold">⚓ Owner</span>' : '<span style="color:var(--muted);">—</span>') + '</td>' : '') +
+      '<td>' + status + '</td>' +
+      '<td style="white-space:nowrap;">' + actions + '</td>';
+    tbody.appendChild(tr);
+  });
+}
+
+// Refresh everything that depends on the lists after any change.
+function mgCommit(msg) {
+  saveLists();
+  applyListsToConstants();
+  refreshListDropdowns();
+  buildAttendanceGrid();
+  ['renderSupplierCards', 'renderTractorSummary', 'renderAgentSummary'].forEach(function(fn) {
+    try { if (typeof window[fn] === 'function') window[fn](); } catch (e) {}
+  });
+  renderManager();
+  if (msg) showToast(msg);
+}
+
+function mgAdd() {
+  const k = _mgTab;
+  const name = document.getElementById('mg-name').value.trim();
+  let err = mgNameError(k, name, -1);
+  const phoneEl = document.getElementById('mg-phone');
+  if (!err && phoneEl) err = mgPhoneError(phoneEl.value);
+  let weight = 1;
+  if (!err && k === 'crew' && WEIGHTS_ENABLED) {
+    weight = parseFloat(document.getElementById('mg-weight').value);
+    if (!(weight > 0 && weight <= 5)) err = 'Share weight must be between 0.1 and 5.';
+  }
+  if (err) { alert(err); return; }
+  const item = { name: name, archived: false };
+  if (k === 'crew') { item.phone = mgPhoneClean(phoneEl.value); item.weight = weight; item.owner = document.getElementById('mg-owner').value === '1'; }
+  if (k === 'suppliers') item.phone = mgPhoneClean(phoneEl.value);
+  if (k === 'expcats') item.locked = false;
+  lists[k].push(item);
+  mgCommit('✓ Added — ' + name);
+}
+
+function mgToggleArchive(k, idx) {
+  const it = lists[k][idx];
+  if (!it || it.locked) return;
+  if (!it.archived) {
+    if (!confirm('Archive "' + it.name + '"?\n\nIt will be hidden from new entries and dropdowns. All past records and reports stay exactly as they are. You can restore it anytime.')) return;
+  }
+  it.archived = !it.archived;
+  mgCommit(it.archived ? '⏸ Archived — ' + it.name : '▶ Restored — ' + it.name);
+}
+
+function mgDelete(k, idx) {
+  const it = lists[k][idx];
+  if (!it || it.locked) return;
+  if (mgUsageCount(k, it.name) > 0) { alert('This name is used in saved records, so it cannot be deleted. Archive it instead.'); return; }
+  if (!confirm('Delete "' + it.name + '" permanently? It is not used in any record.')) return;
+  lists[k].splice(idx, 1);
+  mgCommit('🗑 Deleted — ' + it.name);
+}
+
+function mgOpenEdit(k, idx) {
+  const it = lists[k][idx];
+  if (!it) return;
+  _mgEditRef = { key: k, idx: idx };
+  const used = mgUsageCount(k, it.name);
+  const nameEl = document.getElementById('mg-e-name');
+  nameEl.value = it.name;
+  const locked = it.locked || used > 0;
+  nameEl.disabled = locked;
+  document.getElementById('mg-e-note').textContent = it.locked
+    ? 'Built-in item — the name cannot be changed.'
+    : (used > 0 ? 'Name is locked because it is used in ' + used + ' saved record' + (used === 1 ? '' : 's') + '. Use ARCHIVE to retire it.' : '');
+  const crew = (k === 'crew'), sup = (k === 'suppliers');
+  document.getElementById('mg-e-phone-wrap').style.display  = (crew || sup) ? '' : 'none';
+  document.getElementById('mg-e-weight-wrap').style.display = (crew && WEIGHTS_ENABLED) ? '' : 'none';
+  document.getElementById('mg-e-owner-wrap').style.display  = crew ? '' : 'none';
+  document.getElementById('mg-e-phone').value  = it.phone || '';
+  document.getElementById('mg-e-weight').value = it.weight || 1;
+  document.getElementById('mg-e-owner').value  = it.owner ? '1' : '0';
+  document.getElementById('mg-edit-title').textContent = '✎ Edit — ' + it.name;
+  document.getElementById('modal-mg-edit').classList.add('open');
+}
+
+function mgSaveEdit() {
+  if (!_mgEditRef) return;
+  const k = _mgEditRef.key, idx = _mgEditRef.idx, it = lists[k][idx];
+  if (!it) return;
+  const nameEl = document.getElementById('mg-e-name');
+  const newName = nameEl.disabled ? it.name : nameEl.value.trim();
+  let err = nameEl.disabled ? '' : mgNameError(k, newName, idx);
+  if (!err && (k === 'crew' || k === 'suppliers')) err = mgPhoneError(document.getElementById('mg-e-phone').value);
+  let weight = it.weight || 1;
+  if (!err && k === 'crew' && WEIGHTS_ENABLED) {
+    weight = parseFloat(document.getElementById('mg-e-weight').value);
+    if (!(weight > 0 && weight <= 5)) err = 'Share weight must be between 0.1 and 5.';
+  }
+  if (err) { alert(err); return; }
+  it.name = newName;
+  if (k === 'crew') { it.phone = mgPhoneClean(document.getElementById('mg-e-phone').value); it.weight = weight; it.owner = document.getElementById('mg-e-owner').value === '1'; }
+  if (k === 'suppliers') it.phone = mgPhoneClean(document.getElementById('mg-e-phone').value);
+  closeModal('modal-mg-edit');
+  _mgEditRef = null;
+  mgCommit('✓ Saved — ' + newName);
+}
+
 // ===== WHATSAPP SLIPS =====
 // One shared preview popup (Copy / Send on WhatsApp). Each slip builder below
 // only assembles the text and calls showSlip(). No phone numbers are stored
 // yet, so WhatsApp opens its contact picker (wa.me/?text=...).
 const SLIP_LINE = '━━━━━━━━━━━━━━━━━━━━';
 let _slipText = '';
+let _slipPhone = '';
 
-function showSlip(title, text) {
+function showSlip(title, text, phone) {
   _slipText = text;
+  _slipPhone = waNumber(phone);
   document.getElementById('slip-title').textContent = title;
   document.getElementById('slip-preview').textContent = text;
+  document.getElementById('slip-to').textContent = _slipPhone
+    ? '📱 Will open a chat with +' + _slipPhone
+    : '📱 No phone saved — WhatsApp will ask you to choose a contact (add numbers in ⚙ MANAGE)';
   document.getElementById('modal-slip').classList.add('open');
 }
 
@@ -4235,7 +4685,7 @@ function copySlip() {
 }
 
 function sendSlipWhatsApp() {
-  const url = 'https://wa.me/?text=' + encodeURIComponent(_slipText);
+  const url = 'https://wa.me/' + _slipPhone + '?text=' + encodeURIComponent(_slipText);
   // Very long slips can exceed what a WhatsApp link accepts — copy instead.
   if (url.length > 6000) {
     copySlip();
@@ -4267,7 +4717,7 @@ function slipSettlement(sh) {
   else if (r.net < 0) t += '⚠️ *AMOUNT TO BE RETURNED:* *' + fmt(Math.abs(r.net)) + '*\n';
   else                t += '✅ *FULLY SETTLED:* *₹0*\n';
   t += SLIP_LINE + '\n_Alhamdulillah · Al Ahmed Fleet Management_';
-  showSlip('📜 Crew Settlement Slip — ' + sh, t);
+  showSlip('📜 Crew Settlement Slip — ' + sh, t, crewPhone(sh));
 }
 
 // 2. Trip-wise share statement (individual View Detail)
@@ -4284,7 +4734,7 @@ function slipTripWise() {
          (r.paagiBonus ? ' [🎯 Paagi ' + r.paagiPercent + '%: +' + fmt(r.paagiBonus) + ']' : '') + '\n';
   });
   t += SLIP_LINE + '\n✨ *TOTAL SHARE EARNED:* *' + fmt(d.totalShareEarned) + '*\n' + SLIP_LINE + '\n_Al Ahmed Fleet Management_';
-  showSlip('📊 Trip-Wise Statement — ' + d.name, t);
+  showSlip('📊 Trip-Wise Statement — ' + d.name, t, crewPhone(d.name));
 }
 
 // 3. Customer credit / outstanding reminder (Credit Tracking)
@@ -4332,7 +4782,7 @@ function slipSupplier(sup) {
   const totalSales = fishSales.filter(r => r.supplier === sup).reduce((s, r) => s + r.amount, 0);
   const totalPaid  = supplierPays.filter(r => r.supplier === sup).reduce((s, r) => s + r.amount, 0);
   showSlip('📑 Supplier Statement — ' + sup,
-    supplierSlipText(sup, 'Till ' + fmtDate(today()), totalSales, totalPaid));
+    supplierSlipText(sup, 'Till ' + fmtDate(today()), totalSales, totalPaid), supplierPhone(sup));
 }
 
 // 4b. From the date-range ledger
@@ -4341,7 +4791,7 @@ function slipSupplierLedger() {
   if (!d) { alert('Please generate the ledger first.'); return; }
   const name = d.supplier || 'All Suppliers';
   showSlip('📑 Supplier Statement — ' + name,
-    supplierSlipText(name, fmtDate(d.fromDate) + ' to ' + fmtDate(d.toDate), d.totalSales, d.totalPaid));
+    supplierSlipText(name, fmtDate(d.fromDate) + ' to ' + fmtDate(d.toDate), d.totalSales, d.totalPaid), d.supplier ? supplierPhone(d.supplier) : '');
 }
 
 // 5. Advance / payment acknowledgment (Advances & Payments)
@@ -4355,7 +4805,7 @@ function slipAdvance(id) {
   t += '💰 *Amount:* *' + fmt(p.amount) + '*\n';
   if (p.notes) t += '📝 *Notes:* ' + p.notes + '\n';
   t += SLIP_LINE + '\n_Al Ahmed Fleet Management_';
-  showSlip('💳 Advance Acknowledgment — ' + p.member, t);
+  showSlip('💳 Advance Acknowledgment — ' + p.member, t, crewPhone(p.member));
 }
 
 function showToast(msg) {
@@ -4373,21 +4823,8 @@ function showToast(msg) {
 }
 
 // ===== PAGE 4 =====
-// Populate select
-const p4Select = document.getElementById('p4-member');
-const p4Filter = document.getElementById('p4-filter-member');
-const editPayMember = document.getElementById('edit-pay-member');
-SHAREHOLDERS.forEach(sh => {
-  const o1 = document.createElement('option');
-  o1.value = sh; o1.textContent = sh;
-  p4Select.appendChild(o1);
-  const o2 = document.createElement('option');
-  o2.value = sh; o2.textContent = sh;
-  p4Filter.appendChild(o2);
-  const o3 = document.createElement('option');
-  o3.value = sh; o3.textContent = sh;
-  editPayMember.appendChild(o3);
-});
+// Populate every list-driven dropdown (crew, suppliers, tractors, agents)
+refreshListDropdowns();
 
 document.getElementById('p4-date').value = today();
 
@@ -4675,7 +5112,11 @@ function editPayment(id) {
   const rec = paymentRecords.find(p => p.id === id);
   if (!rec) return;
   document.getElementById('edit-pay-id').value     = id;
-  document.getElementById('edit-pay-member').value = rec.member;
+  const _epm = document.getElementById('edit-pay-member');
+  if (!Array.prototype.some.call(_epm.options, o => o.value === rec.member)) {
+    const _o = document.createElement('option'); _o.value = rec.member; _o.textContent = rec.member; _epm.appendChild(_o);
+  }
+  _epm.value = rec.member;
   document.getElementById('edit-pay-date').value   = rec.date;
   document.getElementById('edit-pay-type').value   = rec.type || 'advance';
   document.getElementById('edit-pay-amount').value = rec.amount;
@@ -4831,7 +5272,8 @@ function getAllData() {
     tractorTrips,
     tractorPays,
     agentComms,
-    agentPays
+    agentPays,
+    lists
   };
 }
 
@@ -4862,6 +5304,10 @@ function applyAllData(data) {
   save(KEY_TRACTORPAYS,  tractorPays);
   save(KEY_AGENTCOMM,    agentComms);
   save(KEY_AGENTPAYS,    agentPays);
+  if (data.lists) {   // older backups have no lists — keep the current ones
+    lists = sanitizeLists(data.lists, buildDefaultLists());
+    saveLists(); applyListsToConstants(); refreshListDropdowns(); buildAttendanceGrid();
+  }
   renderP1Table();
   renderP2Table();
   renderP4Table();
@@ -5015,7 +5461,8 @@ function exportData() {
     dailyRecords,
     attendanceRecords,
     paymentRecords,
-    savedPeriods
+    savedPeriods,
+    lists
   };
 
   const json = JSON.stringify(data, null, 2);
@@ -5067,6 +5514,10 @@ function importData(event) {
       attendanceRecords = data.attendanceRecords || [];
       paymentRecords    = data.paymentRecords    || [];
       savedPeriods      = data.savedPeriods      || [];
+      if (data.lists) {
+        lists = sanitizeLists(data.lists, buildDefaultLists());
+        saveLists(); applyListsToConstants(); refreshListDropdowns(); buildAttendanceGrid();
+      }
 
       save(KEY_DAILY,   dailyRecords);
       save(KEY_ATTEND,  attendanceRecords);
@@ -5323,16 +5774,7 @@ let _groupData = null;
 // Owner's shares — all boat/engine/dhanda entries that belong to the boat owner
 // Default owner shares — pre-selected when clicking ⚓ OWNER GROUP
 // User can freely add/remove any checkbox after clicking the button
-const OWNER_SHARES = [
-  'Owner',
-  'Al Muhammad Boat','Al Muhammad Boat Engine',
-  'Al Bahar Boat','Al Bahar Boat Engine',
-  'Maryam Boat','Maryam Boat Engine',
-  'Safiya Boat','Safiya Boat Engine',
-  'Al Ahmed Boat','Al Ahmed Boat Engine',
-  'Net R 1','Net R 2',
-  'Dhanda 1','Dhanda 2'
-];
+// OWNER_SHARES is derived from the Crew list (⚙ MANAGE → Crew → Owner Group)
 
 function groupSelectOwner() {
   // First clear all
@@ -5521,7 +5963,7 @@ function exportGroupPDF() {
 }
 
 // ===== PAGE 5: FISH SALES & SUPPLIER LEDGER =====
-const SUPPLIERS = ['Local','Auction','A Gift','MGM','Noori Fish','Noori Squid','Mansoori','AFF','Farook','Chawan','Gulshad'];
+// SUPPLIERS is derived from the Suppliers list (⚙ MANAGE → Suppliers)
 
 let _fsLedgerData = null;
 
@@ -5694,6 +6136,8 @@ function renderSupplierCards() {
     const pending    = totalSales - totalPaid;
     const excess     = pending < 0;
     const settled    = pending === 0 && totalSales > 0;
+    const _li = listItem('suppliers', sup);
+    if (_li && _li.archived && totalSales === 0 && totalPaid === 0) return;   // archived and unused
 
     const statusColor = excess ? '#ff9f43' : pending > 0 ? '#e74c3c' : totalSales === 0 ? '#888' : '#2ecc71';
     const statusText  = excess ? '⬆ EXCESS' : pending > 0 ? '⚠ PENDING' : totalSales === 0 ? '— NO SALES' : '✓ CLEARED';
@@ -6388,7 +6832,10 @@ function renderTractorSummary() {
   const container = document.getElementById('tt-summary-cards');
   if (!container) return;
 
-  const providers = ['Kakade', 'AAT', 'Mayuresh'];
+  // active providers, plus archived ones that still have trips or payments
+  const providers = namesOf('tractors', true).filter(function(p) {
+    return namesOf('tractors').indexOf(p) !== -1 || tractorTrips.some(t => t.provider === p) || tractorPays.some(x => x.provider === p);
+  });
   let html = '';
 
   providers.forEach(function(prov) {
@@ -6572,7 +7019,7 @@ function exportTractorPDF() {
     '<div style="font-size:11px;color:#888;margin-top:3px;">TRACTOR TRIP STATEMENT</div>' +
     '</div>' +
     '<div style="display:flex;justify-content:space-between;background:#f7f3eb;border:1px solid #e0d5b8;border-radius:8px;padding:12px 18px;margin-bottom:14px;flex-wrap:wrap;gap:10px;">' +
-    '<div><div style="font-size:10px;color:#888;text-transform:uppercase;font-weight:600;">Provider</div><div style="font-size:15px;font-weight:700;">' + (d.provider||'Kakade + AAT') + '</div></div>' +
+    '<div><div style="font-size:10px;color:#888;text-transform:uppercase;font-weight:600;">Provider</div><div style="font-size:15px;font-weight:700;">' + (d.provider||'All Providers') + '</div></div>' +
     '<div><div style="font-size:10px;color:#888;text-transform:uppercase;font-weight:600;">Period</div><div style="font-size:15px;font-weight:700;">' + pdfD(d.fromDate) + ' to ' + pdfD(d.toDate) + '</div></div>' +
     '<div><div style="font-size:10px;color:#888;text-transform:uppercase;font-weight:600;">Generated</div><div style="font-size:14px;font-weight:700;">' + genDate + '</div></div>' +
     '</div>' +
@@ -7331,6 +7778,7 @@ function closeMoreSheet() {
     <button class="more-item" data-page="6" onclick="goPage(6)"><span class="more-ico"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2Z"/><path d="M5 18a2 2 0 0 1 2-2h11"/><line x1="9" y1="8" x2="14" y2="8"/></svg></span> Credit Tracking</button>
     <button class="more-item" data-page="7" onclick="goPage(7)"><span class="more-ico"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="11" height="8"/><path d="M13 11h4l3 3v2h-7z"/><circle cx="6" cy="18" r="1.6"/><circle cx="16.5" cy="18" r="1.6"/></svg></span> Tractor Trips</button>
     <button class="more-item" data-page="8" onclick="goPage(8)"><span class="more-ico"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg></span> Agent Commission</button>
+    <button class="more-item" data-page="9" onclick="goPage(9)"><span class="more-ico">⚙</span> Manage Lists</button>
 
     <div style="border-top:1px solid var(--border);margin:14px 0 12px;"></div>
     <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;">&#9729; GOOGLE DRIVE &amp; BACKUP</div>
