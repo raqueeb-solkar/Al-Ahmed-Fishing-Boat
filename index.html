@@ -585,6 +585,12 @@
 
 
 
+  /* ===== COMPARE TWO PERIODS ===== */
+  .cmp-good { color: #4ade80; font-weight: 700; }
+  .cmp-bad  { color: #f87171; font-weight: 700; }
+  .cmp-flat { color: var(--muted); }
+  #slip-preview { unicode-bidi: plaintext; }     /* lets Urdu lines read right-to-left inside a mixed message */
+
   /* ===== DATA HEALTH CHECK ===== */
   .hc-status { padding: 12px 16px; border-radius: 10px; font-weight: 700; font-size: 14px; margin-bottom: 14px; border: 1px solid; }
   .hc-status.hc-red    { background: rgba(248,113,113,0.12); color: #f87171; border-color: rgba(248,113,113,0.45); }
@@ -749,6 +755,7 @@
       <input type="file" accept=".json,.txt,application/json,text/plain" id="import-file-input" style="display:none" onchange="importData(event)">
     </label>
     <button id="undo-restore-btn" class="btn btn-sm" style="display:none;background:rgba(251,191,36,0.18);color:#fbbf24;border:1px solid rgba(251,191,36,0.45);" onclick="undoLastRestore()" title="Go back to your data as it was just before the last restore">↩ UNDO RESTORE</button>
+    <button class="btn btn-sm" style="background:rgba(126,207,237,0.15);color:#7ecfed;border:1px solid rgba(126,207,237,0.4);" onclick="showPage(11)" title="Compare two periods and explain why a share was higher or lower">📈 COMPARE</button>
     <button id="health-btn" class="btn btn-sm" style="background:rgba(74,222,128,0.15);color:#4ade80;border:1px solid rgba(74,222,128,0.4);" onclick="showPage(10)" title="Check your records for mistakes before paying shares">🩺 CHECK<span id="health-badge"></span></button>
     <button class="btn btn-sm" style="background:rgba(255,159,67,0.2);color:#ff9f43;border:1px solid rgba(255,159,67,0.4);" onclick="showPage(9)" title="Add or edit crew, suppliers, fish names, categories">⚙ MANAGE</button>
     <button class="btn btn-sm" style="background:rgba(192,57,43,0.2);color:#e74c3c;border:1px solid rgba(192,57,43,0.4);" onclick="logout()">🔒 LOGOUT</button>
@@ -1021,6 +1028,7 @@
 
     <div style="text-align:center;margin:18px 0;">
       <button class="btn btn-primary" style="background:linear-gradient(135deg,var(--gold) 0%,var(--gold-light) 100%);color:#0d1117;font-weight:700;padding:12px 28px;" onclick="exportShareTransparencyPDF()">📄 EXPORT TRANSPARENCY REPORT (PDF) — SHOW TO CREW</button>
+      <button class="btn btn-sm" style="background:rgba(126,207,237,0.15);color:#7ecfed;border:1px solid rgba(126,207,237,0.45);padding:12px 18px;margin-left:8px;" onclick="cmpOpenFromShareCalc()">📈 COMPARE WITH PREVIOUS PERIOD</button>
       <div style="font-size:11px;color:var(--muted);margin-top:8px;">Full day-wise breakdown + category expenses, explained plainly — so every rupee is accounted for.</div>
     </div>
 
@@ -1461,6 +1469,34 @@
     </div>
   </div>
   <div id="hc-results"></div>
+</div>
+
+<!-- ===== PAGE 11: COMPARE TWO PERIODS ===== -->
+<div class="page" id="page11">
+  <div class="page-title">📈 Compare Two Periods</div>
+  <div class="card">
+    <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:14px;">
+      Put two periods side by side to see <strong style="color:var(--text);">why one share was higher or lower</strong>.
+      The numbers use the same calculation as Share Calculation. You can then send the crew a ready message in English, Hinglish or Urdu.
+    </div>
+    <div style="font-family:'Space Grotesk',sans-serif;font-size:12px;color:var(--gold);letter-spacing:1px;margin-bottom:6px;">PERIOD 1 (earlier)</div>
+    <div class="form-row" style="align-items:flex-end;margin-bottom:12px;">
+      <div class="form-group"><label>From</label><input type="date" id="cmp-from-a"></div>
+      <div class="form-group"><label>To</label><input type="date" id="cmp-to-a"></div>
+      <div class="form-group"><label>Saved period</label><select id="cmp-saved-a" onchange="cmpPickSaved('a')" style="padding:10px 12px;background:rgba(13,17,23,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;"></select></div>
+    </div>
+    <div style="font-family:'Space Grotesk',sans-serif;font-size:12px;color:var(--gold);letter-spacing:1px;margin-bottom:6px;">PERIOD 2 (later)</div>
+    <div class="form-row" style="align-items:flex-end;margin-bottom:14px;">
+      <div class="form-group"><label>From</label><input type="date" id="cmp-from-b"></div>
+      <div class="form-group"><label>To</label><input type="date" id="cmp-to-b"></div>
+      <div class="form-group"><label>Saved period</label><select id="cmp-saved-b" onchange="cmpPickSaved('b')" style="padding:10px 12px;background:rgba(13,17,23,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;"></select></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="cmpRun()">📈 COMPARE</button>
+      <button class="btn btn-sm hc-btn" onclick="cmpQuick()">Last 21 days vs the 21 days before</button>
+    </div>
+  </div>
+  <div id="cmp-results"></div>
 </div>
 
 <!-- WHATSAPP SLIP PREVIEW -->
@@ -2500,6 +2536,7 @@ function showPage(n) {
   if (_navBtn) _navBtn.classList.add('active');
   if (n === 9) renderManager();
   if (n === 10) hcOnOpen();
+  if (n === 11) cmpOnOpen();
   if (n === 1) renderP1Table();
   if (n === 2) renderP2Table();
   if (n === 3) renderSavedPeriods();
@@ -4018,23 +4055,12 @@ function exportShareTransparencyPDF() {
   win.document.close();
 }
 
-function calculateShares() {
-  const startDate    = document.getElementById('p3-start').value;
-  const endDate      = document.getElementById('p3-end').value;
-  const settleDate   = document.getElementById('p3-settle-date').value || endDate;
-  if (!startDate || !endDate) { alert('Please select both dates.'); return; }
-  if (startDate > endDate) { alert('Start date must be before end date.'); return; }
-  if (settleDate < endDate) { alert('Settlement Date cannot be before Fishing End Date.'); return; }
-
-  _p3StartDate  = startDate;
-  _p3EndDate    = endDate;
-  _p3SettleDate = settleDate;
-
-  // Filter records
+// Pure share maths used by Share Calculation AND by Compare Two Periods.
+// It reads the records and returns the result; it never touches the screen or the
+// _p3… globals, so it is safe to call from anywhere.
+function computeShares(startDate, endDate) {
   const salesData = dailyRecords.filter(r => r.date >= startDate && r.date <= endDate);
   const attendData = attendanceRecords.filter(r => r.date >= startDate && r.date <= endDate);
-
-  if (salesData.length === 0) { alert('No sales records found in selected range.'); return; }
 
   const totalSales = salesData.reduce((s, r) => s + r.sales, 0);
   const totalExpense = salesData.reduce((s, r) => s + r.expense, 0);
@@ -4129,12 +4155,10 @@ function calculateShares() {
     });
   });
 
-  _p3DailyBreakdown = dailyBreakdown;
 
   // Per-shareholder totals
   const shareMap = {};
   SHAREHOLDERS.forEach(sh => { shareMap[sh] = { days: 0, total: 0 }; });
-  _p3ShareMap = shareMap; // store for Final Payment section
   dailyBreakdown.forEach(d => {
     d.present.forEach(sh => {
       if (!shareMap[sh]) shareMap[sh] = { days: 0, total: 0 };
@@ -4148,6 +4172,31 @@ function calculateShares() {
       shareMap[p.name].paagiBonus = (shareMap[p.name].paagiBonus || 0) + p.bonus;
     });
   });
+
+  return { salesData: salesData, attendData: attendData, totalSales: totalSales, totalExpense: totalExpense,
+           ratio: ratio, dailyBreakdown: dailyBreakdown, shareMap: shareMap };
+}
+
+function calculateShares() {
+  const startDate    = document.getElementById('p3-start').value;
+  const endDate      = document.getElementById('p3-end').value;
+  const settleDate   = document.getElementById('p3-settle-date').value || endDate;
+  if (!startDate || !endDate) { alert('Please select both dates.'); return; }
+  if (startDate > endDate) { alert('Start date must be before end date.'); return; }
+  if (settleDate < endDate) { alert('Settlement Date cannot be before Fishing End Date.'); return; }
+
+  _p3StartDate  = startDate;
+  _p3EndDate    = endDate;
+  _p3SettleDate = settleDate;
+
+  // Filter records
+  if (!dailyRecords.some(r => r.date >= startDate && r.date <= endDate)) { alert('No sales records found in selected range.'); return; }
+
+  const calc = computeShares(startDate, endDate);
+  const salesData = calc.salesData, totalSales = calc.totalSales, totalExpense = calc.totalExpense;
+  const ratio = calc.ratio, dailyBreakdown = calc.dailyBreakdown, shareMap = calc.shareMap;
+  _p3DailyBreakdown = dailyBreakdown;
+  _p3ShareMap = shareMap; // store for Final Payment section
 
   const totalProfit = dailyBreakdown.reduce((s, d) => s + d.profit, 0);
 
@@ -5292,6 +5341,367 @@ function hcRenderBanner(from, to) {
   } catch (e) { el.innerHTML = ''; }
 }
 setTimeout(hcUpdateBadge, 1200);
+
+// ===== 📈 COMPARE TWO PERIODS =====
+// Puts two periods side by side and explains the difference in plain words. All
+// numbers come from computeShares(), the same maths as Share Calculation, so the two
+// screens always agree. Read-only. The crew message is generated in English,
+// Hinglish or Urdu from the same facts. It states what the numbers show and never
+// guesses WHY a day had no sales (a fuel purchase and an empty trip look the same).
+let _cmp = null;     // last comparison: { A, B, F }
+
+function cmpShift(dateStr, days) {
+  const d = new Date(dateStr + 'T00:00:00Z');
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+function cmpDaysBetween(from, to) {        // inclusive
+  return Math.round((new Date(to + 'T00:00:00Z') - new Date(from + 'T00:00:00Z')) / 86400000) + 1;
+}
+function cmpPct(a, b) { return a ? (b - a) / Math.abs(a) * 100 : null; }
+function cmpNum1(x) { return String(Math.round(x * 10) / 10); }
+// whole rupees for messages (the tables on screen keep exact paise)
+function cmpR(n) { return fmt(Math.round(n)); }
+
+function cmpStats(from, to) {
+  const R = computeShares(from, to);
+  const arr = function(x) { return Array.isArray(x) ? x : []; };
+  const daily = R.salesData, trips = R.dailyBreakdown;
+  const tripsCatch = trips.filter(function(t) { return t.sales > 0; });
+  const zero = daily.filter(function(r) { return !(r.sales > 0) && (r.expense || 0) > 0; });
+  const cats = {}, fish = {};
+  let kg = 0, kgAmount = 0;
+  daily.forEach(function(r) {
+    arr(r.expenseItems).forEach(function(i) {
+      const c = (i && i.cat) || 'No category';
+      cats[c] = (cats[c] || 0) + (Number(i && i.amount) || 0);
+    });
+    arr(r.saleItems).forEach(function(i) {
+      if (!i) return;
+      const f = i.fishname || 'Other';
+      const g = fish[f] = fish[f] || { amount: 0, kg: 0 };
+      g.amount += Number(i.amount) || 0;
+      g.kg += Number(i.qty) || 0;
+      if (i.qty > 0) { kg += Number(i.qty); kgAmount += Number(i.amount) || 0; }
+    });
+  });
+  const profit = trips.reduce(function(s, d) { return s + d.profit; }, 0);
+  const fullShare = trips.reduce(function(s, d) { return s + d.sharePerPerson; }, 0);
+  return {
+    from: from, to: to, calendarDays: cmpDaysBetween(from, to), days: daily.length,
+    sales: R.totalSales, expense: R.totalExpense, ratio: R.ratio, profit: profit,
+    trips: tripsCatch.length,
+    zeroDays: zero.length,
+    zeroExpense: zero.reduce(function(s, r) { return s + (r.expense || 0); }, 0),
+    crewAvg: tripsCatch.length ? tripsCatch.reduce(function(s, t) { return s + t.numPresent; }, 0) / tripsCatch.length : 0,
+    fullShare: fullShare,                                     // what a normal (×1) crew member present on EVERY trip earned
+    avgShare: tripsCatch.length ? fullShare / tripsCatch.length : 0,
+    avgRate: kg > 0 ? kgAmount / kg : 0,
+    cats: cats, fish: fish
+  };
+}
+
+function cmpFacts(A, B) {
+  const names = Object.keys(Object.assign({}, A.cats, B.cats));
+  const catDelta = names.map(function(n) { return { name: n, a: A.cats[n] || 0, b: B.cats[n] || 0, d: (B.cats[n] || 0) - (A.cats[n] || 0) }; });
+  return {
+    dSales: B.sales - A.sales, dExpense: B.expense - A.expense, dProfit: B.profit - A.profit, dShare: B.fullShare - A.fullShare,
+    pSales: cmpPct(A.sales, B.sales), pExpense: cmpPct(A.expense, B.expense), pProfit: cmpPct(A.profit, B.profit), pShare: cmpPct(A.fullShare, B.fullShare),
+    pRate: cmpPct(A.avgRate, B.avgRate),
+    catDelta: catDelta,
+    topUp:   catDelta.filter(function(c) { return c.d > 0; }).sort(function(x, y) { return y.d - x.d; }),
+    topDown: catDelta.filter(function(c) { return c.d < 0; }).sort(function(x, y) { return x.d - y.d; }),
+    petrolA: A.cats['Petrol'] || 0, petrolB: B.cats['Petrol'] || 0,
+    overlap: A.from <= B.to && B.from <= A.to
+  };
+}
+// 'up' / 'down' / 'same' (same = within 1%)
+function cmpDir(d, pct) {
+  if (d === 0) return 'same';
+  if (pct !== null && Math.abs(pct) < 1) return 'same';
+  return d > 0 ? 'up' : 'down';
+}
+
+// ---------------- wording: English / Hinglish / Urdu ----------------
+const CMP_LANG = {
+  en: {
+    title: 'Share Comparison', period: 'Period', to: 'to', line: '━━━━━━━━━━━━━━━━━━━━',
+    sales: 'Catch (sales)', petrol: 'Petrol', expense: 'Total expenses', profit: 'Net profit',
+    share: 'Share of a crew member present on every trip', why: 'Why the difference',
+    up: 'higher', down: 'lower', same: 'about the same',
+    money: function(d, w) { return w === 'same' ? '(about the same)' : '(' + cmpR(Math.abs(d)) + ' ' + (w === 'up' ? 'higher' : 'lower') + ')'; },
+    pct:   function(p, w) { return w === 'same' ? '(about the same)' : '(' + cmpNum1(Math.abs(p)) + '% ' + (w === 'up' ? 'higher' : 'lower') + ')'; },
+    rSales: function(d, w) { return w === 'same' ? 'The catch (sales) was about the same.' : 'The catch (sales) was ' + cmpR(Math.abs(d)) + ' ' + (w === 'up' ? 'higher' : 'lower') + '.'; },
+    rExp: function(d, w, tops) {
+      if (w === 'same') return 'Expenses were about the same.';
+      return 'Expenses were ' + cmpR(Math.abs(d)) + ' ' + (w === 'up' ? 'higher' : 'lower') +
+        (tops.length ? ', mainly ' + tops.map(function(c) { return c.name + ' (' + cmpR(Math.abs(c.d)) + ' ' + (c.d > 0 ? 'higher' : 'lower') + ')'; }).join(' and ') : '') + '.';
+    },
+    rZero: function(n, amt, p) { return n + ' day' + (n === 1 ? '' : 's') + ' in Period ' + p + ' had expenses but no sales (' + cmpR(amt) + ') — for example fuel purchases or trips with no catch.'; },
+    rRate: function(a, b) { return 'The average selling rate was ' + cmpR(a) + '/kg in Period 1 and ' + cmpR(b) + '/kg in Period 2.'; },
+    rCrew: function(a, b) { return 'Average crew per trip: ' + cmpNum1(a) + ' in Period 1, ' + cmpNum1(b) + ' in Period 2 — the profit is divided among ' + (b > a ? 'more' : 'fewer') + ' people.'; },
+    footer: 'Every figure is in the Transparency Report PDFs — nothing is hidden.', sign: '_Alhamdulillah · Al Ahmed Fleet Management_'
+  },
+  hi: {
+    title: 'Share ka Muqabla', period: 'Period', to: 'se', line: '━━━━━━━━━━━━━━━━━━━━',
+    sales: 'Bikri (Catch)', petrol: 'Petrol', expense: 'Total Kharcha', profit: 'Net Profit',
+    share: 'Har trip mein maujood crew ka share', why: 'Farq ki wajah',
+    up: 'zyada', down: 'kam', same: 'lagbhag barabar',
+    money: function(d, w) { return w === 'same' ? '(lagbhag barabar)' : '(' + cmpR(Math.abs(d)) + ' ' + (w === 'up' ? 'zyada' : 'kam') + ')'; },
+    pct:   function(p, w) { return w === 'same' ? '(lagbhag barabar)' : '(' + cmpNum1(Math.abs(p)) + '% ' + (w === 'up' ? 'zyada' : 'kam') + ')'; },
+    rSales: function(d, w) { return w === 'same' ? 'Catch (bikri) lagbhag barabar raha.' : 'Catch (bikri) ' + cmpR(Math.abs(d)) + ' ' + (w === 'up' ? 'zyada' : 'kam') + ' raha.'; },
+    rExp: function(d, w, tops) {
+      if (w === 'same') return 'Kharcha lagbhag barabar raha.';
+      return 'Kharcha ' + cmpR(Math.abs(d)) + ' ' + (w === 'up' ? 'zyada' : 'kam') + ' raha' +
+        (tops.length ? ', khaas kar ' + tops.map(function(c) { return c.name + ' (' + cmpR(Math.abs(c.d)) + ' ' + (c.d > 0 ? 'zyada' : 'kam') + ')'; }).join(' aur ') : '') + '.';
+    },
+    rZero: function(n, amt, p) { return 'Period ' + p + ' mein ' + n + ' din kharcha hua lekin bikri nahi hui (' + cmpR(amt) + ') — jaise petrol khareedna ya khaali trip.'; },
+    rRate: function(a, b) { return 'Average bikri rate Period 1 mein ' + cmpR(a) + '/kg aur Period 2 mein ' + cmpR(b) + '/kg raha.'; },
+    rCrew: function(a, b) { return 'Har trip mein average crew: Period 1 mein ' + cmpNum1(a) + ', Period 2 mein ' + cmpNum1(b) + ' — profit ' + (b > a ? 'zyada' : 'kam') + ' logon mein batta hai.'; },
+    footer: 'Har rupya Transparency Report PDF mein saaf likha hai — kuch chhupa nahi hai.', sign: '_Alhamdulillah · Al Ahmed Fleet Management_'
+  },
+  ur: {
+    title: 'شیئر کا موازنہ', period: 'دورانیہ', to: 'سے', line: '━━━━━━━━━━━━━━━━━━━━',
+    sales: 'بکری (کیچ)', petrol: 'پیٹرول', expense: 'کل خرچہ', profit: 'خالص منافع',
+    share: 'ہر ٹرپ میں موجود ساتھی کا شیئر', why: 'فرق کی وجہ',
+    up: 'زیادہ', down: 'کم', same: 'تقریباً برابر',
+    money: function(d, w) { return w === 'same' ? '(تقریباً برابر)' : '(' + cmpR(Math.abs(d)) + ' ' + (w === 'up' ? 'زیادہ' : 'کم') + ')'; },
+    pct:   function(p, w) { return w === 'same' ? '(تقریباً برابر)' : '(' + cmpNum1(Math.abs(p)) + '% ' + (w === 'up' ? 'زیادہ' : 'کم') + ')'; },
+    rSales: function(d, w) { return w === 'same' ? 'کیچ (بکری) تقریباً برابر رہا۔' : 'کیچ (بکری) ' + cmpR(Math.abs(d)) + ' ' + (w === 'up' ? 'زیادہ' : 'کم') + ' رہا۔'; },
+    rExp: function(d, w, tops) {
+      if (w === 'same') return 'خرچہ تقریباً برابر رہا۔';
+      return 'خرچہ ' + cmpR(Math.abs(d)) + ' ' + (w === 'up' ? 'زیادہ' : 'کم') + ' رہا' +
+        (tops.length ? '، خاص طور پر ' + tops.map(function(c) { return (c.name === 'Petrol' ? 'پیٹرول' : c.name) + ' (' + cmpR(Math.abs(c.d)) + ' ' + (c.d > 0 ? 'زیادہ' : 'کم') + ')'; }).join(' اور ') : '') + '۔';
+    },
+    rZero: function(n, amt, p) { return 'دورانیہ ' + p + ' میں ' + n + ' دن خرچہ ہوا مگر بکری نہیں ہوئی (' + cmpR(amt) + ') — جیسے پیٹرول خریدنا یا بغیر کیچ کا ٹرپ۔'; },
+    rRate: function(a, b) { return 'اوسط فروخت ریٹ دورانیہ 1 میں ' + cmpR(a) + '/kg اور دورانیہ 2 میں ' + cmpR(b) + '/kg رہا۔'; },
+    rCrew: function(a, b) { return 'ہر ٹرپ میں اوسط ساتھی: دورانیہ 1 میں ' + cmpNum1(a) + '، دورانیہ 2 میں ' + cmpNum1(b) + ' — منافع ' + (b > a ? 'زیادہ' : 'کم') + ' لوگوں میں بٹتا ہے۔'; },
+    footer: 'ہر روپیہ ٹرانسپیرنسی رپورٹ (PDF) میں صاف لکھا ہے — کچھ بھی چھپا ہوا نہیں۔', sign: '_الحمد للہ · Al Ahmed Fleet Management_'
+  }
+};
+
+// the numbered "why" sentences — facts only
+function cmpReasons(lang) {
+  const T = CMP_LANG[lang], C = _cmp, A = C.A, B = C.B, F = C.F;
+  const out = [];
+  out.push(T.rSales(F.dSales, cmpDir(F.dSales, F.pSales)));
+  const wE = cmpDir(F.dExpense, F.pExpense);
+  const tops = (F.dExpense >= 0 ? F.topUp : F.topDown).slice(0, 2).filter(function(c) { return Math.abs(c.d) >= Math.max(500, Math.abs(F.dExpense) * 0.15); });
+  out.push(T.rExp(F.dExpense, wE, tops));
+  if (A.zeroDays > 0) out.push(T.rZero(A.zeroDays, A.zeroExpense, 1));
+  if (B.zeroDays > 0) out.push(T.rZero(B.zeroDays, B.zeroExpense, 2));
+  if (F.pRate !== null && Math.abs(F.pRate) >= 10) out.push(T.rRate(A.avgRate, B.avgRate));
+  if (Math.abs(B.crewAvg - A.crewAvg) >= 1) out.push(T.rCrew(A.crewAvg, B.crewAvg));
+  return out;
+}
+
+function cmpMessage(lang) {
+  const T = CMP_LANG[lang], C = _cmp, A = C.A, B = C.B, F = C.F;
+  let t = '🚢 *AL AHMED FISHING BOAT — ' + T.title + '*\n' + T.line + '\n';
+  t += '📅 *' + T.period + ' 1:* ' + fmtDate(A.from) + ' ' + T.to + ' ' + fmtDate(A.to) + '\n';
+  t += '📅 *' + T.period + ' 2:* ' + fmtDate(B.from) + ' ' + T.to + ' ' + fmtDate(B.to) + '\n' + T.line + '\n';
+  t += '📊 *' + T.sales + ':* ' + cmpR(A.sales) + ' → ' + cmpR(B.sales) + ' ' + T.money(F.dSales, cmpDir(F.dSales, F.pSales)) + '\n';
+  if (F.petrolA || F.petrolB) t += '⛽ *' + T.petrol + ':* ' + cmpR(F.petrolA) + ' → ' + cmpR(F.petrolB) + ' ' + T.money(F.petrolB - F.petrolA, cmpDir(F.petrolB - F.petrolA, cmpPct(F.petrolA, F.petrolB))) + '\n';
+  t += '💸 *' + T.expense + ':* ' + cmpR(A.expense) + ' → ' + cmpR(B.expense) + ' ' + T.money(F.dExpense, cmpDir(F.dExpense, F.pExpense)) + '\n';
+  t += '💰 *' + T.profit + ':* ' + cmpR(A.profit) + ' → ' + cmpR(B.profit) + ' ' + (F.pProfit === null ? '' : T.pct(F.pProfit, cmpDir(F.dProfit, F.pProfit))) + '\n';
+  t += '👤 *' + T.share + ':* ' + cmpR(A.fullShare) + ' → ' + cmpR(B.fullShare) + ' ' + (F.pShare === null ? '' : T.pct(F.pShare, cmpDir(F.dShare, F.pShare))) + '\n' + T.line + '\n';
+  t += '*' + T.why + ':*\n';
+  cmpReasons(lang).forEach(function(r, i) { t += (i + 1) + '. ' + r + '\n'; });
+  t += T.line + '\n' + T.footer + '\n' + T.sign;
+  return t;
+}
+function cmpSendMessage(lang) {
+  if (!_cmp) { alert('Please run a comparison first.'); return; }
+  showSlip({ en: '💬 Crew message — English', hi: '💬 Crew message — Hinglish', ur: '💬 Crew message — اردو' }[lang], cmpMessage(lang), '');
+}
+
+// ---------------- the page ----------------
+function cmpFillSaved() {
+  ['cmp-saved-a', 'cmp-saved-b'].forEach(function(id) {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    let h = '<option value="">— or pick a saved period —</option>';
+    savedPeriods.slice().sort(function(x, y) { return y.startDate < x.startDate ? -1 : 1; }).forEach(function(p) {
+      h += '<option value="' + p.periodId + '">' + escHtml(fmtDate(p.startDate) + ' → ' + fmtDate(p.endDate)) + '</option>';
+    });
+    sel.innerHTML = h;
+  });
+}
+function cmpPickSaved(which) {
+  const sel = document.getElementById('cmp-saved-' + which);
+  const p = savedPeriods.find(function(x) { return String(x.periodId) === sel.value; });
+  if (!p) return;
+  document.getElementById('cmp-from-' + which).value = p.startDate;
+  document.getElementById('cmp-to-' + which).value = p.endDate;
+}
+function cmpQuick() {          // Period 2 = last 21 days, Period 1 = the 21 days before
+  const to2 = today(), from2 = cmpShift(to2, -20), to1 = cmpShift(from2, -1), from1 = cmpShift(to1, -20);
+  document.getElementById('cmp-from-a').value = from1; document.getElementById('cmp-to-a').value = to1;
+  document.getElementById('cmp-from-b').value = from2; document.getElementById('cmp-to-b').value = to2;
+  cmpRun();
+}
+function cmpOnOpen() {
+  cmpFillSaved();
+  if (document.getElementById('cmp-from-a').value && document.getElementById('cmp-from-b').value) cmpRun();
+  else cmpQuick();
+}
+// from Share Calculation: compare this period with the one just before it (same length)
+function cmpOpenFromShareCalc() {
+  if (!_p3StartDate || !_p3EndDate) { alert('Please calculate shares for a period first.'); return; }
+  const len = cmpDaysBetween(_p3StartDate, _p3EndDate);
+  const to1 = cmpShift(_p3StartDate, -1), from1 = cmpShift(to1, -(len - 1));
+  document.getElementById('cmp-from-a').value = from1; document.getElementById('cmp-to-a').value = to1;
+  document.getElementById('cmp-from-b').value = _p3StartDate; document.getElementById('cmp-to-b').value = _p3EndDate;
+  goPage(11);
+}
+
+function cmpRun() {
+  const v = function(id) { return document.getElementById(id).value; };
+  const fa = v('cmp-from-a'), ta = v('cmp-to-a'), fb = v('cmp-from-b'), tb = v('cmp-to-b');
+  if (!hcValidDate(fa) || !hcValidDate(ta) || !hcValidDate(fb) || !hcValidDate(tb)) { alert('Please choose all four dates.'); return; }
+  if (fa > ta || fb > tb) { alert('In each period the "From" date must be before the "To" date.'); return; }
+  const A = cmpStats(fa, ta), B = cmpStats(fb, tb);
+  _cmp = { A: A, B: B, F: cmpFacts(A, B) };
+  renderCompare();
+}
+
+function cmpCell(kind, val) {
+  if (kind === 'money') return fmt(val);
+  if (kind === 'pct')   return (val * 100).toFixed(2) + '%';
+  if (kind === 'rate')  return val > 0 ? fmt(val) + '/kg' : '—';
+  if (kind === 'dec')   return cmpNum1(val);
+  return String(val);
+}
+// goodUp: true = higher is better (green), false = higher is worse (red), null = neutral
+function cmpRowHtml(label, a, b, kind, goodUp) {
+  const d = b - a, p = cmpPct(a, b), w = cmpDir(d, p);
+  let chg, cls = 'cmp-flat';
+  if (w === 'same') chg = '—';
+  else {
+    const arrow = d > 0 ? '▲' : '▼';
+    chg = arrow + ' ' + (kind === 'money' ? fmt(Math.abs(d)) : kind === 'pct' ? (Math.abs(d) * 100).toFixed(2) + ' pts' : kind === 'rate' ? fmt(Math.abs(d)) : cmpNum1(Math.abs(d))) +
+          (p === null ? '' : ' (' + (d > 0 ? '+' : '−') + cmpNum1(Math.abs(p)) + '%)');
+    if (goodUp !== null) cls = ((d > 0) === goodUp) ? 'cmp-good' : 'cmp-bad';
+  }
+  return '<tr><td>' + escHtml(label) + '</td><td style="text-align:right;">' + cmpCell(kind, a) + '</td><td style="text-align:right;">' + cmpCell(kind, b) + '</td><td style="text-align:right;" class="' + cls + '">' + chg + '</td></tr>';
+}
+
+function renderCompare() {
+  const C = _cmp, A = C.A, B = C.B, F = C.F;
+  const box = document.getElementById('cmp-results');
+  const hdr = function(S, n) {
+    return '<div class="stat-card"><div class="stat-label">Period ' + n + '</div><div class="stat-value" style="font-size:15px;">' + escHtml(fmtDate(S.from) + ' → ' + fmtDate(S.to)) + '</div>' +
+      '<div style="font-size:11px;color:var(--muted);margin-top:4px;">' + S.calendarDays + ' days · ' + S.days + ' recorded · ' + S.trips + ' trips with catch</div></div>';
+  };
+  let h = '';
+  if (!A.days || !B.days) {
+    h += '<div class="hc-status hc-yellow">🟡 ' + (!A.days && !B.days ? 'Neither period has' : (!A.days ? 'Period 1 has' : 'Period 2 has')) + ' any Daily Records, so there is nothing to compare yet.</div>';
+  }
+  if (F.overlap) h += '<div class="hc-status hc-yellow">🟡 The two periods overlap, so some days are counted in both.</div>';
+  const pp = F.pProfit;
+  if (A.days && B.days && pp !== null) {
+    const dir = cmpDir(F.dProfit, pp);
+    h += '<div class="hc-status ' + (dir === 'up' ? 'hc-green' : dir === 'down' ? 'hc-red' : 'hc-yellow') + '">' +
+      (dir === 'same' ? '➡ Net profit is about the same' : (dir === 'up' ? '▲ Net profit is ' : '▼ Net profit is ') + cmpNum1(Math.abs(pp)) + '% ' + (dir === 'up' ? 'higher' : 'lower')) +
+      ' in Period 2 (' + fmt(A.profit) + ' → ' + fmt(B.profit) + ')</div>';
+  }
+  h += '<div class="stats-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:16px;">' + hdr(A, 1) + hdr(B, 2) + '</div>';
+
+  h += '<div class="card"><div class="card-title">📊 Side by side</div><div class="table-wrap"><table><thead><tr><th>Measure</th><th style="text-align:right">Period 1</th><th style="text-align:right">Period 2</th><th style="text-align:right">Change</th></tr></thead><tbody>' +
+    cmpRowHtml('Total sales (catch)', A.sales, B.sales, 'money', true) +
+    cmpRowHtml('Total expenses', A.expense, B.expense, 'money', false) +
+    cmpRowHtml('Petrol', F.petrolA, F.petrolB, 'money', false) +
+    cmpRowHtml('Expense ratio (cost per ₹100 of fish)', A.ratio, B.ratio, 'pct', false) +
+    cmpRowHtml('Net profit', A.profit, B.profit, 'money', true) +
+    cmpRowHtml('Trips with catch', A.trips, B.trips, 'num', true) +
+    cmpRowHtml('Days with expenses but no sales', A.zeroDays, B.zeroDays, 'num', false) +
+    cmpRowHtml('Expense on those days', A.zeroExpense, B.zeroExpense, 'money', false) +
+    cmpRowHtml('Average sales per trip', A.trips ? A.sales / A.trips : 0, B.trips ? B.sales / B.trips : 0, 'money', true) +
+    cmpRowHtml('Average selling rate', A.avgRate, B.avgRate, 'rate', true) +
+    cmpRowHtml('Average crew per trip', A.crewAvg, B.crewAvg, 'dec', null) +
+    cmpRowHtml('Share of a crew member present on every trip (×1)', A.fullShare, B.fullShare, 'money', true) +
+    cmpRowHtml('Average share per trip (×1)', A.avgShare, B.avgShare, 'money', true) +
+    '</tbody></table></div></div>';
+
+  const reasons = cmpReasons('en');
+  h += '<div class="card" style="border-color:rgba(255,159,67,0.4);"><div class="card-title">💡 What changed</div><ol style="margin:0;padding-left:20px;font-size:14px;line-height:1.9;">' +
+    reasons.map(function(r) { return '<li>' + escHtml(r) + '</li>'; }).join('') + '</ol></div>';
+
+  const names = F.catDelta.slice().sort(function(x, y) { return Math.max(y.a, y.b) - Math.max(x.a, x.b); });
+  h += '<div class="card"><div class="card-title">💸 Expenses by category</div><div class="table-wrap"><table><thead><tr><th>Category</th><th style="text-align:right">Period 1</th><th style="text-align:right">Period 2</th><th style="text-align:right">Change</th></tr></thead><tbody>' +
+    (names.length ? names.map(function(c) { return cmpRowHtml(c.name, c.a, c.b, 'money', false); }).join('') : emptyRow(4, 'No expenses recorded')) + '</tbody></table></div></div>';
+
+  const fishNames = Object.keys(Object.assign({}, A.fish, B.fish)).sort(function(x, y) {
+    return ((B.fish[y] || {}).amount || 0) + ((A.fish[y] || {}).amount || 0) - (((B.fish[x] || {}).amount || 0) + ((A.fish[x] || {}).amount || 0));
+  });
+  h += '<div class="card"><div class="card-title">🐟 Sales by fish</div><div class="table-wrap"><table><thead><tr><th>Fish</th><th style="text-align:right">Period 1</th><th style="text-align:right">Period 2</th><th style="text-align:right">Change</th></tr></thead><tbody>' +
+    (fishNames.length ? fishNames.map(function(n) { return cmpRowHtml(n, (A.fish[n] || {}).amount || 0, (B.fish[n] || {}).amount || 0, 'money', true); }).join('') : emptyRow(4, 'No sales recorded')) + '</tbody></table></div></div>';
+
+  h += '<div class="card"><div class="card-title">📤 Share this with the crew</div>' +
+    '<div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.7;">A ready message with these numbers and the reasons. Choose a language, then copy it or send it on WhatsApp.</div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+    '<button class="btn btn-wa" onclick="cmpSendMessage(\'en\')">💬 English</button>' +
+    '<button class="btn btn-wa" onclick="cmpSendMessage(\'hi\')">💬 Hinglish</button>' +
+    '<button class="btn btn-wa" onclick="cmpSendMessage(\'ur\')">💬 اردو</button>' +
+    '<button class="btn btn-primary" onclick="cmpExportPDF()">⬇ EXPORT PDF</button></div></div>';
+  box.innerHTML = h;
+}
+
+function cmpExportPDF() {
+  if (!_cmp) { alert('Please run a comparison first.'); return; }
+  const C = _cmp, A = C.A, B = C.B, F = C.F;
+  const fmtN = function(n) { return Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+  const pdfD = function(s) { const p = String(s).split('-'); return p.length === 3 ? p[2] + '-' + p[1] + '-' + p[0] : s; };
+  const gen = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const money = function(n) { return '&#8377;' + fmtN(n); };
+  const chg = function(a, b, kind, goodUp) {
+    const d = b - a, p = cmpPct(a, b), w = cmpDir(d, p);
+    if (w === 'same') return '<span style="color:#888;">—</span>';
+    const col = goodUp === null ? '#555' : ((d > 0) === goodUp ? '#1a7a4a' : '#c0392b');
+    return '<span style="color:' + col + ';font-weight:700;">' + (d > 0 ? '&#9650; ' : '&#9660; ') + (kind === 'money' ? money(Math.abs(d)) : kind === 'pct' ? (Math.abs(d) * 100).toFixed(2) + ' pts' : cmpNum1(Math.abs(d))) + (p === null ? '' : ' (' + (d > 0 ? '+' : '-') + cmpNum1(Math.abs(p)) + '%)') + '</span>';
+  };
+  const row = function(label, a, b, kind, goodUp) {
+    const show = function(x) { return kind === 'money' ? money(x) : kind === 'pct' ? (x * 100).toFixed(2) + '%' : kind === 'rate' ? (x > 0 ? money(x) + '/kg' : '—') : kind === 'dec' ? cmpNum1(x) : String(x); };
+    return '<tr><td>' + escHtml(label) + '</td><td style="text-align:right;">' + show(a) + '</td><td style="text-align:right;">' + show(b) + '</td><td style="text-align:right;">' + chg(a, b, kind === 'rate' ? 'money' : kind, goodUp) + '</td></tr>';
+  };
+  const catNames = F.catDelta.slice().sort(function(x, y) { return Math.max(y.a, y.b) - Math.max(x.a, x.b); });
+  const fishNames = Object.keys(Object.assign({}, A.fish, B.fish)).sort(function(x, y) {
+    return ((B.fish[y] || {}).amount || 0) + ((A.fish[y] || {}).amount || 0) - (((B.fish[x] || {}).amount || 0) + ((A.fish[x] || {}).amount || 0));
+  });
+  const reasons = cmpReasons('en').map(function(r) { return '<li style="margin-bottom:6px;">' + escHtml(r) + '</li>'; }).join('');
+  const th = '<th style="text-align:right">Period 1</th><th style="text-align:right">Period 2</th><th style="text-align:right">Change</th>';
+  const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Period Comparison</title>' +
+    '<style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,Helvetica,sans-serif;color:#1a1a2e;background:#fff;padding:26px;font-size:13px;}table{width:100%;border-collapse:collapse;margin-bottom:18px;}th{background:#0a1628;color:#ff9f43;font-size:9px;text-transform:uppercase;padding:8px 10px;text-align:left;font-weight:700;}td{padding:7px 10px;border-bottom:1px solid #e8e0d0;}tr:nth-child(even) td{background:#faf7f0;}@media print{body{padding:14px;}@page{margin:11mm;size:A4;}}</style></head><body>' +
+    '<div style="text-align:center;border-bottom:3px double #ff9f43;padding-bottom:14px;margin-bottom:16px;"><div style="font-size:32px;margin-bottom:4px;">&#9875;</div>' +
+    '<div style="font-size:20px;font-weight:700;color:#0a1628;letter-spacing:2px;">AL AHMED FISHING BOAT</div>' +
+    '<div style="font-size:11px;color:#888;margin-top:3px;letter-spacing:1px;">SHARE COMPARISON &mdash; TWO PERIODS</div></div>' +
+    '<div style="display:flex;gap:10px;margin-bottom:16px;">' +
+      '<div style="flex:1;background:#f7f3eb;border:1px solid #e0d5b8;border-radius:8px;padding:10px 14px;"><div style="font-size:9px;color:#888;text-transform:uppercase;font-weight:600;">Period 1</div><div style="font-size:14px;font-weight:700;">' + pdfD(A.from) + ' to ' + pdfD(A.to) + '</div><div style="font-size:11px;color:#777;">' + A.calendarDays + ' days &middot; ' + A.trips + ' trips with catch</div></div>' +
+      '<div style="flex:1;background:#f7f3eb;border:1px solid #e0d5b8;border-radius:8px;padding:10px 14px;"><div style="font-size:9px;color:#888;text-transform:uppercase;font-weight:600;">Period 2</div><div style="font-size:14px;font-weight:700;">' + pdfD(B.from) + ' to ' + pdfD(B.to) + '</div><div style="font-size:11px;color:#777;">' + B.calendarDays + ' days &middot; ' + B.trips + ' trips with catch</div></div>' +
+      '<div style="flex:0 0 110px;background:#f7f3eb;border:1px solid #e0d5b8;border-radius:8px;padding:10px 14px;"><div style="font-size:9px;color:#888;text-transform:uppercase;font-weight:600;">Generated</div><div style="font-size:13px;font-weight:700;">' + gen + '</div></div></div>' +
+    '<div style="background:#0a1628;color:#ff9f43;font-size:11px;padding:8px 14px;font-weight:700;letter-spacing:1px;">SIDE BY SIDE</div>' +
+    '<table><thead><tr><th>Measure</th>' + th + '</tr></thead><tbody>' +
+      row('Total sales (catch)', A.sales, B.sales, 'money', true) + row('Total expenses', A.expense, B.expense, 'money', false) +
+      row('Petrol', F.petrolA, F.petrolB, 'money', false) + row('Expense ratio (cost per Rs.100 of fish)', A.ratio, B.ratio, 'pct', false) +
+      row('Net profit', A.profit, B.profit, 'money', true) + row('Trips with catch', A.trips, B.trips, 'num', true) +
+      row('Days with expenses but no sales', A.zeroDays, B.zeroDays, 'num', false) + row('Expense on those days', A.zeroExpense, B.zeroExpense, 'money', false) +
+      row('Average sales per trip', A.trips ? A.sales / A.trips : 0, B.trips ? B.sales / B.trips : 0, 'money', true) +
+      row('Average selling rate', A.avgRate, B.avgRate, 'rate', true) + row('Average crew per trip', A.crewAvg, B.crewAvg, 'dec', null) +
+      row('Share of a crew member present on every trip (x1)', A.fullShare, B.fullShare, 'money', true) + row('Average share per trip (x1)', A.avgShare, B.avgShare, 'money', true) +
+    '</tbody></table>' +
+    '<div style="background:#fffaf0;border:1px solid #e8d9b0;border-left:4px solid #ff9f43;border-radius:6px;padding:14px 16px;margin-bottom:18px;"><div style="font-size:12px;font-weight:700;color:#8a5a10;margin-bottom:8px;">WHAT CHANGED</div><ol style="padding-left:20px;font-size:12px;color:#333;line-height:1.7;">' + reasons + '</ol></div>' +
+    '<div style="background:#0a1628;color:#ff9f43;font-size:11px;padding:8px 14px;font-weight:700;letter-spacing:1px;">EXPENSES BY CATEGORY</div>' +
+    '<table><thead><tr><th>Category</th>' + th + '</tr></thead><tbody>' + (catNames.length ? catNames.map(function(c) { return row(c.name, c.a, c.b, 'money', false); }).join('') : '<tr><td colspan="4" style="text-align:center;color:#888;">No expenses recorded</td></tr>') + '</tbody></table>' +
+    '<div style="background:#0a1628;color:#ff9f43;font-size:11px;padding:8px 14px;font-weight:700;letter-spacing:1px;">SALES BY FISH</div>' +
+    '<table><thead><tr><th>Fish</th>' + th + '</tr></thead><tbody>' + (fishNames.length ? fishNames.map(function(n) { return row(n, (A.fish[n] || {}).amount || 0, (B.fish[n] || {}).amount || 0, 'money', true); }).join('') : '<tr><td colspan="4" style="text-align:center;color:#888;">No sales recorded</td></tr>') + '</tbody></table>' +
+    '<div style="text-align:center;margin-top:20px;padding-top:14px;border-top:1px solid #e0d5b8;"><div style="font-size:11px;color:#888;">Al Ahmed Fishing Boat &middot; Every figure is in the Transparency Reports &mdash; nothing is hidden &middot; ' + gen + '</div>' +
+    '<div style="font-size:11px;color:#8a5a10;margin-top:4px;font-style:italic;">&#1575;&#1604;&#1581;&#1605;&#1583; &#1604;&#1604;&#1607; &mdash; Alhamdulillah</div></div>' +
+    '<script>window.onload=function(){window.print();}<\/script></body></html>';
+  const win = window.open('', '_blank');
+  if (!win) { alert('Please allow popups.'); return; }
+  win.document.write(html);
+  win.document.close();
+}
 
 // ===== WHATSAPP SLIPS =====
 // One shared preview popup (Copy / Send on WhatsApp). Each slip builder below
@@ -8539,6 +8949,7 @@ function closeMoreSheet() {
     <button class="more-item" data-page="8" onclick="goPage(8)"><span class="more-ico"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg></span> Agent Commission</button>
     <button class="more-item" data-page="9" onclick="goPage(9)"><span class="more-ico">⚙</span> Manage Lists</button>
     <button class="more-item" data-page="10" onclick="goPage(10)"><span class="more-ico">🩺</span> Data Health Check</button>
+    <button class="more-item" data-page="11" onclick="goPage(11)"><span class="more-ico">📈</span> Compare Two Periods</button>
 
     <div style="border-top:1px solid var(--border);margin:14px 0 12px;"></div>
     <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;">&#9729; GOOGLE DRIVE &amp; BACKUP</div>
