@@ -585,6 +585,10 @@
 
 
 
+  /* ===== MAINTENANCE TRACK ===== */
+  #mt-badge { background: #fbbf24; color: #0d1117; border-radius: 10px; padding: 0 6px; margin-left: 4px; font-weight: 700; font-size: 11px; }
+  #mt-badge:empty { display: none; }
+
   /* ===== LOCKED PERIODS ===== */
   #lock-badge { background: #f87171; color: #0d1117; border-radius: 10px; padding: 0 6px; margin-left: 4px; font-weight: 700; font-size: 11px; }
   #lock-badge:empty { display: none; }
@@ -759,6 +763,7 @@
       <input type="file" accept=".json,.txt,application/json,text/plain" id="import-file-input" style="display:none" onchange="importData(event)">
     </label>
     <button id="undo-restore-btn" class="btn btn-sm" style="display:none;background:rgba(251,191,36,0.18);color:#fbbf24;border:1px solid rgba(251,191,36,0.45);" onclick="undoLastRestore()" title="Go back to your data as it was just before the last restore">↩ UNDO RESTORE</button>
+    <button id="mt-btn" class="btn btn-sm" style="background:rgba(255,159,67,0.15);color:#ff9f43;border:1px solid rgba(255,159,67,0.4);" onclick="showPage(13)" title="Track repairs and services for each boat, engine and net">🛠 MAINTENANCE<span id="mt-badge"></span></button>
     <button id="lock-btn" class="btn btn-sm" style="background:rgba(251,191,36,0.15);color:#fbbf24;border:1px solid rgba(251,191,36,0.4);" onclick="showPage(12)" title="Lock settled periods so they cannot change by accident">🔒 LOCKS<span id="lock-badge"></span></button>
     <button class="btn btn-sm" style="background:rgba(126,207,237,0.15);color:#7ecfed;border:1px solid rgba(126,207,237,0.4);" onclick="showPage(11)" title="Compare two periods and explain why a share was higher or lower">📈 COMPARE</button>
     <button id="health-btn" class="btn btn-sm" style="background:rgba(74,222,128,0.15);color:#4ade80;border:1px solid rgba(74,222,128,0.4);" onclick="showPage(10)" title="Check your records for mistakes before paying shares">🩺 CHECK<span id="health-badge"></span></button>
@@ -1525,6 +1530,63 @@
     <button class="btn btn-primary" onclick="lockCreate()">🔒 LOCK THIS PERIOD</button>
   </div>
   <div class="card"><div class="card-title">Locked periods</div><div id="lk-list"></div></div>
+</div>
+
+<!-- ===== PAGE 13: MAINTENANCE TRACK ===== -->
+<div class="page" id="page13">
+  <div class="page-title">🛠 Maintenance Track</div>
+
+  <div class="card">
+    <div class="card-title" id="mt-form-title">Add maintenance entry</div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:14px;">
+      Keep track of repairs and services on each boat, engine and net — what was done, the cost, who did it and when the next service is due.
+      This page is for <strong style="color:var(--text);">tracking only</strong>: it never changes shares, expenses or any payment.
+    </div>
+    <div class="form-row" style="align-items:flex-end;">
+      <div class="form-group"><label>Date of work</label><input type="date" id="mt-date"></div>
+      <div class="form-group"><label>Boat / engine / net</label><select id="mt-asset" style="padding:10px 12px;background:rgba(13,17,23,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;"></select></div>
+      <div class="form-group"><label>Type of work</label><select id="mt-type" style="padding:10px 12px;background:rgba(13,17,23,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;"></select></div>
+      <div class="form-group"><label>Cost (₹, optional)</label><input type="number" id="mt-cost" min="0" step="any" placeholder="0"></div>
+    </div>
+    <div class="form-row" style="align-items:flex-end;margin-top:10px;">
+      <div class="form-group"><label>Paid to / workshop</label><input type="text" id="mt-vendor" maxlength="60" placeholder="e.g. Harnai workshop"></div>
+      <div class="form-group"><label>Next service due (optional)</label><input type="date" id="mt-next"></div>
+      <div class="form-group"><label>Notes</label><input type="text" id="mt-notes" maxlength="200" placeholder="What was done"></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
+      <button class="btn btn-primary" id="mt-save-btn" onclick="mtSave()">+ ADD ENTRY</button>
+      <button class="btn btn-sm hc-btn" id="mt-cancel-btn" style="display:none;" onclick="mtResetForm()">CANCEL</button>
+    </div>
+  </div>
+
+  <div class="stats-grid" id="mt-stats" style="margin-bottom:16px;"></div>
+
+  <div class="card"><div class="card-title">⏰ Service due soon &amp; overdue</div><div id="mt-due"></div></div>
+
+  <div class="card">
+    <div class="card-title">Filters</div>
+    <div class="form-row" style="align-items:flex-end;">
+      <div class="form-group"><label>Boat / asset</label><select id="mt-f-asset" onchange="renderMaintenance()" style="padding:10px 12px;background:rgba(13,17,23,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;"></select></div>
+      <div class="form-group"><label>Type of work</label><select id="mt-f-type" onchange="renderMaintenance()" style="padding:10px 12px;background:rgba(13,17,23,0.8);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;width:100%;"></select></div>
+      <div class="form-group"><label>From</label><input type="date" id="mt-f-from" onchange="renderMaintenance()"></div>
+      <div class="form-group"><label>To</label><input type="date" id="mt-f-to" onchange="renderMaintenance()"></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+      <button class="btn btn-sm hc-btn" onclick="mtClearFilters()">Clear filters</button>
+      <button class="btn btn-primary btn-sm" onclick="mtExportPDF()">⬇ EXPORT PDF</button>
+      <button class="btn btn-sm hc-btn" onclick="mtExportCSV()">⬇ EXPORT CSV</button>
+    </div>
+  </div>
+
+  <div class="card"><div class="card-title">Cost by boat / asset <span style="font-size:11px;color:var(--muted);">(follows the filters)</span></div>
+    <div class="table-wrap"><table><thead><tr><th>Boat / asset</th><th style="text-align:right">Jobs</th><th style="text-align:right">Cost</th><th>Last work</th></tr></thead><tbody id="mt-by-asset"></tbody></table></div></div>
+  <div class="card"><div class="card-title">Cost by type of work <span style="font-size:11px;color:var(--muted);">(follows the filters)</span></div>
+    <div class="table-wrap"><table><thead><tr><th>Type of work</th><th style="text-align:right">Jobs</th><th style="text-align:right">Cost</th><th>Last done on</th></tr></thead><tbody id="mt-by-type"></tbody></table></div></div>
+
+  <div class="card">
+    <div class="section-header"><div class="card-title" style="margin-bottom:0;">All entries</div><div id="mt-count" style="font-size:12px;color:var(--muted);"></div></div>
+    <div class="table-wrap"><table><thead><tr><th>Date</th><th>Boat / asset</th><th>Work</th><th style="text-align:right">Cost</th><th>Paid to</th><th>Notes</th><th>Next due</th><th></th></tr></thead><tbody id="mt-tbody"></tbody></table></div>
+  </div>
 </div>
 
 <!-- WHATSAPP SLIP PREVIEW -->
@@ -2360,7 +2422,10 @@ function buildDefaultLists() {
               'Rickshaw Petrol Rent','Tempo Rent','Bangda','Agent Commission','Other']
       .map(n => ({ name: n, archived: false, locked: LOCKED_EXPCATS.indexOf(n) !== -1 })),
     tractors: ['Kakade','AAT','Mayuresh'].map(plain),
-    agents: ['Baba','Sunny','Nazir Chickte','Zaheer Chickte','Anjum Mahaldar','Rizwan','Arai','Saeed Chickte','Sagir Mahaldar','Other'].map(plain)
+    agents: ['Baba','Sunny','Nazir Chickte','Zaheer Chickte','Anjum Mahaldar','Rizwan','Arai','Saeed Chickte','Sagir Mahaldar','Other'].map(plain),
+    // Maintenance Track: starts with your boats, engines and nets (the owner-group names)
+    assets: crewNames.filter(n => ownerNames.indexOf(n) !== -1 && n !== 'Owner').map(plain),
+    mtypes: ['Engine Service','Engine Repair','Gearbox / Propeller','Net Repair','Boat Repair / Dry-dock','Painting','Electrical','Spare Parts','Other'].map(plain)
   };
 }
 
@@ -2430,6 +2495,14 @@ let periodLocks = (function() {
   catch (e) { return []; }
 })();
 function saveLocks() { save(KEY_LOCKS, periodLocks); }
+
+// Maintenance Track records (see 🛠 MAINTENANCE TRACK)
+const KEY_MAINT = 'aafb_maintenance';
+let maintenanceRecords = (function() {
+  try { const a = JSON.parse(localStorage.getItem(KEY_MAINT) || '[]'); return Array.isArray(a) ? a.filter(function(x) { return x && typeof x === 'object'; }) : []; }
+  catch (e) { return []; }
+})();
+function saveMaint() { save(KEY_MAINT, maintenanceRecords); }
 
 // Derived arrays used all over the app. They hold EVERYTHING (active + archived)
 // so history and reports stay complete. Mutated in place, never reassigned.
@@ -2517,6 +2590,11 @@ function refreshListDropdowns() {
   fillSelectById('p4-filter-member',   crAll,                   { keepFirst: true });
   fillSelectById('edit-pay-member',    crA,                     {});
   fillSelectById('adv-stmt-member',    crAll,                   { keepFirst: true });
+  const asA = namesOf('assets'), asAll = namesOf('assets', true), tyA = namesOf('mtypes'), tyAll = namesOf('mtypes', true);
+  fillSelectById('mt-asset',           asA,                     { first: ['', '— Select boat / engine / net —'] });
+  fillSelectById('mt-type',            tyA,                     { first: ['', '— Select type of work —'] });
+  fillSelectById('mt-f-asset',         asAll,                   { first: ['', 'All boats / assets'] });
+  fillSelectById('mt-f-type',          tyAll,                   { first: ['', 'All types of work'] });
 }
 
 
@@ -2589,6 +2667,7 @@ function showPage(n) {
   if (n === 10) hcOnOpen();
   if (n === 11) cmpOnOpen();
   if (n === 12) renderLocks();
+  if (n === 13) renderMaintenance();
   if (n === 1) renderP1Table();
   if (n === 2) renderP2Table();
   if (n === 3) renderSavedPeriods();
@@ -4672,7 +4751,9 @@ const MG_DEFS = {
   fish:      { label: 'Fish Names',         hint: 'Fish names shown in the Daily Records sales dropdown.' },
   expcats:   { label: 'Expense Categories', hint: 'Tractor, Agent Commission and Other have built-in logic and are locked.' },
   tractors:  { label: 'Tractor Providers',  hint: 'Tractor service providers used in Tractor Trips and in Daily Records expenses.' },
-  agents:    { label: 'Auction Agents',     hint: 'Agents who earn the 2% commission on auction sales.' }
+  agents:    { label: 'Auction Agents',     hint: 'Agents who earn the 2% commission on auction sales.' },
+  assets:    { label: 'Boats & Assets',     hint: 'Boats, engines and nets used in 🛠 Maintenance Track. It starts with your owner-group names — add or archive as needed.' },
+  mtypes:    { label: 'Maintenance Types',  hint: 'Kinds of work used in 🛠 Maintenance Track, for example Engine Service or Net Repair.' }
 };
 
 function mgNameError(key, name, exceptIdx) {
@@ -4719,6 +4800,10 @@ function mgUsageCount(key, name) {
     agentPays.forEach(p => { if (p.agent === name) n++; });
     dailyRecords.forEach(r => (r.saleItems || []).forEach(i => { if (i.auctionAgent === name) n++; }));
     creditSales.forEach(s => { if (s.agent === name) n++; });
+  } else if (key === 'assets') {
+    maintenanceRecords.forEach(r => { if (r && r.asset === name) n++; });
+  } else if (key === 'mtypes') {
+    maintenanceRecords.forEach(r => { if (r && r.type === name) n++; });
   }
   return n;
 }
@@ -4932,7 +5017,7 @@ function runHealthChecks(from, to) {
   safe('dates', function() {
     const sets = [['Daily record', dailyRecords], ['Attendance', attendanceRecords], ['Advance/payment', paymentRecords],
       ['Supplier sale', fishSales], ['Supplier payment', supplierPays], ['Credit sale', creditSales], ['Credit payment', creditPays],
-      ['Tractor trip', tractorTrips], ['Tractor payment', tractorPays], ['Agent commission', agentComms], ['Agent payment', agentPays]];
+      ['Tractor trip', tractorTrips], ['Tractor payment', tractorPays], ['Agent commission', agentComms], ['Agent payment', agentPays], ['Maintenance entry', maintenanceRecords]];
     let total = 0, shown = 0;
     sets.forEach(function(s) {
       A(s[1]).forEach(function(r, i) {
@@ -5266,6 +5351,33 @@ function runHealthChecks(from, to) {
     }
   });
 
+  // ---------- maintenance entries ----------
+  safe('maintenance', function() {
+    const assetSet = {}, typeSet = {};
+    namesOf('assets', true).forEach(function(n) { assetSet[n] = 1; });
+    namesOf('mtypes', true).forEach(function(n) { typeSet[n] = 1; });
+    const unknown = {};
+    A(maintenanceRecords).forEach(function(r) {
+      if (!r || typeof r !== 'object' || !inR(r.date)) return;
+      if (r.cost !== undefined && r.cost !== '' && (!hcNum(r.cost) || r.cost < 0)) {
+        hcAdd(out, 'red', 'MAINT_COST', r.date, 'Maintenance cost is not a proper number', (r.asset || '?') + ' — ' + (r.type || '?') + ': the cost is "' + r.cost + '".', String(r.id) + r.cost, [{ t: 'maint' }]);
+      }
+      if (r.asset && !assetSet[r.asset]) { const u = unknown['assets|' + r.asset] = unknown['assets|' + r.asset] || { tab: 'assets', name: r.asset, first: r.date, n: 0 }; u.n++; if (r.date < u.first) u.first = r.date; }
+      if (r.type && !typeSet[r.type]) { const u = unknown['mtypes|' + r.type] = unknown['mtypes|' + r.type] || { tab: 'mtypes', name: r.type, first: r.date, n: 0 }; u.n++; if (r.date < u.first) u.first = r.date; }
+    });
+    Object.keys(unknown).forEach(function(k) {
+      const u = unknown[k];
+      hcAdd(out, 'yellow', 'UNKNOWN_LIST', u.first, '"' + u.name + '" is not in your ' + (u.tab === 'assets' ? 'Boats & Assets' : 'Maintenance Types') + ' list',
+        'Used in ' + u.n + ' maintenance entr' + (u.n === 1 ? 'y' : 'ies') + '. Add it in ⚙ Manage if it is correct, or fix the spelling.', k, [{ t: 'mgr', tab: u.tab, name: u.name, label: '➕ Add "' + u.name + '"' }]);
+    });
+    if (to >= today()) {
+      mtDueList().forEach(function(d) {
+        hcAdd(out, 'blue', 'MAINT_DUE', d.rec.nextDue, d.rec.asset + ' — ' + d.rec.type + (d.overdue ? ' is overdue' : ' is due soon'),
+          (d.overdue ? 'Overdue by ' + (-d.days) + ' day(s).' : 'Due ' + (d.days === 0 ? 'today' : 'in ' + d.days + ' day(s)') + '.') + ' Last done ' + fmtDate(d.rec.date) + '.', String(d.rec.id), [{ t: 'maint', label: '🛠 Open Maintenance' }]);
+      });
+    }
+  });
+
   // ---------- locked periods that changed behind the app's back ----------
   safe('locks', function() {
     lockActive().forEach(function(l) {
@@ -5294,6 +5406,7 @@ function hcAct(i, j) {
   else if (a.t === 'newdaily') { goPage(1); document.getElementById('p1-date').value = a.date; }
   else if (a.t === 'pay')      { goPage(4); editPayment(a.id); }
   else if (a.t === 'locks')    { goPage(12); }
+  else if (a.t === 'maint')    { goPage(13); }
   else if (a.t === 'mgr')      { goPage(9); mgSetTab(a.tab); const el = document.getElementById('mg-name'); if (el && a.name) { el.value = a.name; el.focus(); } }
 }
 function hcIgnore(i) {
@@ -6066,6 +6179,248 @@ function renderLocks() {
 }
 setTimeout(lockUpdateBadge, 1300);
 
+// ===== 🛠 MAINTENANCE TRACK =====
+// A tracker: what was repaired or serviced, on which boat / engine / net, what it cost, who did
+// the work and when the next service is due. It is for TRACKING ONLY — it never changes shares,
+// expenses, ledgers or any payment. (If a repair was also entered as a Daily Record expense,
+// that expense is counted there as usual; this page does not touch it.)
+// Boats & assets and work types are editable lists in ⚙ MANAGE.
+let _mtEditId = null;
+const MT_DUE_DAYS = 14;        // "due soon" window
+
+function mtDaysTo(dateStr) { return Math.round((new Date(dateStr + 'T00:00:00Z') - new Date(today() + 'T00:00:00Z')) / 86400000); }
+function mtList() { return maintenanceRecords.filter(function(r) { return r && typeof r === 'object' && hcValidDate(r.date); }); }
+function mtCost(r) { return hcNum(r.cost) && r.cost > 0 ? r.cost : 0; }
+function mtSort(a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : (b.id || 0) - (a.id || 0); }
+
+// For each boat/asset + work type, the most recent entry decides whether a service is due.
+// A newer entry for the same boat and type automatically replaces an older "next due".
+function mtDueList() {
+  const latest = {};
+  mtList().forEach(function(r) {
+    const k = r.asset + '|' + r.type, cur = latest[k];
+    if (!cur || r.date > cur.date || (r.date === cur.date && (r.id || 0) > (cur.id || 0))) latest[k] = r;
+  });
+  const out = [];
+  Object.keys(latest).forEach(function(k) {
+    const r = latest[k];
+    if (!r.nextDue || !hcValidDate(r.nextDue)) return;
+    const days = mtDaysTo(r.nextDue);
+    if (days <= MT_DUE_DAYS) out.push({ rec: r, days: days, overdue: days < 0 });
+  });
+  out.sort(function(a, b) { return a.days - b.days; });
+  return out;
+}
+function mtUpdateBadge() {
+  const b = document.getElementById('mt-badge');
+  if (!b) return;
+  try { const n = mtDueList().length; b.textContent = n ? String(n) : ''; } catch (e) { b.textContent = ''; }
+}
+
+// ---------- add / edit / delete ----------
+function mtReadForm() {
+  const v = function(id) { return document.getElementById(id).value; };
+  const costTxt = v('mt-cost').trim();
+  return { date: v('mt-date'), asset: v('mt-asset'), type: v('mt-type'), cost: costTxt === '' ? 0 : Number(costTxt),
+           vendor: v('mt-vendor').trim(), nextDue: v('mt-next'), notes: v('mt-notes').trim() };
+}
+function mtFormError(f) {
+  if (!hcValidDate(f.date)) return 'Please choose the date of the work.';
+  if (!f.asset) return 'Please choose the boat / engine / net.';
+  if (!f.type) return 'Please choose the type of work.';
+  if (!hcNum(f.cost) || f.cost < 0) return 'The cost must be a number, 0 or more (leave it empty if you do not know it yet).';
+  if (f.nextDue && !hcValidDate(f.nextDue)) return 'The next-due date is not a valid date.';
+  if (f.nextDue && f.nextDue < f.date) return 'The next-due date cannot be before the date of the work.';
+  if (f.vendor.length > 60 || f.notes.length > 200) return 'The text is too long (paid-to: 60 characters, notes: 200).';
+  return '';
+}
+function mtResetForm() {
+  _mtEditId = null;
+  ['mt-asset', 'mt-type', 'mt-cost', 'mt-vendor', 'mt-next', 'mt-notes'].forEach(function(id) { document.getElementById(id).value = ''; });
+  document.getElementById('mt-date').value = today();
+  document.getElementById('mt-save-btn').textContent = '+ ADD ENTRY';
+  document.getElementById('mt-cancel-btn').style.display = 'none';
+  document.getElementById('mt-form-title').textContent = 'Add maintenance entry';
+}
+function mtSave() {
+  const f = mtReadForm(), err = mtFormError(f);
+  if (err) { alert(err); return; }
+  if (_mtEditId !== null) {
+    const r = maintenanceRecords.find(function(x) { return x.id === _mtEditId; });
+    if (!r) { mtResetForm(); return; }
+    Object.assign(r, f);
+    showToast('✓ Entry updated');
+  } else {
+    maintenanceRecords.push(Object.assign({ id: Date.now() }, f));
+    showToast('✓ Added — ' + f.asset + ' · ' + f.type);
+  }
+  saveMaint();
+  mtResetForm();
+  renderMaintenance();
+}
+function mtEdit(id) {
+  const r = maintenanceRecords.find(function(x) { return x.id === id; });
+  if (!r) return;
+  _mtEditId = id;
+  [['mt-asset', r.asset], ['mt-type', r.type]].forEach(function(p) {         // keep an archived boat / type selectable
+    const sel = document.getElementById(p[0]);
+    if (p[1] && !Array.prototype.some.call(sel.options, function(o) { return o.value === p[1]; })) {
+      const o = document.createElement('option'); o.value = p[1]; o.textContent = p[1]; sel.appendChild(o);
+    }
+    sel.value = p[1] || '';
+  });
+  document.getElementById('mt-date').value = r.date;
+  document.getElementById('mt-cost').value = r.cost || '';
+  document.getElementById('mt-vendor').value = r.vendor || '';
+  document.getElementById('mt-next').value = r.nextDue || '';
+  document.getElementById('mt-notes').value = r.notes || '';
+  document.getElementById('mt-save-btn').textContent = '✓ SAVE CHANGES';
+  document.getElementById('mt-cancel-btn').style.display = '';
+  document.getElementById('mt-form-title').textContent = 'Edit maintenance entry';
+  window.scrollTo(0, 0);
+}
+function mtDelete(id) {
+  const r = maintenanceRecords.find(function(x) { return x.id === id; });
+  if (!r) return;
+  if (!confirm('Delete this entry?\n\n' + fmtDate(r.date) + ' — ' + r.asset + ' — ' + r.type + (r.cost ? ' — ' + fmt(r.cost) : ''))) return;
+  maintenanceRecords = maintenanceRecords.filter(function(x) { return x.id !== id; });
+  saveMaint();
+  if (_mtEditId === id) mtResetForm();
+  renderMaintenance();
+}
+// "Log it as done": start a new entry for the same boat and work type
+function mtPrefill(id) {
+  const r = maintenanceRecords.find(function(x) { return x.id === id; });
+  if (!r) return;
+  mtResetForm();
+  [['mt-asset', r.asset], ['mt-type', r.type]].forEach(function(p) {
+    const sel = document.getElementById(p[0]);
+    if (!Array.prototype.some.call(sel.options, function(o) { return o.value === p[1]; })) {
+      const o = document.createElement('option'); o.value = p[1]; o.textContent = p[1]; sel.appendChild(o);
+    }
+    sel.value = p[1];
+  });
+  window.scrollTo(0, 0);
+}
+
+// ---------- filters + summaries ----------
+function mtFiltered() {
+  const v = function(id) { const e = document.getElementById(id); return e ? e.value : ''; };
+  const a = v('mt-f-asset'), t = v('mt-f-type'), from = v('mt-f-from'), to = v('mt-f-to');
+  return mtList().filter(function(r) {
+    return (!a || r.asset === a) && (!t || r.type === t) && (!from || r.date >= from) && (!to || r.date <= to);
+  }).sort(mtSort);
+}
+function mtClearFilters() {
+  ['mt-f-asset', 'mt-f-type', 'mt-f-from', 'mt-f-to'].forEach(function(id) { document.getElementById(id).value = ''; });
+  renderMaintenance();
+}
+function mtGroup(list, field) {
+  const g = {};
+  list.forEach(function(r) {
+    const k = r[field] || '—';
+    const x = g[k] = g[k] || { name: k, jobs: 0, cost: 0, last: '', lastType: '' };
+    x.jobs++; x.cost += mtCost(r);
+    if (r.date > x.last) { x.last = r.date; x.lastType = field === 'asset' ? r.type : r.asset; }
+  });
+  return Object.keys(g).map(function(k) { return g[k]; }).sort(function(a, b) { return b.cost - a.cost || b.jobs - a.jobs; });
+}
+
+function renderMaintenance() {
+  const form = document.getElementById('mt-date');
+  if (!form) return;
+  if (!form.value) form.value = today();
+  const all = mtList(), t = today(), month = t.slice(0, 7), year = t.slice(0, 4);
+  const sum = function(arr) { return arr.reduce(function(s, r) { return s + mtCost(r); }, 0); };
+  const thisMonth = all.filter(function(r) { return r.date.slice(0, 7) === month; });
+  const thisYear = all.filter(function(r) { return r.date.slice(0, 4) === year; });
+  const due = mtDueList();
+  const overdue = due.filter(function(d) { return d.overdue; }).length;
+  document.getElementById('mt-stats').innerHTML =
+    '<div class="stat-card"><div class="stat-label">This month</div><div class="stat-value">' + fmt(sum(thisMonth)) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">This year</div><div class="stat-value">' + fmt(sum(thisYear)) + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Jobs this year</div><div class="stat-value">' + thisYear.length + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Service due / overdue</div><div class="stat-value ' + (overdue ? 'red' : '') + '">' + due.length + '</div></div>';
+
+  // due soon + overdue
+  let dh = '';
+  due.forEach(function(d) {
+    const r = d.rec;
+    const when = d.overdue ? 'Overdue by ' + (-d.days) + ' day' + (d.days === -1 ? '' : 's') : (d.days === 0 ? 'Due today' : 'Due in ' + d.days + ' day' + (d.days === 1 ? '' : 's'));
+    dh += '<div class="hc-issue ' + (d.overdue ? 'hc-red' : 'hc-yellow') + '"><div class="hc-head"><span class="badge badge-gold">' + escHtml(fmtDate(r.nextDue)) + '</span> <strong>' +
+      escHtml(r.asset) + ' — ' + escHtml(r.type) + '</strong></div><div class="hc-detail">' + when + '. Last done ' + escHtml(fmtDate(r.date)) +
+      (r.vendor ? ' by ' + escHtml(r.vendor) : '') + (r.cost ? ' (' + fmt(r.cost) + ')' : '') + '.</div>' +
+      '<div class="hc-actions"><button class="btn btn-sm hc-btn" onclick="mtPrefill(' + r.id + ')">➕ LOG IT AS DONE</button></div></div>';
+  });
+  document.getElementById('mt-due').innerHTML = dh || emptyPara('Nothing is due in the next ' + MT_DUE_DAYS + ' days');
+
+  // summaries + history follow the filters
+  const list = mtFiltered();
+  const byAsset = mtGroup(list, 'asset'), byType = mtGroup(list, 'type');
+  const row = function(g) { return '<tr><td><strong>' + escHtml(g.name) + '</strong></td><td style="text-align:right;">' + g.jobs + '</td><td style="text-align:right;">' + fmt(g.cost) +
+    '</td><td>' + (g.last ? escHtml(fmtDate(g.last)) + ' <span style="color:var(--muted);font-size:11px;">' + escHtml(g.lastType) + '</span>' : '—') + '</td></tr>'; };
+  document.getElementById('mt-by-asset').innerHTML = byAsset.length ? byAsset.map(row).join('') : emptyRow(4, 'No maintenance entries for these filters');
+  document.getElementById('mt-by-type').innerHTML = byType.length ? byType.map(row).join('') : emptyRow(4, 'No maintenance entries for these filters');
+  const total = list.reduce(function(s, r) { return s + mtCost(r); }, 0);
+  document.getElementById('mt-count').textContent = list.length + ' entr' + (list.length === 1 ? 'y' : 'ies') + ' · ' + fmt(total);
+  document.getElementById('mt-tbody').innerHTML = list.length ? list.map(function(r) {
+    return '<tr><td><span class="badge badge-gold">' + escHtml(fmtDate(r.date)) + '</span></td><td><strong>' + escHtml(r.asset) + '</strong></td><td>' + escHtml(r.type) + '</td>' +
+      '<td style="text-align:right;">' + (mtCost(r) ? fmt(r.cost) : '—') + '</td><td>' + (r.vendor ? escHtml(r.vendor) : '—') + '</td>' +
+      '<td style="color:var(--muted);white-space:normal;min-width:140px;">' + (r.notes ? escHtml(r.notes) : '') + '</td>' +
+      '<td>' + (r.nextDue ? escHtml(fmtDate(r.nextDue)) : '—') + '</td>' +
+      '<td style="white-space:nowrap;"><button class="btn btn-edit btn-sm" onclick="mtEdit(' + r.id + ')">✎</button> <button class="btn btn-danger btn-sm" onclick="mtDelete(' + r.id + ')">✕</button></td></tr>';
+  }).join('') : emptyRow(8, 'No maintenance entries yet — add the first one above');
+  mtUpdateBadge();
+}
+
+// ---------- exports ----------
+function mtExportCSV() {
+  const list = mtFiltered();
+  const q = function(x) { return '"' + String(x == null ? '' : x).replace(/"/g, '""') + '"'; };
+  const lines = [['Date', 'Boat/Asset', 'Work type', 'Cost (Rs)', 'Paid to / workshop', 'Notes', 'Next due'].map(q).join(',')];
+  list.forEach(function(r) { lines.push([r.date, r.asset, r.type, mtCost(r), r.vendor || '', r.notes || '', r.nextDue || ''].map(q).join(',')); });
+  const blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = 'AlAhmed-Maintenance-' + today() + '.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+function mtExportPDF() {
+  const list = mtFiltered();
+  if (!list.length) { alert('There are no entries to export for these filters.'); return; }
+  const fmtN = function(n) { return Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+  const pdfD = function(s) { const p = String(s).split('-'); return p.length === 3 ? p[2] + '-' + p[1] + '-' + p[0] : s; };
+  const gen = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const v = function(id) { return document.getElementById(id).value; };
+  const filt = [v('mt-f-asset') && 'Boat/asset: ' + v('mt-f-asset'), v('mt-f-type') && 'Work: ' + v('mt-f-type'),
+                (v('mt-f-from') || v('mt-f-to')) && ('Dates: ' + (v('mt-f-from') ? pdfD(v('mt-f-from')) : 'start') + ' to ' + (v('mt-f-to') ? pdfD(v('mt-f-to')) : 'today'))].filter(Boolean).join(' · ') || 'All entries';
+  const total = list.reduce(function(s, r) { return s + mtCost(r); }, 0);
+  const grp = function(g) { return g.map(function(x) { return '<tr><td>' + escHtml(x.name) + '</td><td style="text-align:right;">' + x.jobs + '</td><td style="text-align:right;color:#c0392b;font-weight:700;">&#8377;' + fmtN(x.cost) + '</td></tr>'; }).join(''); };
+  const hist = list.map(function(r) {
+    return '<tr><td style="white-space:nowrap;">' + pdfD(r.date) + '</td><td>' + escHtml(r.asset) + '</td><td>' + escHtml(r.type) + '</td><td style="text-align:right;">' + (mtCost(r) ? '&#8377;' + fmtN(r.cost) : '&mdash;') +
+      '</td><td>' + escHtml(r.vendor || '') + '</td><td style="font-size:11px;color:#555;">' + escHtml(r.notes || '') + '</td><td style="white-space:nowrap;">' + (r.nextDue ? pdfD(r.nextDue) : '') + '</td></tr>';
+  }).join('');
+  const th = function(a) { return '<th>' + a + '</th>'; };
+  const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Maintenance Report</title>' +
+    '<style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,Helvetica,sans-serif;color:#1a1a2e;background:#fff;padding:26px;font-size:12px;}table{width:100%;border-collapse:collapse;margin-bottom:18px;}th{background:#0a1628;color:#ff9f43;font-size:9px;text-transform:uppercase;padding:8px 10px;text-align:left;font-weight:700;}td{padding:7px 10px;border-bottom:1px solid #e8e0d0;vertical-align:top;}tr:nth-child(even) td{background:#faf7f0;}@media print{body{padding:14px;}@page{margin:11mm;size:A4;}}</style></head><body>' +
+    '<div style="text-align:center;border-bottom:3px double #ff9f43;padding-bottom:14px;margin-bottom:16px;"><div style="font-size:32px;margin-bottom:4px;">&#9875;</div>' +
+    '<div style="font-size:20px;font-weight:700;color:#0a1628;letter-spacing:2px;">AL AHMED FISHING BOAT</div><div style="font-size:11px;color:#888;margin-top:3px;letter-spacing:1px;">MAINTENANCE REPORT</div></div>' +
+    '<div style="display:flex;justify-content:space-between;background:#f7f3eb;border:1px solid #e0d5b8;border-radius:8px;padding:10px 16px;margin-bottom:16px;gap:10px;flex-wrap:wrap;">' +
+      '<div><div style="font-size:9px;color:#888;text-transform:uppercase;font-weight:600;">Filter</div><div style="font-size:13px;font-weight:700;">' + escHtml(filt) + '</div></div>' +
+      '<div><div style="font-size:9px;color:#888;text-transform:uppercase;font-weight:600;">Entries</div><div style="font-size:13px;font-weight:700;">' + list.length + '</div></div>' +
+      '<div><div style="font-size:9px;color:#888;text-transform:uppercase;font-weight:600;">Total cost</div><div style="font-size:13px;font-weight:700;color:#c0392b;">&#8377;' + fmtN(total) + '</div></div>' +
+      '<div><div style="font-size:9px;color:#888;text-transform:uppercase;font-weight:600;">Generated</div><div style="font-size:13px;font-weight:700;">' + gen + '</div></div></div>' +
+    '<div style="background:#0a1628;color:#ff9f43;font-size:11px;padding:8px 14px;font-weight:700;letter-spacing:1px;">COST BY BOAT / ASSET</div><table><thead><tr>' + th('Boat / asset') + th('Jobs') + th('Cost') + '</tr></thead><tbody>' + grp(mtGroup(list, 'asset')) + '</tbody></table>' +
+    '<div style="background:#0a1628;color:#ff9f43;font-size:11px;padding:8px 14px;font-weight:700;letter-spacing:1px;">COST BY TYPE OF WORK</div><table><thead><tr>' + th('Work') + th('Jobs') + th('Cost') + '</tr></thead><tbody>' + grp(mtGroup(list, 'type')) + '</tbody></table>' +
+    '<div style="background:#0a1628;color:#ff9f43;font-size:11px;padding:8px 14px;font-weight:700;letter-spacing:1px;">ALL ENTRIES</div><table><thead><tr>' + th('Date') + th('Boat / asset') + th('Work') + th('Cost') + th('Paid to') + th('Notes') + th('Next due') + '</tr></thead><tbody>' + hist + '</tbody></table>' +
+    '<div style="text-align:center;margin-top:20px;padding-top:14px;border-top:1px solid #e0d5b8;font-size:11px;color:#888;">Al Ahmed Fishing Boat &middot; Maintenance Track &middot; ' + gen + ' &middot; for tracking only &mdash; it does not change shares</div>' +
+    '<script>window.onload=function(){window.print();}<\/script></body></html>';
+  const win = window.open('', '_blank');
+  if (!win) { alert('Please allow popups.'); return; }
+  win.document.write(html);
+  win.document.close();
+}
+setTimeout(mtUpdateBadge, 1400);
+
 // ===== WHATSAPP SLIPS =====
 // One shared preview popup (Copy / Send on WhatsApp). Each slip builder below
 // only assembles the text and calls showSlip(). No phone numbers are stored
@@ -6706,7 +7061,8 @@ function getAllData() {
     agentComms,
     agentPays,
     lists,
-    periodLocks
+    periodLocks,
+    maintenanceRecords
   };
 }
 
@@ -6737,6 +7093,10 @@ function applyAllData(data) {
   save(KEY_TRACTORPAYS,  tractorPays);
   save(KEY_AGENTCOMM,    agentComms);
   save(KEY_AGENTPAYS,    agentPays);
+  if (Array.isArray(data.maintenanceRecords)) {   // older backups have no maintenance records — keep the current ones
+    maintenanceRecords = data.maintenanceRecords.filter(function(x) { return x && typeof x === 'object'; });
+    saveMaint();
+  }
   if (Array.isArray(data.periodLocks)) {   // older backups have no locks — keep the current ones (they protect settled periods)
     periodLocks = lockLoadList(data.periodLocks);
     saveLocks();
@@ -6908,7 +7268,8 @@ const BACKUP_SETS = [
   ['retailers', 'Customers'],                 ['tractorTrips', 'Tractor trips'],
   ['tractorPays', 'Tractor payments'],        ['agentComms', 'Agent commissions'],
   ['agentPays', 'Agent payments'],
-  ['periodLocks', 'Locked periods']
+  ['periodLocks', 'Locked periods'],
+  ['maintenanceRecords', 'Maintenance records']
 ];
 
 function reloadApp() { setTimeout(function() { location.reload(); }, 900); }
@@ -9330,6 +9691,7 @@ function closeMoreSheet() {
     <button class="more-item" data-page="10" onclick="goPage(10)"><span class="more-ico">🩺</span> Data Health Check</button>
     <button class="more-item" data-page="11" onclick="goPage(11)"><span class="more-ico">📈</span> Compare Two Periods</button>
     <button class="more-item" data-page="12" onclick="goPage(12)"><span class="more-ico">🔒</span> Locked Periods</button>
+    <button class="more-item" data-page="13" onclick="goPage(13)"><span class="more-ico">🛠</span> Maintenance Track</button>
 
     <div style="border-top:1px solid var(--border);margin:14px 0 12px;"></div>
     <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;">&#9729; GOOGLE DRIVE &amp; BACKUP</div>
