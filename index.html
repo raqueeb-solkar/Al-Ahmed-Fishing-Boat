@@ -956,7 +956,7 @@
         Paagi earns one full share that day, same as any crew member. If more than one person cast the net,
         tap each one and split that single share between them by % (must total 100%).
       </div>
-      <div style="display:flex;flex-direction:column;gap:8px;"><div class="paagi-row" data-paagi-name="Sarfaraz" onclick="togglePaagiPerson(this)" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid rgba(248,113,113,0.25);border-radius:8px;cursor:pointer;background:rgba(248,113,113,0.04);"><span class="paagi-check-box" style="width:18px;height:18px;border:1px solid rgba(248,113,113,0.5);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#f87171;flex-shrink:0;"></span><span style="flex:1;font-size:13px;">Sarfaraz</span><input type="number" class="paagi-percent-input" data-paagi-name="Sarfaraz" placeholder="%" min="0" max="100" oninput="updatePaagiRemaining()" style="display:none;width:70px;background:rgba(13,17,23,0.8);border:1px solid rgba(248,113,113,0.4);border-radius:6px;padding:6px 8px;color:#f87171;font-size:13px;text-align:center;font-weight:700;"></div><div class="paagi-row" data-paagi-name="Azim" onclick="togglePaagiPerson(this)" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid rgba(248,113,113,0.25);border-radius:8px;cursor:pointer;background:rgba(248,113,113,0.04);"><span class="paagi-check-box" style="width:18px;height:18px;border:1px solid rgba(248,113,113,0.5);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#f87171;flex-shrink:0;"></span><span style="flex:1;font-size:13px;">Azim</span><input type="number" class="paagi-percent-input" data-paagi-name="Azim" placeholder="%" min="0" max="100" oninput="updatePaagiRemaining()" style="display:none;width:70px;background:rgba(13,17,23,0.8);border:1px solid rgba(248,113,113,0.4);border-radius:6px;padding:6px 8px;color:#f87171;font-size:13px;text-align:center;font-weight:700;"></div><div class="paagi-row" data-paagi-name="Ittifaque" onclick="togglePaagiPerson(this)" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid rgba(248,113,113,0.25);border-radius:8px;cursor:pointer;background:rgba(248,113,113,0.04);"><span class="paagi-check-box" style="width:18px;height:18px;border:1px solid rgba(248,113,113,0.5);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#f87171;flex-shrink:0;"></span><span style="flex:1;font-size:13px;">Ittifaque</span><input type="number" class="paagi-percent-input" data-paagi-name="Ittifaque" placeholder="%" min="0" max="100" oninput="updatePaagiRemaining()" style="display:none;width:70px;background:rgba(13,17,23,0.8);border:1px solid rgba(248,113,113,0.4);border-radius:6px;padding:6px 8px;color:#f87171;font-size:13px;text-align:center;font-weight:700;"></div><div class="paagi-row" data-paagi-name="IrfanW" onclick="togglePaagiPerson(this)" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid rgba(248,113,113,0.25);border-radius:8px;cursor:pointer;background:rgba(248,113,113,0.04);"><span class="paagi-check-box" style="width:18px;height:18px;border:1px solid rgba(248,113,113,0.5);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#f87171;flex-shrink:0;"></span><span style="flex:1;font-size:13px;">IrfanW</span><input type="number" class="paagi-percent-input" data-paagi-name="IrfanW" placeholder="%" min="0" max="100" oninput="updatePaagiRemaining()" style="display:none;width:70px;background:rgba(13,17,23,0.8);border:1px solid rgba(248,113,113,0.4);border-radius:6px;padding:6px 8px;color:#f87171;font-size:13px;text-align:center;font-weight:700;"></div></div>
+      <div style="display:flex;flex-direction:column;gap:8px;"><div class="paagi-row" data-paagi-name="Sarfaraz" onclick="togglePaagiPerson(this, event)" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid rgba(248,113,113,0.25);border-radius:8px;cursor:pointer;background:rgba(248,113,113,0.04);"><span class="paagi-check-box" style="width:18px;height:18px;border:1px solid rgba(248,113,113,0.5);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#f87171;flex-shrink:0;"></span><span style="flex:1;font-size:13px;">Sarfaraz</span><input type="number" class="paagi-percent-input" data-paagi-name="Sarfaraz" placeholder="%" min="0" max="100" inputmode="decimal" step="any" onclick="event.stopPropagation()" onfocus="this.select()" oninput="updatePaagiRemaining()" style="display:none;width:70px;background:rgba(13,17,23,0.8);border:1px solid rgba(248,113,113,0.4);border-radius:6px;padding:6px 8px;color:#f87171;font-size:13px;text-align:center;font-weight:700;"></div><div class="paagi-row" data-paagi-name="Azim" onclick="togglePaagiPerson(this, event)" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid rgba(248,113,113,0.25);border-radius:8px;cursor:pointer;background:rgba(248,113,113,0.04);"><span class="paagi-check-box" style="width:18px;height:18px;border:1px solid rgba(248,113,113,0.5);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#f87171;flex-shrink:0;"></span><span style="flex:1;font-size:13px;">Azim</span><input type="number" class="paagi-percent-input" data-paagi-name="Azim" placeholder="%" min="0" max="100" inputmode="decimal" step="any" onclick="event.stopPropagation()" onfocus="this.select()" oninput="updatePaagiRemaining()" style="display:none;width:70px;background:rgba(13,17,23,0.8);border:1px solid rgba(248,113,113,0.4);border-radius:6px;padding:6px 8px;color:#f87171;font-size:13px;text-align:center;font-weight:700;"></div><div class="paagi-row" data-paagi-name="Ittifaque" onclick="togglePaagiPerson(this, event)" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid rgba(248,113,113,0.25);border-radius:8px;cursor:pointer;background:rgba(248,113,113,0.04);"><span class="paagi-check-box" style="width:18px;height:18px;border:1px solid rgba(248,113,113,0.5);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#f87171;flex-shrink:0;"></span><span style="flex:1;font-size:13px;">Ittifaque</span><input type="number" class="paagi-percent-input" data-paagi-name="Ittifaque" placeholder="%" min="0" max="100" inputmode="decimal" step="any" onclick="event.stopPropagation()" onfocus="this.select()" oninput="updatePaagiRemaining()" style="display:none;width:70px;background:rgba(13,17,23,0.8);border:1px solid rgba(248,113,113,0.4);border-radius:6px;padding:6px 8px;color:#f87171;font-size:13px;text-align:center;font-weight:700;"></div><div class="paagi-row" data-paagi-name="IrfanW" onclick="togglePaagiPerson(this, event)" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid rgba(248,113,113,0.25);border-radius:8px;cursor:pointer;background:rgba(248,113,113,0.04);"><span class="paagi-check-box" style="width:18px;height:18px;border:1px solid rgba(248,113,113,0.5);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#f87171;flex-shrink:0;"></span><span style="flex:1;font-size:13px;">IrfanW</span><input type="number" class="paagi-percent-input" data-paagi-name="IrfanW" placeholder="%" min="0" max="100" inputmode="decimal" step="any" onclick="event.stopPropagation()" onfocus="this.select()" oninput="updatePaagiRemaining()" style="display:none;width:70px;background:rgba(13,17,23,0.8);border:1px solid rgba(248,113,113,0.4);border-radius:6px;padding:6px 8px;color:#f87171;font-size:13px;text-align:center;font-weight:700;"></div></div>
       <div id="paagi-remaining" style="margin-top:10px;font-size:12px;font-weight:700;color:var(--muted);"></div>
     </div>
 
@@ -3730,13 +3730,22 @@ function togglePaagiSection() {
   updatePaagiRemaining();
 }
 
-function togglePaagiPerson(el) {
+function togglePaagiPerson(el, ev) {
+  // Taps on the % box must only edit the number — never tick/untick the row
+  ev = ev || window.event;
+  if (ev && ev.target && ev.target.classList && ev.target.classList.contains('paagi-percent-input')) return;
   const checked = el.classList.toggle('checked');
   const box = el.querySelector('.paagi-check-box');
   const inp = el.querySelector('.paagi-percent-input');
   if (checked) {
     if (box) box.textContent = '✓';
-    if (inp) inp.style.display = 'inline-block';
+    if (inp) {
+      inp.style.display = 'inline-block';
+      // first Paagi picked = 100% by default; otherwise leave empty for the user to type
+      const others = getPaagiSelections().filter(function(p) { return p.name !== el.dataset.paagiName; });
+      if (others.length === 0 && !inp.value) inp.value = 100;
+      try { inp.focus(); inp.select(); } catch (e) {}
+    }
   } else {
     if (box) box.textContent = '';
     if (inp) { inp.style.display = 'none'; inp.value = ''; }
@@ -3760,8 +3769,8 @@ function updatePaagiRemaining() {
   if (!box) return;
   const sel = getPaagiSelections();
   if (sel.length === 0) { box.textContent = ''; return; }
-  const used = sel.reduce(function(s, p) { return s + p.percent; }, 0);
-  const remaining = 100 - used;
+  const used = Math.round(sel.reduce(function(s, p) { return s + p.percent; }, 0) * 100) / 100;
+  const remaining = Math.round((100 - used) * 100) / 100;
   if (remaining === 0) {
     box.innerHTML = '<span style="color:#4ade80;">✓ 100% allocated — ready to save</span>';
   } else if (remaining > 0) {
@@ -3830,8 +3839,8 @@ function saveAttendance() {
   if (fishingType === 'Squid') {
     paagi = getPaagiSelections();
     if (paagi.length > 0) {
-      const totalPct = paagi.reduce((s, p) => s + p.percent, 0);
-      if (Math.round(totalPct) !== 100) {
+      const totalPct = Math.round(paagi.reduce((s, p) => s + p.percent, 0) * 100) / 100;
+      if (Math.abs(totalPct - 100) > 0.01) {
         alert('Paagi percentages must add up to exactly 100%.\nCurrently: ' + totalPct + '%');
         return;
       }
