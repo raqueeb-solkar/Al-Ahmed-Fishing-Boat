@@ -953,11 +953,9 @@
     <div id="paagi-section" style="display:none;border:1px solid rgba(248,113,113,0.3);border-radius:10px;padding:14px 16px;margin-bottom:18px;background:rgba(248,113,113,0.03);">
       <div style="font-family:'Space Grotesk',sans-serif;font-size:13px;color:#f87171;letter-spacing:0.5px;margin-bottom:4px;">🎯 PAAGI (CAST NET) — SQUID FISHING</div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">
-        Paagi earns one full share that day, same as any crew member. If more than one person cast the net,
-        tap each one and split that single share between them by % (must total 100%).
+        Each boat that cast a net gets one full Paagi share that day. Tap + ADD PAAGI under that boat, pick the person (from those marked present) and enter their %. If one person cast the net, leave 100%. Each boat's Paagi must total 100%.
       </div>
-      <div style="display:flex;flex-direction:column;gap:8px;"><div class="paagi-row" data-paagi-name="Sarfaraz" onclick="togglePaagiPerson(this, event)" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid rgba(248,113,113,0.25);border-radius:8px;cursor:pointer;background:rgba(248,113,113,0.04);"><span class="paagi-check-box" style="width:18px;height:18px;border:1px solid rgba(248,113,113,0.5);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#f87171;flex-shrink:0;"></span><span style="flex:1;font-size:13px;">Sarfaraz</span><input type="number" class="paagi-percent-input" data-paagi-name="Sarfaraz" placeholder="%" min="0" max="100" inputmode="decimal" step="any" onclick="event.stopPropagation()" onfocus="this.select()" oninput="updatePaagiRemaining()" style="display:none;width:70px;background:rgba(13,17,23,0.8);border:1px solid rgba(248,113,113,0.4);border-radius:6px;padding:6px 8px;color:#f87171;font-size:13px;text-align:center;font-weight:700;"></div><div class="paagi-row" data-paagi-name="Azim" onclick="togglePaagiPerson(this, event)" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid rgba(248,113,113,0.25);border-radius:8px;cursor:pointer;background:rgba(248,113,113,0.04);"><span class="paagi-check-box" style="width:18px;height:18px;border:1px solid rgba(248,113,113,0.5);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#f87171;flex-shrink:0;"></span><span style="flex:1;font-size:13px;">Azim</span><input type="number" class="paagi-percent-input" data-paagi-name="Azim" placeholder="%" min="0" max="100" inputmode="decimal" step="any" onclick="event.stopPropagation()" onfocus="this.select()" oninput="updatePaagiRemaining()" style="display:none;width:70px;background:rgba(13,17,23,0.8);border:1px solid rgba(248,113,113,0.4);border-radius:6px;padding:6px 8px;color:#f87171;font-size:13px;text-align:center;font-weight:700;"></div><div class="paagi-row" data-paagi-name="Ittifaque" onclick="togglePaagiPerson(this, event)" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid rgba(248,113,113,0.25);border-radius:8px;cursor:pointer;background:rgba(248,113,113,0.04);"><span class="paagi-check-box" style="width:18px;height:18px;border:1px solid rgba(248,113,113,0.5);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#f87171;flex-shrink:0;"></span><span style="flex:1;font-size:13px;">Ittifaque</span><input type="number" class="paagi-percent-input" data-paagi-name="Ittifaque" placeholder="%" min="0" max="100" inputmode="decimal" step="any" onclick="event.stopPropagation()" onfocus="this.select()" oninput="updatePaagiRemaining()" style="display:none;width:70px;background:rgba(13,17,23,0.8);border:1px solid rgba(248,113,113,0.4);border-radius:6px;padding:6px 8px;color:#f87171;font-size:13px;text-align:center;font-weight:700;"></div><div class="paagi-row" data-paagi-name="IrfanW" onclick="togglePaagiPerson(this, event)" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid rgba(248,113,113,0.25);border-radius:8px;cursor:pointer;background:rgba(248,113,113,0.04);"><span class="paagi-check-box" style="width:18px;height:18px;border:1px solid rgba(248,113,113,0.5);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#f87171;flex-shrink:0;"></span><span style="flex:1;font-size:13px;">IrfanW</span><input type="number" class="paagi-percent-input" data-paagi-name="IrfanW" placeholder="%" min="0" max="100" inputmode="decimal" step="any" onclick="event.stopPropagation()" onfocus="this.select()" oninput="updatePaagiRemaining()" style="display:none;width:70px;background:rgba(13,17,23,0.8);border:1px solid rgba(248,113,113,0.4);border-radius:6px;padding:6px 8px;color:#f87171;font-size:13px;text-align:center;font-weight:700;"></div><div class="paagi-row" data-paagi-name="Paagi 1" onclick="togglePaagiPerson(this, event)" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid rgba(248,113,113,0.25);border-radius:8px;cursor:pointer;background:rgba(248,113,113,0.04);"><span class="paagi-check-box" style="width:18px;height:18px;border:1px solid rgba(248,113,113,0.5);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#f87171;flex-shrink:0;"></span><span style="flex:1;font-size:13px;">Paagi 1</span><input type="number" class="paagi-percent-input" data-paagi-name="Paagi 1" placeholder="%" min="0" max="100" inputmode="decimal" step="any" onclick="event.stopPropagation()" onfocus="this.select()" oninput="updatePaagiRemaining()" style="display:none;width:70px;background:rgba(13,17,23,0.8);border:1px solid rgba(248,113,113,0.4);border-radius:6px;padding:6px 8px;color:#f87171;font-size:13px;text-align:center;font-weight:700;"></div><div class="paagi-row" data-paagi-name="Paagi 2" onclick="togglePaagiPerson(this, event)" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid rgba(248,113,113,0.25);border-radius:8px;cursor:pointer;background:rgba(248,113,113,0.04);"><span class="paagi-check-box" style="width:18px;height:18px;border:1px solid rgba(248,113,113,0.5);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#f87171;flex-shrink:0;"></span><span style="flex:1;font-size:13px;">Paagi 2</span><input type="number" class="paagi-percent-input" data-paagi-name="Paagi 2" placeholder="%" min="0" max="100" inputmode="decimal" step="any" onclick="event.stopPropagation()" onfocus="this.select()" oninput="updatePaagiRemaining()" style="display:none;width:70px;background:rgba(13,17,23,0.8);border:1px solid rgba(248,113,113,0.4);border-radius:6px;padding:6px 8px;color:#f87171;font-size:13px;text-align:center;font-weight:700;"></div></div>
-      <div id="paagi-remaining" style="margin-top:10px;font-size:12px;font-weight:700;color:var(--muted);"></div>
+      <div class="paagi-boat" data-boat="1" style="border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:10px 12px;margin-bottom:10px;background:rgba(248,113,113,0.04);"><div style="font-size:12px;font-weight:700;color:#f87171;margin-bottom:8px;">BOAT 1 — PAAGI</div><div id="paagi-lines-1"></div><button type="button" class="btn btn-sm" onclick="addPaagiLine(1)" style="background:rgba(248,113,113,0.12);color:#f87171;border:1px solid rgba(248,113,113,0.4);">+ ADD PAAGI</button><div id="paagi-remaining-1" style="margin-top:8px;font-size:12px;font-weight:700;color:var(--muted);"></div></div><div class="paagi-boat" data-boat="2" style="border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:10px 12px;margin-bottom:10px;background:rgba(248,113,113,0.04);"><div style="font-size:12px;font-weight:700;color:#f87171;margin-bottom:8px;">BOAT 2 — PAAGI</div><div id="paagi-lines-2"></div><button type="button" class="btn btn-sm" onclick="addPaagiLine(2)" style="background:rgba(248,113,113,0.12);color:#f87171;border:1px solid rgba(248,113,113,0.4);">+ ADD PAAGI</button><div id="paagi-remaining-2" style="margin-top:8px;font-size:12px;font-weight:700;color:var(--muted);"></div></div>
     </div>
 
     <div class="card-title">Select Present Shareholders</div>
@@ -2392,7 +2390,7 @@ function buildDefaultLists() {
   const crewNames = [
     'Azim','Taasir','Maqsood','Ittifaque','Zubair','Sufiyan',
     'IrfanW','IrfanS','Shafi','Riyaz','Salim','Maqbool','Maazin',
-    'Sagir','Parvez','Nazim','Sarfaraz','Munim','Affan','Altamash','Azman','Sahel','Ayyan','Aman','Paagi','Paagi 1','Paagi 2','Zaid','Zihan','Tandel 1','Tandel 2','Owner',
+    'Sagir','Parvez','Nazim','Sarfaraz','Munim','Affan','Altamash','Azman','Sahel','Ayyan','Aman','Paagi','Zaid','Zihan','Tandel 1','Tandel 2','Owner',
     'Al Muhammad Boat','Al Muhammad Boat Engine',
     'Al Bahar Boat','Al Bahar Boat Engine',
     'Maryam Boat','Maryam Boat Engine',
@@ -3712,72 +3710,132 @@ function selectAll() {
 
 
 // ===== PAAGI (CAST NET) — Squid Fishing only =====
+// Two boats can fish the same night. Each boat has its own Paagi group (1 or more people
+// picked from the crew marked present). Each group is worth ONE normal share, split
+// between its people by %. Profit is pooled, so units = crew + number of boats with a Paagi.
+// Old records have no `boat` on their Paagi entries — they count as Boat 1 (unchanged result).
+function paagiBoatCount(list) {
+  const seen = {};
+  (list || []).forEach(function(p) { seen[(p && p.boat) || 1] = 1; });
+  return Object.keys(seen).length;
+}
+
 function togglePaagiSection() {
   const ft = document.getElementById('p2-fishing-type').value;
   const section = document.getElementById('paagi-section');
   if (!section) return;
   section.style.display = (ft === 'Squid') ? 'block' : 'none';
-  if (ft !== 'Squid') {
-    // Clear any selection if user switches away from Squid, so it never saves by accident
-    document.querySelectorAll('[data-paagi-name]').forEach(function(el) {
-      el.classList.remove('checked');
-      const box = el.querySelector('.paagi-check-box');
-      if (box) box.textContent = '';
-      const inp = el.querySelector('.paagi-percent-input');
-      if (inp) { inp.style.display = 'none'; inp.value = ''; }
-    });
-  }
+  // Clear any selection if user switches away from Squid, so it never saves by accident
+  if (ft !== 'Squid') clearPaagiLines();
   updatePaagiRemaining();
 }
 
-function togglePaagiPerson(el, ev) {
-  // Taps on the % box must only edit the number — never tick/untick the row
-  ev = ev || window.event;
-  if (ev && ev.target && ev.target.classList && ev.target.classList.contains('paagi-percent-input')) return;
-  const checked = el.classList.toggle('checked');
-  const box = el.querySelector('.paagi-check-box');
-  const inp = el.querySelector('.paagi-percent-input');
-  if (checked) {
-    if (box) box.textContent = '✓';
-    if (inp) {
-      inp.style.display = 'inline-block';
-      // first Paagi picked = 100% by default; otherwise leave empty for the user to type
-      const others = getPaagiSelections().filter(function(p) { return p.name !== el.dataset.paagiName; });
-      if (others.length === 0 && !inp.value) inp.value = 100;
-      try { inp.focus(); inp.select(); } catch (e) {}
-    }
-  } else {
-    if (box) box.textContent = '';
-    if (inp) { inp.style.display = 'none'; inp.value = ''; }
-  }
+function paagiPresentNames() {
+  return Array.prototype.map.call(document.querySelectorAll('.checkbox-item.checked'), function(e) { return e.dataset.name; });
+}
+
+// Fill a person dropdown with whoever is marked present right now (keeps the current pick).
+function paagiFillOptions(sel) {
+  const cur = sel.value;
+  const names = paagiPresentNames();
+  if (cur && names.indexOf(cur) === -1) names.push(cur);
+  sel.innerHTML = '<option value="">Select person</option>' +
+    names.map(function(n) { return '<option value="' + escHtml(n) + '">' + escHtml(n) + '</option>'; }).join('');
+  sel.value = cur;
+}
+
+function addPaagiLine(boat, name, pct) {
+  const wrap = document.getElementById('paagi-lines-' + boat);
+  if (!wrap) return;
+  const first = wrap.querySelectorAll('.paagi-line').length === 0;
+  if (pct === undefined && first) pct = 100;           // one person = 100% by default
+  const line = document.createElement('div');
+  line.className = 'paagi-line';
+  line.dataset.boat = String(boat);
+  line.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:8px;';
+  line.innerHTML =
+    '<select class="paagi-name-sel" onmousedown="paagiFillOptions(this)" onfocus="paagiFillOptions(this)" ontouchstart="paagiFillOptions(this)" onchange="updatePaagiRemaining()" ' +
+      'style="flex:1;min-width:0;padding:8px;background:rgba(13,17,23,0.8);border:1px solid rgba(248,113,113,0.4);border-radius:6px;color:#fff;font-size:13px;"></select>' +
+    '<input type="number" class="paagi-percent-input" inputmode="decimal" step="any" min="0" max="100" placeholder="%" onfocus="this.select()" oninput="updatePaagiRemaining()" ' +
+      'style="width:70px;background:rgba(13,17,23,0.8);border:1px solid rgba(248,113,113,0.4);border-radius:6px;padding:7px 8px;color:#f87171;font-size:13px;text-align:center;font-weight:700;">' +
+    '<button type="button" onclick="removePaagiLine(this)" aria-label="Remove" ' +
+      'style="background:none;border:1px solid rgba(248,113,113,0.4);color:#f87171;border-radius:6px;width:32px;height:34px;font-size:14px;cursor:pointer;">✕</button>';
+  wrap.appendChild(line);
+  const sel = line.querySelector('.paagi-name-sel');
+  if (name) sel.innerHTML = '<option value="' + escHtml(name) + '">' + escHtml(name) + '</option>';
+  sel.value = name || '';
+  paagiFillOptions(sel);
+  sel.value = name || '';
+  const inp = line.querySelector('.paagi-percent-input');
+  if (pct !== undefined && pct !== null && pct !== '') inp.value = pct;
+  updatePaagiRemaining();
+}
+
+function removePaagiLine(btn) {
+  const line = btn.closest('.paagi-line');
+  if (line) line.remove();
+  updatePaagiRemaining();
+}
+
+function clearPaagiLines() {
+  document.querySelectorAll('#paagi-section .paagi-line').forEach(function(l) { l.remove(); });
   updatePaagiRemaining();
 }
 
 function getPaagiSelections() {
   const out = [];
-  document.querySelectorAll('[data-paagi-name].checked').forEach(function(el) {
-    const name = el.dataset.paagiName;
-    const inp = el.querySelector('.paagi-percent-input');
-    const pct = inp ? (parseFloat(inp.value) || 0) : 0;
-    out.push({ name: name, percent: pct });
+  document.querySelectorAll('#paagi-section .paagi-line').forEach(function(line) {
+    const sel = line.querySelector('.paagi-name-sel');
+    const inp = line.querySelector('.paagi-percent-input');
+    const name = sel ? sel.value : '';
+    if (!name) return;
+    out.push({ name: name, percent: inp ? (parseFloat(inp.value) || 0) : 0, boat: parseInt(line.dataset.boat, 10) || 1 });
   });
   return out;
 }
 
-function updatePaagiRemaining() {
-  const box = document.getElementById('paagi-remaining');
-  if (!box) return;
-  const sel = getPaagiSelections();
-  if (sel.length === 0) { box.textContent = ''; return; }
-  const used = Math.round(sel.reduce(function(s, p) { return s + p.percent; }, 0) * 100) / 100;
-  const remaining = Math.round((100 - used) * 100) / 100;
-  if (remaining === 0) {
-    box.innerHTML = '<span style="color:#4ade80;">✓ 100% allocated — ready to save</span>';
-  } else if (remaining > 0) {
-    box.innerHTML = '<span style="color:#fbbf24;">Remaining to allocate: ' + remaining + '%</span>';
-  } else {
-    box.innerHTML = '<span style="color:#f87171;">⚠ Over-allocated by ' + Math.abs(remaining) + '% — totals must equal 100%</span>';
+// Returns a plain-language problem with the Paagi entries, or '' if all is well.
+function paagiProblem(present) {
+  const lines = document.querySelectorAll('#paagi-section .paagi-line');
+  const sums = {}, seen = {};
+  for (let i = 0; i < lines.length; i++) {
+    const sel = lines[i].querySelector('.paagi-name-sel');
+    const inp = lines[i].querySelector('.paagi-percent-input');
+    const boat = parseInt(lines[i].dataset.boat, 10) || 1;
+    const name = sel ? sel.value : '';
+    const pct = inp ? (parseFloat(inp.value) || 0) : 0;
+    if (!name) return 'Boat ' + boat + ': choose a person for every Paagi line, or remove the empty line (✕).';
+    if (pct <= 0) return 'Boat ' + boat + ': enter a percentage for ' + name + '.';
+    if (seen[name]) return name + ' is listed twice as Paagi. Use one line per person.';
+    seen[name] = 1;
+    if (present.indexOf(name) === -1) return name + ' is a Paagi but is not marked present. Tick them under "Select Present Shareholders".';
+    sums[boat] = (sums[boat] || 0) + pct;
   }
+  const boats = Object.keys(sums);
+  for (let j = 0; j < boats.length; j++) {
+    const t = Math.round(sums[boats[j]] * 100) / 100;
+    if (Math.abs(t - 100) > 0.01) return 'Boat ' + boats[j] + ' Paagi percentages must add up to exactly 100%.\nCurrently: ' + t + '%';
+  }
+  return '';
+}
+
+function updatePaagiRemaining() {
+  const sel = getPaagiSelections();
+  [1, 2].forEach(function(b) {
+    const box = document.getElementById('paagi-remaining-' + b);
+    if (!box) return;
+    const mine = sel.filter(function(p) { return p.boat === b; });
+    if (mine.length === 0) { box.textContent = ''; return; }
+    const used = Math.round(mine.reduce(function(s, p) { return s + p.percent; }, 0) * 100) / 100;
+    const remaining = Math.round((100 - used) * 100) / 100;
+    if (remaining === 0) {
+      box.innerHTML = '<span style="color:#4ade80;">✓ 100% allocated — ready to save</span>';
+    } else if (remaining > 0) {
+      box.innerHTML = '<span style="color:#fbbf24;">Remaining to allocate: ' + remaining + '%</span>';
+    } else {
+      box.innerHTML = '<span style="color:#f87171;">⚠ Over-allocated by ' + Math.abs(remaining) + '% — totals must equal 100%</span>';
+    }
+  });
 }
 
 // ---- share weights: info shown while editing an existing attendance record ----
@@ -3807,7 +3865,7 @@ function hideWeightsNote() {
 // Share units of the PRESENT crew on a trip when weights are used (null when everyone is ×1)
 function weightedUnits(d) {
   if (!d.weights || !Object.keys(d.weights).length) return null;
-  return fmtWt(d.totalUnits - ((d.paagi && d.paagi.length) ? 1 : 0));
+  return fmtWt(d.totalUnits - (d.paagiUnits || ((d.paagi && d.paagi.length) ? 1 : 0)));
 }
 
 function clearAll() {
@@ -3815,6 +3873,7 @@ function clearAll() {
     d.classList.remove('checked');
     d.querySelector('.check-box').textContent = '';
   });
+  clearPaagiLines();
 }
 
 // A day can have more than one fishing trip (e.g. Morning and Evening), each with
@@ -3837,14 +3896,9 @@ function saveAttendance() {
   // Paagi (cast net) — only meaningful for Squid Fishing
   let paagi = [];
   if (fishingType === 'Squid') {
+    const problem = paagiProblem(present);
+    if (problem) { alert(problem); return; }
     paagi = getPaagiSelections();
-    if (paagi.length > 0) {
-      const totalPct = Math.round(paagi.reduce((s, p) => s + p.percent, 0) * 100) / 100;
-      if (Math.abs(totalPct - 100) > 0.01) {
-        alert('Paagi percentages must add up to exactly 100%.\nCurrently: ' + totalPct + '%');
-        return;
-      }
-    }
   }
 
   // Guard against mixing a "Full Day" record with named trips on the same date —
@@ -3891,7 +3945,7 @@ function saveAttendance() {
   buildAttendanceGrid();
   hideWeightsNote();
   renderP2Table();
-  showToast('✓ Attendance saved — ' + fmtDate(date) + (trip ? ' | ' + trip + ' Trip' : '') + (fishingType ? ' | ' + fishingType + ' Fishing' : '') + (paagi.length ? ' | Paagi: ' + paagi.map(p=>p.name+' '+p.percent+'%').join(', ') : ''));
+  showToast('✓ Attendance saved — ' + fmtDate(date) + (trip ? ' | ' + trip + ' Trip' : '') + (fishingType ? ' | ' + fishingType + ' Fishing' : '') + (paagi.length ? ' | Paagi: ' + paagi.map(p=>p.name+' (B'+p.boat+') '+p.percent+'%').join(', ') : ''));
 }
 
 function deleteAttendance(date, trip) {
@@ -3919,23 +3973,9 @@ function loadAttendanceForEdit(date, trip) {
     const div = document.querySelector(`.checkbox-item[data-name="${name}"]`);
     if (div) { div.classList.add('checked'); div.querySelector('.check-box').textContent = '✓'; }
   });
-  // Restore Paagi selections if this was a Squid Fishing day
-  document.querySelectorAll('[data-paagi-name]').forEach(function(el) {
-    el.classList.remove('checked');
-    const box = el.querySelector('.paagi-check-box');
-    if (box) box.textContent = '';
-    const inp = el.querySelector('.paagi-percent-input');
-    if (inp) { inp.style.display = 'none'; inp.value = ''; }
-  });
-  (rec.paagi || []).forEach(function(p) {
-    const el = document.querySelector('[data-paagi-name="' + p.name + '"]');
-    if (!el) return;
-    el.classList.add('checked');
-    const box = el.querySelector('.paagi-check-box');
-    if (box) box.textContent = '✓';
-    const inp = el.querySelector('.paagi-percent-input');
-    if (inp) { inp.style.display = 'inline-block'; inp.value = p.percent; }
-  });
+  // Restore Paagi selections if this was a Squid Fishing day (old records without a boat = Boat 1)
+  clearPaagiLines();
+  (rec.paagi || []).forEach(function(p) { addPaagiLine(p.boat || 1, p.name, p.percent); });
   updatePaagiRemaining();
   showWeightsNote(rec);
   window.scrollTo(0, 0);
@@ -4115,7 +4155,7 @@ function exportShareTransparencyPDF() {
       '<td style="text-align:right;color:#1a7a4a;font-weight:700;">&#8377;' + fmtN(d.profit) + '</td>' +
       '<td style="text-align:center;">' + d.numPresent +
         (weightedUnits(d) !== null ? '<div style="color:#a06a1a;font-size:9px;">⚖ ' + weightedUnits(d) + ' units</div>' : '') +
-        ((d.paagi && d.paagi.length) ? '<div style="color:#c0392b;font-size:9px;">+1 Paagi</div>' : '') + '</td>' +
+        ((d.paagi && d.paagi.length) ? '<div style="color:#c0392b;font-size:9px;">+' + (d.paagiUnits || 1) + ' Paagi</div>' : '') + '</td>' +
       '<td style="text-align:right;color:#0a5c2e;font-weight:700;">&#8377;' + fmtN(d.sharePerPerson) + '</td>' +
       '</tr>';
   });
@@ -4176,7 +4216,7 @@ function exportShareTransparencyPDF() {
     '2. Every day\'s share of expense = that day\'s sales × the <strong>period expense ratio</strong> (' + (ratio*100).toFixed(2) + '% for this period) — shown in the "Alloc. Expense" column below. This is a fair, consistent formula applied equally to every single day.<br>' +
     '3. <strong>Share per person</strong> = (that day\'s profit after its fair expense share) ÷ <strong>number of crew present that day</strong>. A day with a big catch but more crew present will still give a smaller per-person share than a smaller catch with fewer crew — this is not a mistake, it is simple division.<br>' +
     (anyWeighted ? '3a. <strong>Weighted shares:</strong> some crew members carry a share weight (shown as "⚖ units"). A weight of ×1.25 means that person earns 1.25 normal shares for the day; the day\'s profit is divided by the total share <em>units</em> present instead of the head-count.<br>' : '') +
-    (anyPaagi ? '3b. <strong>Paagi (cast net, squid fishing):</strong> the Paagi role earns <strong>one extra normal share</strong> that day (shown as "+1 Paagi"). If more than one person cast the net, that single share is split between them by the agreed percentage. This is why the per-person share on squid days is the profit divided by (crew + 1).<br>' : '') +
+    (anyPaagi ? '3b. <strong>Paagi (cast net, squid fishing):</strong> each boat that cast a net earns <strong>one extra normal share</strong> that day (shown as "+1 Paagi", or "+2 Paagi" when both boats had a Paagi). If more than one person cast the net of a boat, that boat\'s share is split between them by the agreed percentage. This is why the per-person share on squid days is the profit divided by (crew + Paagi shares).<br>' : '') +
     '4. The category table below shows exactly where every rupee of expense went — nothing is hidden.' +
     '</div></div>' +
 
@@ -4241,11 +4281,12 @@ function computeShares(startDate, endDate) {
       presentUnits += wt;
       if (wt !== 1) weightsUsed[n] = wt;
     });
-    const shareDivisor = presentUnits + (paagiList.length > 0 ? 1 : 0);
+    const paagiBoats = paagiBoatCount(paagiList);   // one extra normal share per boat that had a Paagi
+    const shareDivisor = presentUnits + paagiBoats;
     const sharePerPerson = shareDivisor > 0 ? profit / shareDivisor : 0;   // value of ONE normal (×1) share
     const paagiShareUnit = sharePerPerson; // the "+1" share — always one normal share, regardless of anyone's weight
     const paagiBreakdown = paagiList.map(function(p) {
-      return { name: p.name, percent: p.percent, bonus: paagiShareUnit * (p.percent / 100) };
+      return { name: p.name, percent: p.percent, boat: p.boat || 1, bonus: paagiShareUnit * (p.percent / 100) };
     });
 
     dailyBreakdown.push({
@@ -4258,6 +4299,7 @@ function computeShares(startDate, endDate) {
       profit,
       numPresent,
       totalUnits: shareDivisor,
+      paagiUnits: paagiBoats,
       weights: weightsUsed,
       sharePerPerson: sharePerPerson,
       present: present,
@@ -4380,7 +4422,7 @@ function calculateShares() {
       <td class="result-negative">${fmt(d.allocExpense)}</td>
       <td class="result-positive">${fmt(d.profit)}</td>
       <td>${(d.paagi && d.paagi.length) ? d.paagi.map(p => '<span class="badge" style="background:rgba(248,113,113,0.15);color:#f87171;border:1px solid rgba(248,113,113,0.3);margin:1px;">🎯 ' + p.name + ' ' + p.percent + '% (' + fmt(p.bonus) + ')</span>').join(' ') : '<span style="color:var(--muted);font-size:11px;">—</span>'}</td>
-      <td><span class="badge badge-green">${d.numPresent}</span>${weightedUnits(d) !== null ? ' <span style="color:var(--gold-light);font-size:10px;">⚖ ' + weightedUnits(d) + ' units</span>' : ''}${(d.paagi && d.paagi.length) ? ' <span style="color:#f87171;font-size:10px;">+1 Paagi share</span>' : ''}</td>
+      <td><span class="badge badge-green">${d.numPresent}</span>${weightedUnits(d) !== null ? ' <span style="color:var(--gold-light);font-size:10px;">⚖ ' + weightedUnits(d) + ' units</span>' : ''}${(d.paagi && d.paagi.length) ? ' <span style="color:#f87171;font-size:10px;">+' + (d.paagiUnits || 1) + ' Paagi share</span>' : ''}</td>
       <td class="result-positive">${fmt(d.sharePerPerson)}</td>
     `;
     dtbody.appendChild(tr);
@@ -4476,13 +4518,14 @@ function showIndividual(name) {
 
   _p3DailyBreakdown.forEach(d => {
     const paagiEntry = (d.paagi || []).find(p => p.name === name);
+    const paagiBonusAll = (d.paagi || []).filter(p => p.name === name).reduce((t, p) => t + p.bonus, 0);
     const wasPresent = d.present.includes(name);
     if (!wasPresent && !paagiEntry) return;
 
     daysPresent++;
     const wt = wasPresent ? ((d.weights && d.weights[name]) || 1) : 1;
     const baseShare = wasPresent ? d.sharePerPerson * wt : 0;
-    const paagiBonus = paagiEntry ? paagiEntry.bonus : 0;
+    const paagiBonus = paagiEntry ? paagiBonusAll : 0;
     const dayTotal = baseShare + paagiBonus;
     totalShareEarned += dayTotal;
     dailyRows.push({ date: d.date, earned: dayTotal, weight: wt, baseShare: baseShare, paagiBonus: paagiBonus, paagiPercent: paagiEntry ? paagiEntry.percent : 0, fishingType: d.fishingType || '', trip: d.trip || '' });
@@ -5106,9 +5149,12 @@ function runHealthChecks(from, to) {
       });
       const paagi = A(a.paagi);
       if (paagi.length) {
-        const total = paagi.reduce(function(s, p) { return s + (Number(p && p.percent) || 0); }, 0);
-        if (Math.abs(total - 100) > 0.01) hcAdd(out, 'red', 'PAAGI_SUM', a.date, 'Paagi percentages add up to ' + (Math.round(total * 100) / 100) + '%, not 100%' + label,
-          'The Paagi share would be paid too much or too little.', k, acts);
+        const byBoat = {};
+        paagi.forEach(function(p) { const bt = (p && p.boat) || 1; byBoat[bt] = (byBoat[bt] || 0) + (Number(p && p.percent) || 0); });
+        Object.keys(byBoat).forEach(function(bt) {
+          if (Math.abs(byBoat[bt] - 100) > 0.01) hcAdd(out, 'red', 'PAAGI_SUM', a.date, 'Boat ' + bt + ' Paagi percentages add up to ' + (Math.round(byBoat[bt] * 100) / 100) + '%, not 100%' + label,
+            'The Paagi share would be paid too much or too little.', k + 'b' + bt, acts);
+        });
         paagi.forEach(function(p) {
           if (p && present.indexOf(p.name) === -1) hcAdd(out, 'yellow', 'PAAGI_ABSENT', a.date, p.name + ' is a Paagi but is not marked present' + label,
             'Normally the Paagi is also on the boat. Check the attendance.', k + p.name, acts);
