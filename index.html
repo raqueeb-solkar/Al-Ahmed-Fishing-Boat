@@ -3699,6 +3699,7 @@ function toggleCheck(div) {
   div.classList.toggle('checked');
   const cb = div.querySelector('.check-box');
   cb.textContent = div.classList.contains('checked') ? '✓' : '';
+  if (typeof paagiRefreshAll === 'function') paagiRefreshAll();
 }
 
 function selectAll() {
@@ -3706,6 +3707,7 @@ function selectAll() {
     d.classList.add('checked');
     d.querySelector('.check-box').textContent = '✓';
   });
+  if (typeof paagiRefreshAll === 'function') paagiRefreshAll();
 }
 
 
@@ -3739,9 +3741,14 @@ function paagiFillOptions(sel) {
   const cur = sel.value;
   const names = paagiPresentNames();
   if (cur && names.indexOf(cur) === -1) names.push(cur);
-  sel.innerHTML = '<option value="">Select person</option>' +
+  sel.innerHTML = '<option value="">' + (names.length ? 'Select person' : 'Tick present shareholders first') + '</option>' +
     names.map(function(n) { return '<option value="' + escHtml(n) + '">' + escHtml(n) + '</option>'; }).join('');
   sel.value = cur;
+}
+
+// Re-fill every Paagi dropdown whenever the present list changes (keeps each pick)
+function paagiRefreshAll() {
+  document.querySelectorAll('#paagi-section .paagi-name-sel').forEach(paagiFillOptions);
 }
 
 function addPaagiLine(boat, name, pct) {
