@@ -2699,7 +2699,7 @@ function showPage(n) {
   if (document.getElementById('p1-to-date'))   document.getElementById('p1-to-date').value   = lastDay; }
   if (n === 5) { renderFSTable(); renderSupplierCards(); renderSupplierPayTable(); }
   if (n === 6) { renderCreditSummary(); updateRetailerDropdowns(); }
-  if (n === 7) { renderTractorTable(); renderTractorSummary(); }
+  if (n === 7) { renderTractorTable(); renderTractorSummary(); renderTractorPayTable(); }
   if (n === 8) { renderAgentSummary(); renderAgentCommTable(); renderAgentPayTable(); }
 }
 
@@ -7211,6 +7211,11 @@ function applyAllData(data) {
   renderFSTable();
   renderSupplierCards();
   renderCreditSummary();
+  // Tractor + Agent pages: refresh their lists too, so payments loaded from Drive / a backup show up immediately
+  ['renderSupplierPayTable', 'renderTractorTable', 'renderTractorSummary', 'renderTractorPayTable',
+   'renderAgentSummary', 'renderAgentCommTable', 'renderAgentPayTable'].forEach(function(fn) {
+    try { if (typeof window[fn] === 'function') window[fn](); } catch (e) {}
+  });
 }
 
 async function gdriveFindFile() {
