@@ -1039,7 +1039,7 @@
       <button class="btn btn-primary" style="background:linear-gradient(135deg,var(--gold) 0%,var(--gold-light) 100%);color:#0d1117;font-weight:700;padding:12px 28px;" onclick="exportShareTransparencyPDF()">📄 EXPORT TRANSPARENCY REPORT (PDF) — SHOW TO CREW</button>
       <button class="btn btn-sm" style="background:rgba(126,207,237,0.15);color:#7ecfed;border:1px solid rgba(126,207,237,0.45);padding:12px 18px;margin-left:8px;" onclick="cmpOpenFromShareCalc()">📈 COMPARE WITH PREVIOUS PERIOD</button>
       <button class="btn btn-sm" style="background:rgba(251,191,36,0.15);color:#fbbf24;border:1px solid rgba(251,191,36,0.45);padding:12px 18px;margin-left:8px;" onclick="lockOpenFromShareCalc()">🔒 LOCK THIS PERIOD (after paying)</button>
-      <div style="font-size:11px;color:var(--muted);margin-top:8px;">Full day-wise breakdown + category expenses, explained plainly — so every rupee is accounted for.</div>
+      <div style="margin-top:12px;"><button class="btn btn-sm" style="background:rgba(26,122,74,0.25);color:#52d48a;border:1px solid rgba(26,122,74,0.5);padding:12px 18px;" onclick="exportShareTXT()">📝 EXPORT TXT (for ledger)</button><button class="btn btn-sm" style="background:rgba(126,207,237,0.15);color:#7ecfed;border:1px solid rgba(126,207,237,0.45);padding:12px 18px;margin-left:8px;" onclick="copyShareText()">📋 COPY AS TEXT</button></div><div style="font-size:11px;color:var(--muted);margin-top:8px;">Full day-wise breakdown + category expenses, explained plainly — so every rupee is accounted for.</div>
     </div>
 
     <div class="card">
@@ -1310,6 +1310,8 @@
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;">
         <button class="btn btn-primary" onclick="exportAdvStmtPDF()">⬇ EXPORT PDF</button>
         <button class="btn btn-sm" style="background:rgba(26,122,74,0.25);color:#52d48a;border:1px solid rgba(26,122,74,0.5);" onclick="exportAdvStmtCSV()">⬇ EXPORT CSV (Excel)</button>
+        <button class="btn btn-sm" style="background:rgba(26,122,74,0.25);color:#52d48a;border:1px solid rgba(26,122,74,0.5);" onclick="exportAdvStmtTXT()">📝 EXPORT TXT</button>
+        <button class="btn btn-sm" style="background:rgba(126,207,237,0.15);color:#7ecfed;border:1px solid rgba(126,207,237,0.45);" onclick="copyAdvStmtText()">📋 COPY AS TEXT</button>
       </div>
     </div>
   </div>
@@ -4735,6 +4737,178 @@ function exportToCSV() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+// ===== TEXT EXPORTS (plain .txt / copy) — compact, fixed layout, made for building ledgers =====
+function txtN(n) { return (Math.round((Number(n) || 0) * 100) / 100).toFixed(2); }
+function txtD(s) { if (!s) return ''; var p = String(s).split('-'); return p.length === 3 ? p[2] + '-' + p[1] + '-' + p[0] : s; }
+function txtClean(v) { return String(v == null ? '' : v).replace(/[\r\n|]+/g, ' ').trim(); }
+function txtToday() { return new Date().toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-'); }
+
+function txtDownload(filename, text) {
+  const blob = new Blob(['﻿' + text.replace(/\n/g, '\r\n')], { type: 'text/plain;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function txtCopy(text, okMsg) {
+  function done() { showToast(okMsg || '✓ Copied — paste it in the chat'); }
+  function fallbackCopy() {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); }
+    catch (e) { alert('Copy failed — please use EXPORT TXT instead.'); }
+    document.body.removeChild(ta);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done).catch(fallbackCopy);
+  else fallbackCopy();
+}
+
+// ---- Share Calculation (whole period, all people, date-wise) ----
+function buildShareStatementText() {
+  if (!_p3StartDate || !_p3EndDate || !_p3DailyBreakdown.length || !_p3ShareMap) return '';
+  const start = _p3StartDate, end = _p3EndDate, settle = _p3SettleDate || _p3EndDate;
+  const salesData = dailyRecords.filter(r => r.date >= start && r.date <= end);
+  const totalSales = salesData.reduce((t, r) => t + (r.sales || 0), 0);
+  const totalExpense = salesData.reduce((t, r) => t + (r.expense || 0), 0);
+  const ratio = totalSales > 0 ? totalExpense / totalSales : 0;
+  const totalProfit = _p3DailyBreakdown.reduce((t, d) => t + d.profit, 0);
+  const L = [];
+  L.push('AL AHMED FISHING BOAT - SHARE STATEMENT');
+  L.push('Period: ' + txtD(start) + ' to ' + txtD(end));
+  L.push('Settlement date: ' + txtD(settle));
+  L.push('Generated: ' + txtToday());
+  L.push('Amounts in Rs. Dates DD-MM-YYYY. Fields separated by |');
+  L.push('');
+  L.push('SUMMARY');
+  L.push('Total sales: ' + txtN(totalSales));
+  L.push('Total expense: ' + txtN(totalExpense));
+  L.push('Expense ratio: ' + (ratio * 100).toFixed(2) + '%');
+  L.push('Net profit: ' + txtN(totalProfit));
+  L.push('Days/Trips: ' + salesData.length + ' / ' + _p3DailyBreakdown.length);
+  L.push('');
+  L.push('HOW SHARE WORKS: expense is spread over the period by the ratio above; profit of a day/trip / units = one share; person gets share x weight; each boat with a Paagi adds 1 unit, split among its Paagi by %.');
+  L.push('');
+  L.push('DATE-WISE BREAKDOWN');
+  L.push('Date | Trip | Fishing type | Sales | Actual expense | Alloc expense | Profit | Units | Share per unit | Present (weight) | Paagi');
+  const seen = {};
+  _p3DailyBreakdown.forEach(function(d) {
+    const rec = salesData.find(r => r.date === d.date);
+    const actual = (rec && !seen[d.date]) ? txtN(rec.expense || 0) : 'same day';
+    seen[d.date] = true;
+    const present = d.present.map(n => n + ((d.weights && d.weights[n]) ? ' x' + fmtWt(d.weights[n]) : '')).join(', ');
+    const paagi = (d.paagi || []).map(p => (p.boatName ? p.boatName + ': ' : '') + p.name + ' ' + p.percent + '% = ' + txtN(p.bonus)).join('; ');
+    L.push([txtD(d.date), d.trip || 'Full Day', d.fishingType || '-', txtN(d.sales), actual, txtN(d.allocExpense), txtN(d.profit),
+            fmtWt(d.totalUnits), txtN(d.sharePerPerson), present, paagi || '-'].map(txtClean).join(' | '));
+  });
+  L.push('');
+  const cat = {};
+  salesData.forEach(r => (r.expenseItems || []).forEach(i => { const c = i.cat || 'Other'; cat[c] = (cat[c] || 0) + (i.amount || 0); }));
+  const catRows = Object.keys(cat).map(c => ({ c: c, a: cat[c] })).sort((a, b) => b.a - a.a);
+  const catTot = catRows.reduce((t, r) => t + r.a, 0);
+  L.push('EXPENSE BY CATEGORY');
+  L.push('Category | Amount | % of expense');
+  catRows.forEach(r => L.push(txtClean(r.c) + ' | ' + txtN(r.a) + ' | ' + (catTot > 0 ? (r.a / catTot * 100).toFixed(1) : '0.0') + '%'));
+  L.push('TOTAL | ' + txtN(catTot) + ' | 100%');
+  L.push('');
+  L.push('SHARE PER PERSON (period totals; advances counted from ' + txtD(start) + ' to ' + txtD(settle) + ')');
+  L.push('Name | Days | Share earned | of which Paagi bonus | Advances/payments | Net payable');
+  let tShare = 0, tAdv = 0;
+  const people = [];
+  SHAREHOLDERS.forEach(function(sh) {
+    const s = _p3ShareMap[sh];
+    if (!s || s.days === 0) return;
+    const adv = paymentRecords.filter(p => p.member === sh && p.date >= start && p.date <= settle).reduce((t, p) => t + p.amount, 0);
+    tShare += s.total; tAdv += adv;
+    people.push(sh);
+    L.push([sh, s.days, txtN(s.total), txtN(s.paagiBonus || 0), txtN(adv), txtN(s.total - adv)].join(' | '));
+  });
+  L.push('TOTAL | | ' + txtN(tShare) + ' | | ' + txtN(tAdv) + ' | ' + txtN(tShare - tAdv));
+  L.push('');
+  L.push('PER-PERSON DAILY DETAIL (share = share per unit x weight; Paagi bonus added on top)');
+  people.forEach(function(sh) {
+    const rows = [];
+    let tot = 0;
+    _p3DailyBreakdown.forEach(function(d) {
+      const was = d.present.indexOf(sh) !== -1;
+      const pb = (d.paagi || []).filter(p => p.name === sh).reduce((t, p) => t + p.bonus, 0);
+      if (!was && !pb) return;
+      const wt = was ? ((d.weights && d.weights[sh]) || 1) : 0;
+      const base = was ? d.sharePerPerson * wt : 0;
+      tot += base + pb;
+      rows.push([txtD(d.date), d.trip || 'Full Day', was ? fmtWt(wt) : '-', txtN(base), txtN(pb), txtN(base + pb)].join(' | '));
+    });
+    L.push('');
+    L.push('## ' + sh + ' (total ' + txtN(tot) + ')');
+    L.push('Date | Trip | Weight | Share | Paagi bonus | Day total');
+    rows.forEach(r => L.push(r));
+  });
+  return L.join('\n');
+}
+
+function exportShareTXT() {
+  const t = buildShareStatementText();
+  if (!t) { alert('Please calculate shares for a period first.'); return; }
+  txtDownload('Share_Statement_' + _p3StartDate + '_to_' + _p3EndDate + '.txt', t);
+  showToast('✓ Text file saved');
+}
+function copyShareText() {
+  const t = buildShareStatementText();
+  if (!t) { alert('Please calculate shares for a period first.'); return; }
+  txtCopy(t, '✓ Share statement copied — paste it in the chat');
+}
+
+// ---- Advance Statement ----
+function buildAdvStmtText() {
+  const d = _advStmtData;
+  if (!d) return '';
+  const L = [];
+  L.push('AL AHMED FISHING BOAT - ADVANCE STATEMENT');
+  L.push('Shareholder: ' + (d.member || 'All shareholders'));
+  L.push('Period: ' + txtD(d.fromDate) + ' to ' + txtD(d.toDate));
+  L.push('Generated: ' + txtToday());
+  L.push('Amounts in Rs. Dates DD-MM-YYYY. Fields separated by |');
+  L.push('');
+  L.push('SUMMARY');
+  L.push('Total advance: ' + txtN(d.totalAdv));
+  L.push('Total salary: ' + txtN(d.totalSal));
+  L.push('Other: ' + txtN(d.totalOth));
+  L.push('Grand total: ' + txtN(d.totalAll));
+  L.push('Transactions: ' + d.filtered.length);
+  L.push('');
+  L.push('TRANSACTIONS');
+  L.push('Date | Shareholder | Type | Amount | Notes');
+  d.filtered.forEach(p => L.push([txtD(p.date), p.member, p.type.charAt(0).toUpperCase() + p.type.slice(1), txtN(p.amount), p.notes || '-'].map(txtClean).join(' | ')));
+  L.push('GRAND TOTAL | | | ' + txtN(d.totalAll) + ' |');
+  const by = {};
+  d.filtered.forEach(function(p) {
+    const r = by[p.member] || (by[p.member] = { advance: 0, salary: 0, other: 0, total: 0 });
+    r[p.type] = (r[p.type] || 0) + p.amount; r.total += p.amount;
+  });
+  const names = Object.keys(by).sort();
+  if (names.length > 1) {
+    L.push('');
+    L.push('PER-PERSON TOTALS');
+    L.push('Shareholder | Advance | Salary | Other | Total');
+    names.forEach(n => L.push([n, txtN(by[n].advance), txtN(by[n].salary), txtN(by[n].other), txtN(by[n].total)].join(' | ')));
+  }
+  return L.join('\n');
+}
+function exportAdvStmtTXT() {
+  const t = buildAdvStmtText();
+  if (!t) { alert('Please generate a statement first.'); return; }
+  const d = _advStmtData;
+  txtDownload('Advance_Statement_' + (d.member ? d.member.replace(/\s+/g, '_') + '_' : '') + d.fromDate + '_to_' + d.toDate + '.txt', t);
+  showToast('✓ Text file saved');
+}
+function copyAdvStmtText() {
+  const t = buildAdvStmtText();
+  if (!t) { alert('Please generate a statement first.'); return; }
+  txtCopy(t, '✓ Advance statement copied — paste it in the chat');
 }
 
 // ===== SMART CALCULATOR =====
